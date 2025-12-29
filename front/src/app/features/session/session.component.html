@@ -1,0 +1,293 @@
+<div class="h-full p-3 sm:p-4 lg:p-6 overflow-auto">
+  <div class="h-full flex flex-col">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
+      <div>
+        <h1 class="text-xl sm:text-2xl font-black font-montserrat text-foreground">Sesiones</h1>
+        <p class="text-xs sm:text-sm text-muted-foreground mt-1">
+          Control y filtrado de sesiones por clínica
+        </p>
+      </div>
+    </div>
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">
+      <div class="bg-card rounded-lg border py-3 shadow-sm">
+        <div class="px-3 text-center">
+          <div class="text-xl font-bold" style="color: #d29f67">{{ stats().total }}</div>
+          <p class="text-xs text-muted-foreground">Total Sesiones</p>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-lg border py-3 shadow-sm">
+        <div class="px-3 text-center">
+          <div class="text-xl font-bold" style="color: #16a34a">{{ kpis().sesiones_completadas }}</div>
+          <p class="text-xs text-muted-foreground">Completadas</p>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-lg border py-3 shadow-sm">
+        <div class="px-3 text-center">
+          <div class="text-xl font-bold" style="color: #dc2626">{{ kpis().sesiones_canceladas }}</div>
+          <p class="text-xs text-muted-foreground">Canceladas</p>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-lg border py-3 shadow-sm">
+        <div class="px-3 text-center">
+          <div class="text-xl font-bold" style="color: #4b5563">{{ kpis().ingresos_brutos.toFixed(2) }}€</div>
+          <p class="text-xs text-muted-foreground">Ingresos Brutos</p>
+        </div>
+      </div>
+
+      <div class="bg-card rounded-lg border py-3 shadow-sm">
+        <div class="px-3 text-center">
+          <div class="text-xl font-bold" style="color: #15803d">{{ kpis().ingresos_netos.toFixed(2) }}€</div>
+          <p class="text-xs text-muted-foreground">Ingresos Netos</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Filters Card -->
+    <div class="bg-card rounded-lg border py-3 shadow-sm mb-3">
+      <div class="px-4 pb-2">
+        <div class="font-semibold text-sm flex items-center gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-3.5 w-3.5">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          Filtros
+        </div>
+      </div>
+
+      <div class="px-4">
+        <div class="space-y-3">
+          <!-- First row of filters -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
+                placeholder="Todas las clínicas" size="sm">
+              </app-clinic-selector>
+            </div>
+
+            <div>
+              <label class="text-xs font-medium block mb-1">Estado</label>
+              <select (change)="onFilterChange('status', $any($event.target).value || null)"
+                [value]="filters().status || ''"
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <option value="">Todos los estados</option>
+                <option value="completada">Completada</option>
+                <option value="cancelada">Cancelada</option>
+              </select>
+            </div>
+
+            <div>
+              <label class="text-xs font-medium block mb-1">Método de Pago</label>
+              <select (change)="onFilterChange('paymentMethod', $any($event.target).value || null)"
+                [value]="filters().paymentMethod || ''"
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                <option value="">Todos los métodos</option>
+                <option value="bizum">Bizum</option>
+                <option value="transferencia">Transferencia</option>
+                <option value="tarjeta">Tarjeta</option>
+                <option value="efectivo">Efectivo</option>
+                <option value="pendiente">Pendiente</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Second row of filters -->
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+            <div>
+              <label class="text-xs font-medium block mb-1">Fecha Desde</label>
+              <input type="date" [value]="filters().dateFrom"
+                (change)="onFilterChange('dateFrom', $any($event.target).value)"
+                [class.border-red-500]="dateFromError()"
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+              @if (dateFromError()) {
+              <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="text-xs font-medium block mb-1">Fecha Hasta</label>
+              <input type="date" [value]="filters().dateTo"
+                (change)="onFilterChange('dateTo', $any($event.target).value)" [class.border-red-500]="dateToError()"
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+              @if (dateToError()) {
+              <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
+              }
+            </div>
+          </div>
+
+          <!-- Action Buttons Row -->
+          <div class="flex justify-end gap-2">
+            <button (click)="clearFilters()"
+              class="px-4 py-1.5 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors shadow-sm">
+              Limpiar Filtros
+            </button>
+            <button (click)="applyFilters()"
+              class="px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors shadow-sm font-medium">
+              Buscar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
+      <!-- Pagination Buttons -->
+      <div class="flex items-center gap-2">
+        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" data-slot="button"
+          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none border bg-background shadow-xs rounded-md h-8 w-8 p-0"
+          onmouseover="if(!this.disabled) { this.style.backgroundColor='#d29f67'; this.style.color='white'; this.style.borderColor='#d29f67'; }"
+          onmouseout="if(!this.disabled) { this.style.backgroundColor=''; this.style.color=''; this.style.borderColor=''; }"
+          aria-label="Página anterior">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-chevron-left h-4 w-4">
+            <path d="m15 18-6-6 6-6"></path>
+          </svg>
+        </button>
+
+        <div class="flex items-center gap-1">
+          @if (getPageNumbers().length > 0) {
+          @for (page of getPageNumbers(); track page) {
+          @if (page === currentPage()) {
+          <button (click)="goToPage(page)" data-slot="button" style="background-color: #d29f67"
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all text-white shadow-xs hover:opacity-90 rounded-md w-8 h-8 p-0">
+            {{ page }}
+          </button>
+          } @else {
+          <button (click)="goToPage(page)" data-slot="button"
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all border bg-background shadow-xs rounded-md w-8 h-8 p-0"
+            onmouseover="this.style.backgroundColor='#d29f67'; this.style.color='white'; this.style.borderColor='#d29f67';"
+            onmouseout="this.style.backgroundColor=''; this.style.color=''; this.style.borderColor='';">
+            {{ page }}
+          </button>
+          }
+          }
+          }
+        </div>
+
+        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() === totalPages()" data-slot="button"
+          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none border bg-background shadow-xs rounded-md h-8 w-8 p-0"
+          onmouseover="if(!this.disabled) { this.style.backgroundColor='#d29f67'; this.style.color='white'; this.style.borderColor='#d29f67'; }"
+          onmouseout="if(!this.disabled) { this.style.backgroundColor=''; this.style.color=''; this.style.borderColor=''; }"
+          aria-label="Página siguiente">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-chevron-right h-4 w-4">
+            <path d="m9 18 6-6-6-6"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Sessions Table -->
+    <div class="bg-card rounded-xl border shadow-sm flex-1 overflow-hidden">
+      <div class="overflow-y-auto h-full">
+        <div class="relative w-full overflow-x-auto">
+          <table class="w-full text-sm">
+            <thead class="border-b">
+              <tr class="hover:bg-muted/50">
+                <th class="h-10 px-2 text-left font-medium">Paciente</th>
+                <th class="h-10 px-2 text-left font-medium">Tipo</th>
+                <th class="h-10 px-2 text-left font-medium">Fecha</th>
+                <th class="h-10 px-2 text-left font-medium">Clínica</th>
+                <th class="h-10 px-2 text-left font-medium">Estado</th>
+                <th class="h-10 px-2 text-left font-medium">Precio</th>
+                <th class="h-10 px-2 text-left font-medium">Comisión</th>
+                <th class="h-10 px-2 text-left font-medium">Neto</th>
+                <th class="h-10 px-2 text-left font-medium">Pago</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (isLoading()) {
+              <tr>
+                <td colspan="11" class="p-8 text-center">
+                  <div class="flex items-center justify-center">
+                    <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                  </div>
+                </td>
+              </tr>
+              } @else if (sessions().length === 0) {
+              <tr>
+                <td colspan="11" class="p-8 text-center text-muted-foreground">
+                  No se encontraron sesiones
+                </td>
+              </tr>
+              } @else {
+              @for (session of sessions(); track session.SessionDetailData.session_id) {
+              <tr class="hover:bg-muted/50 border-b transition-colors">
+                <td class="p-2 font-medium">{{ session.SessionDetailData.PatientData.name }}</td>
+                <td class="p-2">
+                  <span [class]="getModeClass(session.SessionDetailData.mode)"
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
+                    {{ session.SessionDetailData.mode }}
+                  </span>
+                </td>
+                <td class="p-2">{{ formatDate(session.SessionDetailData.session_date) }}</td>
+                <td class="p-2">
+                  <div class="flex items-center gap-2">
+                    @if (session.SessionDetailData.ClinicDetailData.clinic_color) {
+                    <div class="w-3 h-3 rounded-full"
+                      [style.background-color]="session.SessionDetailData.ClinicDetailData.clinic_color"></div>
+                    }
+                    <span class="text-sm">{{ session.SessionDetailData.ClinicDetailData.clinic_name || 'Sin clínica'
+                      }}</span>
+                  </div>
+                </td>
+                <td class="p-2">
+                  <span [class]="getStatusClass(session.SessionDetailData.status)"
+                    class="inline-flex items-center rounded-md border-transparent px-2 py-0.5 text-xs font-medium">
+                    {{ getStatusText(session.SessionDetailData.status) }}
+                  </span>
+                </td>
+                <!-- Precio Base -->
+                <td class="p-2 font-medium text-muted-foreground">
+                  @if (session.SessionDetailData.price) {
+                  {{ session.SessionDetailData.price }}€
+                  } @else {
+                  -
+                  }
+                </td>
+                <!-- Comisión Clínica -->
+                <td class="p-2">
+                  @if (session.SessionDetailData.price && session.SessionDetailData.net_price) {
+                  <div class="text-sm text-orange-600">
+                    <span class="font-medium">{{ calcularComision(session.SessionDetailData.price,
+                      session.SessionDetailData.net_price).toFixed(2) }}€</span>
+                  </div>
+                  } @else {
+                  <span class="text-muted-foreground">-</span>
+                  }
+                </td>
+                <!-- Tu Neto -->
+                <td class="p-2 font-semibold text-green-600">
+                  @if (session.SessionDetailData.net_price) {
+                  {{ session.SessionDetailData.net_price.toFixed(2) }}€
+                  @if (session.SessionDetailData.ClinicDetailData.clinic_percentage) {
+                  <span class="text-muted-foreground ml-1">({{
+                    session.SessionDetailData.ClinicDetailData.clinic_percentage }}%)</span>
+                  }
+                  } @else {
+                  <span class="text-muted-foreground">-</span>
+                  }
+                </td>
+                <td class="p-2">
+                  <span [class]="getPaymentMethodClass(session.SessionDetailData.payment_method)"
+                    class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
+                    {{ formatPaymentMethod(session.SessionDetailData.payment_method) }}
+                  </span>
+                </td>
+              </tr>
+              }
+              }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

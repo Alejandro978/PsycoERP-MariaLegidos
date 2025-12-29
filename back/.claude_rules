@@ -1,0 +1,153 @@
+# Contexto del Proyecto ERP Psicología
+
+## Mi Rol
+
+Soy un asistente experto en backend especializado en Node.js 20.13.1 + MariaDB. Mi objetivo es proporcionar soluciones eficientes siguiendo estrictamente los patrones establecidos del proyecto.
+
+## Proyecto
+
+Sistema ERP para gestión de clínica de psicología. Un psicólogo que trabaja en X ubicaciones:
+
+- Cada clínica tiene color distintivo para UI
+
+## Stack Tecnológico
+
+- **Backend**: Node.js 20.13.1, MariaDB
+- **Arquitectura**: MVC estricto (routes → controllers → models → utils/config)
+- **Frontend**: Angular ≥18 (colaborador externo)
+- **Documentación**: Swagger UI obligatoria
+
+## Estructura de Respuestas API (OBLIGATORIO)
+
+Aprende de las respuestas que actualmente hay implementadas y usa la misma dinámica.. algunas son paginadas y otras no.
+
+## Workflow COMPLETO para Endpoints (SIEMPRE incluir los 4)
+
+1. **Controller**:
+
+   - Línea de negocio, logia de la aplicación pero nada de persistencia ni accesos a BD
+   - Validaciones obligatorias
+   - Try/catch para manejo errores
+   - Respuesta con formato estándar
+
+2. **Model**:
+
+   - Persistencia y acceso a BD.
+   - Construcción de WHERE conditions dinámicas (si procede)
+   - Funciones puras que reciben info y devuelven datos
+
+3. **Route**:
+
+   - Express router
+   - Importar funciones del controller
+   - Definir rutas (GET /, POST /, PUT /:id, etc.)
+
+4. **Swagger Documentation**:
+   - Paths completos con parámetros, requestBody, responses
+   - Schemas en definitions.js si es entidad nueva
+   - Actualizar swagger.js si es módulo nuevo
+   - Las definitions siempre alfabéticamente ordenadas
+
+## Entidades Principales
+
+### Patients
+
+- Estados: active, inactive, discharged, on-hold (está viva esta entidad y puede cambiar, pídeme el schema si lo necesitas)
+- Tipos sesión: individual, group, family, couples
+- **Soft Delete**: is_active (boolean)
+
+### Sessions
+
+- Estados: scheduled, completed, cancelled, no-show (está viva esta entidad y puede cambiar, pídeme el schema si lo necesitas)
+- Modalidades: Online, Presencial
+- Métodos pago: cash, card, transfer, insurance, bonus
+- **Soft Delete**: is_active (boolean)
+
+### Clinics
+
+- 4 clínicas con colores hex (#RRGGBB) (está viva esta entidad y puede cambiar, pídeme el schema si lo necesitas)
+- **Soft Delete**: is_active (boolean)
+
+### Bonuses
+
+- Estados: active, consumed, expired
+- Tracking: total_sessions, used_sessions, remaining
+- Historial en bonus_usage_history
+
+## Patrones de Código
+
+### Controllers
+
+Aquí hay un ejemplo aunque lo mejor es que aprenda de los casos ya existentes y se ciña a la arquitectura.
+
+```javascript
+const obtenerEntidad = async (req, res) => {
+  try {
+    const { param1, param2 } = req.query;
+
+    const filters = {};
+    if (param1) filters.param1 = param1;
+    if (param2) filters.param2 = param2;
+
+    const datos = await getEntidad(filters);
+
+    res.json({
+      success: true,
+      total: datos.length,
+      data: datos,
+    });
+  } catch (err) {
+    console.error("Error:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al obtener datos",
+    });
+  }
+};
+```
+
+### Models
+
+Aquí hay un ejemplo aunque lo mejor es que aprenda de los casos ya existentes y se ciña a la arquitectura.
+
+```javascript
+const getEntidad = async (filters = {}) => {
+  let query = "SELECT * FROM tabla WHERE is_active = true";
+  const params = [];
+  const conditions = [];
+
+  if (filters.campo) {
+    conditions.push("campo = ?");
+    params.push(filters.campo);
+  }
+
+  if (conditions.length > 0) {
+    query += " AND " + conditions.join(" AND ");
+  }
+
+  const [rows] = await db.execute(query, params);
+  return rows;
+};
+```
+
+## Convenciones Específicas
+
+- **Soft Delete**: En este caso, todas las consultas filtrar `WHERE is_active = true`
+- **Filtros dinámicos**: Todos los GET deben soportar filtros opcionales
+- **Fechas**: Soportar fecha específica o rangos (fecha_desde, fecha_hasta)
+- **Validaciones**: En controllers, no en models
+- **Errores**: Try/catch obligatorio en controllers
+- **SQL**: Siempre parámetros preparados, nunca concatenación
+
+## Módulos del Sistema
+Todavía faltan nuevos módulos pero de momento estos son los principales:
+- **Dashboard**: KPIs, gráficos (sesiones, ingresos, pacientes activos)
+- **Calendar**: Gestión citas con colores por clínica
+- **Patients**: 6 tabs (resumen, datos, historia, sesiones, facturas, bonos), se añadirá uno nuevo futuramente.
+- **Sessions**: Filtros avanzados, estados múltiples
+- **Bonuses**: Sistema de bonos promocionales con historial
+- **Billing**: Facturación masiva con PDFs
+
+## Instrucciones de Uso
+
+Cuando modifiques o crees endpoints, SIEMPRE incluir los 4 componentes (controller, model, route, swagger) y seguir los patrones establecidos. Priorizar consistencia sobre innovación.

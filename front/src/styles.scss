@@ -1,0 +1,246 @@
+@import url('https://fonts.googleapis.com/css2?family=Montserrat:ital,wght@0,100..900;1,100..900&display=swap');
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Updated color tokens to match modern ERP design brief */
+  --background: #ffffff;
+  --foreground: #4b5563;
+  --card: #f9fafb;
+  --card-foreground: #4b5563;
+  --popover: #ffffff;
+  --popover-foreground: #4b5563;
+  --primary: #d29f67;
+  --primary-semi-light: #f4bb7e70;
+  --primary-light: #d29e6775;
+  --primary-foreground: #ffffff;
+  --secondary: #ec4899;
+  --secondary-foreground: #ffffff;
+  --muted: #f9fafb;
+  --muted-foreground: #4b5563;
+  --accent: #ec4899;
+  --accent-foreground: #ffffff;
+  --destructive: #be123c;
+  --destructive-foreground: #ffffff;
+  --border: #e5e7eb;
+  --input: #ffffff;
+  --ring: #d29f67;
+  --chart-1: #6366f1;
+  --chart-2: #ec4899;
+  --chart-3: #be123c;
+  --chart-4: #4b5563;
+  --chart-5: #d29f67;
+  --radius: 0.375rem;
+  --radius-sm: 0.125rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
+  --radius-2xl: 1rem;
+  --radius-3xl: 1.5rem;
+  --sidebar: #f9fafb;
+  --sidebar-foreground: #4b5563;
+  --sidebar-primary: #ffffff;
+  --sidebar-primary-foreground: #4b5563;
+  --sidebar-accent: #ec4899;
+  --sidebar-accent-foreground: #ffffff;
+  --sidebar-border: #e5e7eb;
+  --sidebar-ring: #d29f67;
+
+  /* Added clinic color variables for calendar system */
+  --clinic-a: #d29f67;
+  --clinic-b: #ec4899;
+  --clinic-c: #6366f1;
+  --clinic-private: #be123c;
+
+  /* Color variables for Tailwind config */
+  --color-border: #e5e7eb;
+  --color-input: #ffffff;
+  --color-ring: #d29f67;
+  --color-background: #ffffff;
+  --color-foreground: #4b5563;
+  --color-primary: #d29f67;
+  --color-primary-foreground: #ffffff;
+  --color-secondary: #ec4899;
+  --color-secondary-foreground: #ffffff;
+  --color-destructive: #be123c;
+  --color-destructive-foreground: #ffffff;
+  --color-muted: #f9fafb;
+  --color-muted-foreground: #4b5563;
+  --color-accent: #ec4899;
+  --color-accent-foreground: #ffffff;
+  --color-popover: #ffffff;
+  --color-popover-foreground: #4b5563;
+  --color-card: #f9fafb;
+  --color-card-foreground: #4b5563;
+  --color-sidebar: #f9fafb;
+  --color-sidebar-foreground: #4b5563;
+  --color-sidebar-primary: #ffffff;
+  --color-sidebar-primary-foreground: #4b5563;
+  --color-sidebar-accent: #ec4899;
+  --color-sidebar-accent-foreground: #ffffff;
+  --color-sidebar-border: #e5e7eb;
+  --color-sidebar-ring: #d29f67;
+  --color-chart-1: #6366f1;
+  --color-chart-2: #ec4899;
+  --color-chart-3: #be123c;
+  --color-chart-4: #4b5563;
+  --color-chart-5: #d29f67;
+  --color-clinic-a: #d29f67;
+  --color-clinic-b: #ec4899;
+  --color-clinic-c: #6366f1;
+  --color-clinic-private: #be123c;
+}
+
+@layer components {
+  /* Background colors */
+  .bg-sidebar {
+    background-color: var(--sidebar);
+  }
+  .bg-sidebar-primary {
+    background-color: var(--sidebar-primary);
+  }
+  .bg-sidebar-accent {
+    background-color: var(--sidebar-accent);
+  }
+  .bg-background {
+    background-color: var(--background);
+  }
+  .bg-primary {
+    background-color: var(--primary);
+  }
+  .bg-primary-light {
+    background-color: var(--primary-light);
+  }
+  .bg-primary-semi-light {
+    background-color: var(--primary-semi-light);
+  }
+  .bg-primary\/5 {
+    background-color: rgba(8, 145, 178, 0.05);
+  }
+  .bg-primary\/90 {
+    background-color: #d29e6772;
+  }
+  .bg-card {
+    background-color: var(--card);
+  }
+  .bg-muted {
+    background-color: var(--muted);
+  }
+  .bg-muted\/30 {
+    background-color: rgba(249, 250, 251, 0.3);
+  }
+  .bg-muted\/50 {
+    background-color: rgba(249, 250, 251, 0.5);
+  }
+  .bg-accent {
+    background-color: var(--accent);
+  }
+  .bg-destructive {
+    background-color: var(--destructive);
+  }
+  
+  /* Text colors */
+  .text-sidebar-foreground {
+    color: var(--sidebar-foreground);
+  }
+  .text-sidebar-primary-foreground {
+    color: var(--sidebar-primary-foreground);
+  }
+  .text-sidebar-accent-foreground {
+    color: var(--sidebar-accent-foreground);
+  }
+  .text-foreground {
+    color: var(--foreground);
+  }
+  .text-primary {
+    color: var(--primary);
+  }
+  .text-primary-foreground {
+    color: var(--primary-foreground);
+  }
+  .text-card-foreground {
+    color: var(--card-foreground);
+  }
+  .text-muted-foreground {
+    color: var(--muted-foreground);
+  }
+  .text-accent-foreground {
+    color: var(--accent-foreground);
+  }
+  .text-destructive-foreground {
+    color: var(--destructive-foreground);
+  }
+  
+  /* Border colors */
+  .border-sidebar-border {
+    border-color: var(--sidebar-border);
+  }
+  .border-border {
+    border-color: var(--border);
+  }
+  
+  /* Hover states */
+  .hover\:bg-sidebar-primary:hover {
+    background-color: var(--sidebar-primary);
+  }
+  .hover\:text-sidebar-primary-foreground:hover {
+    color: var(--sidebar-primary-foreground);
+  }
+  .hover\:bg-sidebar-accent:hover {
+    background-color: var(--sidebar-accent);
+  }
+  .hover\:bg-accent:hover {
+    background-color: var(--accent);
+  }
+  .hover\:text-accent-foreground:hover {
+    color: var(--accent-foreground);
+  }
+  .hover\:bg-primary\/90:hover {
+    background-color: rgba(8, 145, 178, 0.9);
+  }
+  .hover\:bg-destructive:hover {
+    background-color: var(--destructive);
+  }
+  .hover\:text-destructive-foreground:hover {
+    color: var(--destructive-foreground);
+  }
+
+  /* Scrollbar styles */
+  .scrollbar-thin {
+    scrollbar-width: thin;
+  }
+  
+  .scrollbar-thumb-muted {
+    scrollbar-color: var(--muted) transparent;
+  }
+  
+  .scrollbar-track-transparent {
+    scrollbar-color: var(--muted) transparent;
+  }
+
+  /* Webkit scrollbar styles */
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 4px;
+  }
+  
+  .scrollbar-thumb-muted::-webkit-scrollbar-thumb {
+    background-color: var(--muted);
+    border-radius: 2px;
+  }
+  
+  .scrollbar-track-transparent::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+@layer base {
+  * {
+    border-color: var(--border);
+  }
+  body {
+    background-color: var(--background);
+    color: var(--foreground);
+  }
+}

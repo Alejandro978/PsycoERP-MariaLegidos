@@ -1,0 +1,177 @@
+<!-- Patient Filters Modal -->
+@if (isOpen) {
+  <div class="fixed inset-0 z-50 bg-black/80 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0">
+    <div class="fixed left-[50%] top-[50%] z-50 grid w-full max-w-4xl max-h-[90vh] translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg overflow-y-auto">
+
+      <!-- Modal Header -->
+      <div class="flex flex-col space-y-1.5 text-center sm:text-left">
+        <h2 class="text-lg font-semibold leading-none tracking-tight">Filtrar Pacientes</h2>
+        <p class="text-sm text-muted-foreground">
+          Aplica filtros para encontrar pacientes específicos
+        </p>
+      </div>
+
+      <!-- Modal Content -->
+      <form [formGroup]="filtersForm" (ngSubmit)="handleApplyFilters()" class="space-y-4">
+
+        <!-- Nombre y Apellidos -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="first_name" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+              Nombre
+            </label>
+            <input
+              id="first_name"
+              type="text"
+              formControlName="first_name"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:bg-white focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              placeholder="Buscar por nombre...">
+          </div>
+
+          <div>
+            <label for="last_name" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+              Apellidos
+            </label>
+            <input
+              id="last_name"
+              type="text"
+              formControlName="last_name"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:bg-white focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              placeholder="Buscar por apellidos...">
+          </div>
+        </div>
+
+        <!-- Email y DNI -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <div>
+            <label for="email" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+              Email
+            </label>
+            <input
+              id="email"
+              type="email"
+              formControlName="email"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:bg-white focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              placeholder="Buscar por email...">
+          </div>
+
+          <div>
+            <label for="dni" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+              DNI
+            </label>
+            <input
+              id="dni"
+              type="text"
+              formControlName="dni"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:bg-white focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+              placeholder="Buscar por DNI...">
+          </div>
+        </div>
+
+        <!-- Género y Clínica -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4 items-start">
+          <div>
+            <label for="gender" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+              Género
+            </label>
+            <select
+              id="gender"
+              formControlName="gender"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:bg-white focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors">
+              <option value="">Todos los géneros</option>
+              @for (option of genderOptions; track option.value) {
+                <option [value]="option.value">{{ option.label }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <app-clinic-selector
+              [control]="$any(filtersForm.get('clinic_id'))"
+              [clinics]="clinics"
+              label="Clínica"
+              placeholder="Buscar clínica...">
+            </app-clinic-selector>
+          </div>
+        </div>
+
+        <!-- Estado (only for inactive tab) -->
+        @if (showInactiveTab) {
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div>
+              <label for="status" class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block">
+                Estado
+              </label>
+              <select
+                id="status"
+                formControlName="status"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:bg-white focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors">
+                <option value="">Todos los estados</option>
+                @for (option of statusOptions; track option.value) {
+                  <option [value]="option.value">{{ option.label }}</option>
+                }
+              </select>
+            </div>
+          </div>
+        }
+
+        <!-- Active filters indicator -->
+        @if (hasActiveFilters) {
+          <div class="bg-blue-50 border border-blue-200 rounded-md p-3">
+            <div class="flex items-center gap-2">
+              <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+              </svg>
+              <span class="text-sm font-medium text-blue-800">Filtros activos aplicados</span>
+            </div>
+          </div>
+        }
+
+        <!-- Buttons -->
+        <div class="flex flex-col gap-2 pt-4 sm:flex-row-reverse">
+          <!-- Apply Filters Button -->
+          <button
+            type="submit"
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[#d29f67] text-white hover:bg-[#d29f67]/90 h-10 px-4 py-2 flex-1 sm:flex-initial">
+            <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 2v-6.586a1 1 0 00-.293-.707L3.293 7.207A1 1 0 013 6.5V4z"></path>
+            </svg>
+            Aplicar Filtros
+          </button>
+
+          <!-- Clear Filters Button -->
+          @if (hasActiveFilters) {
+            <button
+              type="button"
+              class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 h-10 px-4 py-2 flex-1 sm:flex-initial"
+              (click)="handleClearFilters()">
+              <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+              </svg>
+              Limpiar Filtros
+            </button>
+          }
+
+          <!-- Cancel Button -->
+          <button
+            type="button"
+            class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-gray-300 bg-gray-50 hover:border-gray-400 hover:bg-gray-100 h-10 px-4 py-2 flex-1 sm:flex-initial"
+            (click)="handleCancel()">
+            Cancelar
+          </button>
+        </div>
+      </form>
+
+      <!-- Close button -->
+      <button
+        type="button"
+        class="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none"
+        (click)="handleCancel()">
+        <span class="sr-only">Close</span>
+        <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+    </div>
+  </div>
+}

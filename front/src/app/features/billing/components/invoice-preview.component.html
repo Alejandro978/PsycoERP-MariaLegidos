@@ -1,0 +1,43 @@
+@if (isOpen && invoiceData) {
+  <div class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm">
+    <div class="fixed left-[50%] top-[50%] z-[60] w-[95vw] max-w-4xl max-h-[90vh] translate-x-[-50%] translate-y-[-50%] rounded-xl overflow-hidden bg-white shadow-2xl flex flex-col">
+
+      <!-- Header -->
+      <div class="flex items-center justify-between p-6 border-b bg-white">
+        <h2 class="text-xl font-bold">Vista Previa - {{ invoiceData.invoice_number }}</h2>
+        <div class="flex gap-2">
+          <button
+            data-slot="button"
+            type="button"
+            (click)="download()"
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7 10 12 15 17 10"></polyline>
+              <line x1="12" x2="12" y1="15" y2="3"></line>
+            </svg>
+            Descargar PDF
+          </button>
+          <button
+            data-slot="button"
+            type="button"
+            (click)="close()"
+            class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+        </div>
+      </div>
+
+      <!-- Content -->
+      <div class="p-8 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50">
+        <div id="invoice-content" class="rounded-lg shadow-sm">
+          <app-invoice-template [invoiceData]="invoiceData" [userData]="userData"></app-invoice-template>
+        </div>
+      </div>
+
+    </div>
+  </div>
+}

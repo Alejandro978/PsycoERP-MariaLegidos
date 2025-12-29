@@ -1,0 +1,72 @@
+<div
+  class="w-64 bg-gray-50 border-r border-gray-200 flex flex-col transition-transform duration-300 ease-in-out
+         lg:translate-x-0 lg:static lg:z-auto lg:h-screen
+         fixed inset-y-0 left-0 z-50"
+  [class.translate-x-0]="isOpen"
+  [class.-translate-x-full]="!isOpen">
+
+  <!-- Header -->
+  <div class="p-6 border-b border-gray-200">
+    <div class="flex items-center justify-between">
+      <div>
+        <h1 class="text-xl font-black text-gray-900">PsycoERP</h1>
+        <p class="text-sm mt-1 text-gray-500">Gestión de clínica</p>
+      </div>
+      <button
+        (click)="onToggle()"
+        class="lg:hidden p-2 rounded-lg transition-colors text-gray-600 hover:bg-primary hover:text-white">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
+        </svg>
+      </button>
+    </div>
+  </div>
+
+  <!-- Navigation -->
+  <nav class="flex-1 px-3 py-4">
+    <ul class="space-y-1">
+      @for (item of menuItems(); track item.path) {
+        <li>
+          <button
+            (click)="onModuleChange(item.path)"
+            class="flex items-center gap-3 px-3 py-2.5 mx-1 text-left transition-all duration-200 font-medium w-full rounded-lg"
+            [class.bg-primary]="activeModule === item.path"
+            [class.text-white]="activeModule === item.path"
+            [class.text-gray-700]="activeModule !== item.path"
+            [class.hover:bg-primary-light]="activeModule === item.path"
+            [class.hover:bg-primary-semi-light]="activeModule !== item.path"
+            [class.hover:text-gray-800]="activeModule !== item.path">
+            <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" [attr.d]="item.icon" />
+            </svg>
+            <span>{{ item.label }}</span>
+          </button>
+        </li>
+      }
+    </ul>
+  </nav>
+
+  <!-- Footer -->
+  <div class="p-4 border-t border-gray-200">
+    <!-- Logout Button -->
+    <button
+      (click)="onLogout()"
+      class="flex items-center gap-3 px-3 py-2.5 mx-1 mb-2 text-left transition-colors font-medium
+             w-full rounded-xl text-gray-700 hover:bg-red-50 hover:text-red-600">
+      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+      </svg>
+      <span class="text-sm font-medium">Cerrar Sesión</span>
+    </button>
+
+    <!-- User Info -->
+    <div class="flex items-center gap-3 px-3 py-2.5 mx-1 w-full rounded-xl">
+      <div class="w-8 h-8 bg-primary rounded-full flex items-center justify-center">
+          <span class="text-sm font-semibold text-white">{{ userInitials() }}</span>
+        </div>
+        <div>
+          <p class="text-sm font-medium text-gray-700">{{ userName() || 'Perfil' }}</p>
+        </div>
+    </div>
+  </div>
+</div>

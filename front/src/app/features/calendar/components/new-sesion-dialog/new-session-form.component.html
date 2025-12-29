@@ -1,0 +1,523 @@
+<app-reusable-modal [isOpen]="true" [title]="isEditMode ? 'Editar Cita' : 'Nueva Cita'"
+  [subtitle]="isEditMode ? 'Modificar información de la sesión' : 'Programar una nueva sesión'"
+  [isFormValid]="isFormValid" [actionType]="isEditMode ? 'edit' : 'create'" (onSubmit)="onSubmit()"
+  (onCancel)="onClose()" [cancelButtonText]="isEditMode ? 'Cancelar sesión' : null"
+  [deleteButtonText]="isEditMode ? 'Borrar sesión' : null" [isCancelled]="isCancelledSession()"
+  (onCancelSession)="onCancelSession()" (onDeleteSession)="onDeleteSession()">
+
+  <!-- Tabs Navigation (only in edit mode) -->
+  @if (isEditMode) {
+  <div class="border-b border-gray-200 px-4 sm:px-6 pt-4">
+    <nav class="flex gap-4" aria-label="Tabs">
+      <button type="button" (click)="activeTab.set('details')"
+        [class]="activeTab() === 'details' ? 'border-cyan-500 text-cyan-600 font-medium' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+        class="whitespace-nowrap py-2 px-1 border-b-2 text-sm transition-colors">
+        Detalles de la sesión
+      </button>
+      <button type="button" (click)="activeTab.set('clinical-notes')"
+        [class]="activeTab() === 'clinical-notes' ? 'border-cyan-500 text-cyan-600 font-medium' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
+        class="whitespace-nowrap py-2 px-1 border-b-2 text-sm transition-colors">
+        Historias Clínicas
+        @if (notes().length > 0) {
+        <span class="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{{ notes().length }}</span>
+        }
+      </button>
+    </nav>
+  </div>
+  }
+
+  <!-- Tab Content: Details -->
+  @if (activeTab() === 'details' || !isEditMode) {
+  <form [formGroup]="sessionForm" class="p-4 sm:p-6 space-y-6">
+
+    <!-- Error Message -->
+    @if (error()) {
+    <div class="mb-4 p-4 bg-red-50 border border-red-200 rounded-md">
+      <p class="text-sm text-red-600">{{ error() }}</p>
+    </div>
+    }
+
+    <!-- Patient Selector -->
+    <div>
+      <app-patient-selector [control]="$any(sessionForm.get('patient_id')!)" [patients]="patients()"
+        [label]="'Paciente'" [required]="true">
+      </app-patient-selector>
+    </div>
+
+    <!-- Patient Info Section - Always Visible -->
+    <section class="space-y-4">
+      <div class="flex items-center justify-between gap-3 pb-3 border-b border-gray-100">
+        <div class="flex items-center gap-3">
+          <div class="p-1.5 bg-blue-100 rounded-md">
+          <svg class="h-4 w-4 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+          </svg>
+          </div>
+          <h3 class="text-lg font-semibold text-gray-900">Información del Paciente</h3>
+        </div>
+
+        <!-- View patient detail button -->
+        <div class="pl-3">
+          <button type="button" (click)="viewPatientDetail()"
+            class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+            <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m0 0l4-4m-4 4l4 4M21 12v6a2 2 0 0 1-2 2H7" />
+            </svg>
+            Ver ficha
+          </button>
+        </div>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Clínica -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Clínica
+          </label>
+          <div class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+            @if (selectedPatientData) {
+            {{ selectedPatientData.nombreClinica }}
+            } @else {
+            <span class="text-gray-400">Selecciona un paciente</span>
+            }
+          </div>
+        </div>
+
+        <!-- Precio Base Editable -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Precio
+            <span class="text-red-500">*</span>
+          </label>
+          <div class="relative">
+            <div class="absolute inset-y-0 left-0 pl-3 flex items-center pointer-events-none">
+              <span class="text-gray-500 text-sm">€</span>
+            </div>
+            <input type="number" formControlName="base_price" step="0.01" min="0" placeholder="0.00"
+              class="block w-full h-10 pl-8 pr-3 py-2 text-sm border border-gray-300 rounded-lg bg-white placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+              [class.border-red-500]="sessionForm.get('base_price')?.invalid && (sessionForm.get('base_price')?.dirty || sessionForm.get('base_price')?.touched)">
+          </div>
+
+          @if (sessionForm.get('base_price')?.invalid && (sessionForm.get('base_price')?.dirty ||
+          sessionForm.get('base_price')?.touched)) {
+          <p class="text-red-600 text-xs mt-2 flex items-center gap-1">
+            <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+              <path fill-rule="evenodd"
+                d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+                clip-rule="evenodd" />
+            </svg>
+            @if (sessionForm.get('base_price')?.errors?.['required']) {
+            Precio es requerido
+            } @else if (sessionForm.get('base_price')?.errors?.['min']) {
+            El precio debe ser mayor a 0
+            }
+          </p>
+          }
+        </div>
+
+        <!-- Porcentaje -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Porcentaje propio
+          </label>
+          <div class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+            @if (selectedPatientData) {
+            {{ selectedPatientData.porcentaje }}%
+            } @else {
+            <span class="text-gray-400">-</span>
+            }
+          </div>
+        </div>
+
+        <!-- Neto -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">
+            Neto
+          </label>
+          <div class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+            @if (selectedPatientData && netPrice() > 0) {
+            €{{ netPrice().toFixed(2) }}
+            } @else {
+            <span class="text-gray-400">-</span>
+            }
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Información de la Cita -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+        <div class="p-1.5 bg-green-100 rounded-md">
+          <svg class="h-4 w-4 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M8 2v4m8-4v4M3 10h18M5 4h14a2 2 0 012 2v14a2 2 0 01-2 2H5a2 2 0 01-2-2V6a2 2 0 012-2z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">Información de la Cita</h3>
+      </div>
+
+      <!-- Fecha y Horarios -->
+      <div class="space-y-4">
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <app-form-input controlName="session_date" label="Fecha de la sesión" type="date" [required]="true">
+          </app-form-input>
+
+          <app-form-input controlName="start_time" label="Hora de inicio" type="time" [required]="true"
+            (onChange)="onStartTimeChange()">
+          </app-form-input>
+
+          <app-form-input controlName="end_time" label="Hora de fin" type="time" [required]="true">
+          </app-form-input>
+        </div>
+
+        <!-- Modalidad -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          <app-form-input controlName="mode" label="Modalidad" type="select" [options]="modeOptions" [required]="true">
+          </app-form-input>
+
+          <app-form-input controlName="payment_method" label="Método de pago" type="select"
+            [options]="paymentMethodOptions" [required]="true">
+          </app-form-input>
+        </div>
+      </div>
+    </section>
+
+    <!-- Notas Adicionales -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+        <div class="p-1.5 bg-orange-100 rounded-md">
+          <svg class="h-4 w-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">Notas Adicionales</h3>
+      </div>
+
+      <div>
+        <label for="notes" class="block text-sm font-medium text-gray-700 mb-2">
+          Observaciones
+        </label>
+        <textarea id="notes" formControlName="notes" rows="3" placeholder="Notas opcionales sobre la sesión..."
+          class="block w-full px-3 py-2 text-sm border border-gray-300 rounded-lg bg-white placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200 resize-none">
+        </textarea>
+      </div>
+    </section>
+
+    <!-- Loading indicator -->
+    @if (isLoading()) {
+    <div class="flex items-center justify-center py-4">
+      <div class="animate-spin rounded-full h-6 w-6 border-b-2 border-primary"></div>
+      <span class="ml-2 text-sm text-gray-600">{{ isEditMode ? 'Actualizando cita...' : 'Creando cita...' }}</span>
+    </div>
+    }
+
+  </form>
+  }
+
+  <!-- Tab Content: Clinical Notes -->
+  @if (activeTab() === 'clinical-notes' && isEditMode) {
+  <div class="p-4 sm:p-6 h-full flex flex-col">
+    <!-- Header with Search and New Note Button -->
+    <div class="flex items-center justify-between gap-4 mb-4 sm:mb-6">
+      <div class="flex items-center gap-4">
+        <div class="relative max-w-md">
+          <svg class="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400" fill="none"
+            stroke="currentColor" viewBox="0 0 24 24" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round"
+              d="m21 21-5.197-5.197m0 0A7.5 7.5 0 1 0 5.196 5.196a7.5 7.5 0 0 0 10.607 10.607Z" />
+          </svg>
+          <input type="text" placeholder="Buscar en notas..." [value]="searchTerm()" (input)="onSearchChange($event)"
+            class="w-full pl-10 pr-3 py-2 text-sm bg-gray-50 border border-gray-200 rounded-lg focus:outline-none focus:ring-1 focus:ring-cyan-300 focus:border-cyan-300 focus:bg-white transition-colors">
+        </div>
+        <div class="text-sm text-gray-500">
+          {{ sortedNotes().length }} nota{{ sortedNotes().length !== 1 ? 's' : '' }}
+        </div>
+      </div>
+      <button type="button" (click)="onCreateNote()" style="background-color: #d29f67"
+        class="hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium">
+        <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+        </svg>
+        Nueva Nota
+      </button>
+    </div>
+
+    <!-- Notes Content -->
+    <div class="flex-1 overflow-y-auto min-h-0">
+      <!-- Create Note Form (only shown when creating new note) -->
+      @if (isCreatingNote() && !editingNote()) {
+      <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm mb-6">
+        <!-- Header -->
+        <div
+          class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+          <h3 class="text-lg font-semibold">
+            Nueva Nota Clínica
+          </h3>
+        </div>
+
+        <!-- Content -->
+        <div class="px-6 space-y-4">
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Título
+              <span class="text-red-500">*</span>
+            </label>
+            <input type="text" [value]="newNote().title || ''" (input)="onTitleChange($event)"
+              placeholder="Título de la nota..."
+              class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500">
+          </div>
+
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Contenido
+              <span class="text-red-500">*</span>
+              <span class="text-xs text-gray-500 font-normal ml-1">
+                ({{ (newNote().content || '').length }}/10 caracteres mínimo)
+              </span>
+            </label>
+            <div class="relative">
+              <textarea [value]="newNote().content || ''" (input)="onContentChange($event)"
+                placeholder="Contenido de la nota clínica..." rows="8"
+                class="w-full px-3 py-2 pr-12 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 resize-none"
+                [class.border-red-300]="(newNote().content || '').length > 0 && (newNote().content || '').length < 10"></textarea>
+              <button type="button" (click)="toggleRecording($event)"
+                [class]="isRecording() ? 'absolute top-3 right-3 p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors animate-pulse' : 'absolute top-3 right-3 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors'"
+                [title]="isRecording() ? 'Detener grabación' : 'Grabar con micrófono'">
+                @if (isRecording()) {
+                <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                  <rect x="6" y="4" width="4" height="16" rx="2"></rect>
+                  <rect x="14" y="4" width="4" height="16" rx="2"></rect>
+                </svg>
+                } @else {
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round"
+                    d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 19v4"></path>
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 23h8"></path>
+                </svg>
+                }
+              </button>
+            </div>
+          </div>
+
+          <div class="flex justify-end gap-2 pt-2">
+            <button type="button" (click)="onCancelEdit()" [disabled]="isSavingNote()"
+              class="border border-gray-300 bg-white hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+              onmouseover="this.style.backgroundColor='#d29f67'; this.style.borderColor='#d29f67'"
+              onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+              Cancelar
+            </button>
+            <button type="button" (click)="onSaveNote()" [disabled]="isSavingNote() || !isFormValidNote()"
+              style="background-color: #d29f67"
+              class="hover:opacity-90 inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+              [title]="!isFormValidNote() ? 'Completa el título y el contenido (mínimo 10 caracteres)' : ''">
+              Crear Nota
+            </button>
+
+            @if (isSavingNote()) {
+            <app-spinner [overlay]="true" text="Guardando nota clínica..." size="lg">
+            </app-spinner>
+            }
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Notes List -->
+      <div class="space-y-4">
+        @for (note of sortedNotes(); track note.id) {
+        <div class="space-y-4">
+          <!-- Edit Note Form (inline above the note being edited) -->
+          @if (editingNote() && editingNote()?.id === note.id) {
+          <div class="bg-cyan-50 border-2 border-cyan-300 text-card-foreground flex flex-col gap-6 rounded-xl py-6 shadow-md">
+            <!-- Header -->
+            <div
+              class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+              <h3 class="text-lg font-semibold text-cyan-900">
+                Editar Nota Clínica
+              </h3>
+            </div>
+
+            <!-- Content -->
+            <div class="px-6 space-y-4">
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Título
+                  <span class="text-red-500">*</span>
+                </label>
+                <input type="text" [value]="newNote().title || ''" (input)="onTitleChange($event)"
+                  placeholder="Título de la nota..."
+                  class="w-full px-3 py-2 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 bg-white">
+              </div>
+
+              <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">
+                  Contenido
+                  <span class="text-red-500">*</span>
+                  <span class="text-xs text-gray-500 font-normal ml-1">
+                    ({{ (newNote().content || '').length }}/10 caracteres mínimo)
+                  </span>
+                </label>
+                <div class="relative">
+                  <textarea [value]="newNote().content || ''" (input)="onContentChange($event)"
+                    placeholder="Contenido de la nota clínica..." rows="8"
+                    class="w-full px-3 py-2 pr-12 text-sm border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 focus:border-cyan-500 resize-none bg-white"
+                    [class.border-red-300]="(newNote().content || '').length > 0 && (newNote().content || '').length < 10"></textarea>
+                  <button type="button" (click)="toggleRecording($event)"
+                    [class]="isRecording() ? 'absolute top-3 right-3 p-2 text-white bg-red-500 hover:bg-red-600 rounded-md transition-colors animate-pulse' : 'absolute top-3 right-3 p-1.5 text-gray-500 hover:text-gray-700 hover:bg-gray-100 rounded-md transition-colors'"
+                    [title]="isRecording() ? 'Detener grabación' : 'Grabar con micrófono'">
+                    @if (isRecording()) {
+                    <svg class="h-4 w-4" fill="currentColor" viewBox="0 0 24 24">
+                      <rect x="6" y="4" width="4" height="16" rx="2"></rect>
+                      <rect x="14" y="4" width="4" height="16" rx="2"></rect>
+                    </svg>
+                    } @else {
+                    <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M19 10v2a7 7 0 0 1-14 0v-2"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M12 19v4"></path>
+                      <path stroke-linecap="round" stroke-linejoin="round" d="M8 23h8"></path>
+                    </svg>
+                    }
+                  </button>
+                </div>
+              </div>
+
+              <div class="flex justify-end gap-2 pt-2">
+                <button type="button" (click)="onCancelEdit()" [disabled]="isSavingNote()"
+                  class="border border-gray-300 bg-white hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  onmouseover="this.style.backgroundColor='#d29f67'; this.style.borderColor='#d29f67'"
+                  onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+                  Cancelar
+                </button>
+                <button type="button" (click)="onSaveNote()" [disabled]="isSavingNote() || !isFormValidNote()"
+                  style="background-color: #d29f67"
+                  class="hover:opacity-90 inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+                  [title]="!isFormValidNote() ? 'Completa el título y el contenido (mínimo 10 caracteres)' : ''">
+                  Actualizar Nota
+                </button>
+
+                @if (isSavingNote()) {
+                <app-spinner [overlay]="true" text="Guardando nota clínica..." size="lg">
+                </app-spinner>
+                }
+              </div>
+            </div>
+          </div>
+          }
+
+          <!-- Note Card -->
+          <div
+            class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm cursor-pointer hover:shadow-md transition-shadow"
+            (click)="onEditNote(note)">
+            <!-- Header -->
+            <div
+              class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+              <div class="flex items-start justify-between w-full gap-4">
+                <div class="flex-1">
+                  <h3 class="text-base font-semibold text-gray-900">{{ note.title }}</h3>
+                </div>
+                <div class="flex items-center gap-3">
+                  <div class="text-right">
+                    <p class="text-sm text-gray-600">{{ formatDate(note.date) }}</p>
+                  </div>
+                  <button type="button" (click)="onEditNoteButton($event, note)"
+                    class="p-2 text-gray-400 hover:text-cyan-600 hover:bg-cyan-50 rounded-lg transition-colors"
+                    title="Editar nota">
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M16.862 4.487l1.687-1.688a1.875 1.875 0 112.652 2.652L10.582 16.07a4.5 4.5 0 01-1.897 1.13L6 18l.8-2.685a4.5 4.5 0 011.13-1.897l8.932-8.931zm0 0L19.5 7.125M18 14v4.75A2.25 2.25 0 0115.75 21H5.25A2.25 2.25 0 013 18.75V8.25A2.25 2.25 0 015.25 6H10" />
+                    </svg>
+                  </button>
+                  <button type="button" (click)="onDeleteNote($event, note)" [disabled]="deletingNoteId() === note.id"
+                    class="p-2 text-gray-400 hover:text-red-600 hover:bg-red-50 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    [title]="deletingNoteId() === note.id ? 'Eliminando...' : 'Eliminar nota'">
+                    @if (deletingNoteId() === note.id) {
+                    <svg class="animate-spin h-5 w-5" fill="none" viewBox="0 0 24 24">
+                      <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                      <path class="opacity-75" fill="currentColor"
+                        d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z">
+                      </path>
+                    </svg>
+                    } @else {
+                    <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                      <path stroke-linecap="round" stroke-linejoin="round"
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+                    </svg>
+                    }
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Content -->
+            <div class="px-6">
+              <div class="prose prose-sm max-w-none">
+                <p class="text-sm whitespace-pre-wrap text-gray-700">{{ note.content }}</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        }
+      </div>
+
+      <!-- Empty State -->
+      @if (sortedNotes().length === 0 && !isCreatingNote()) {
+      <div class="text-center py-12">
+        <svg class="h-12 w-12 mx-auto mb-4 text-gray-300" fill="none" stroke="currentColor" viewBox="0 0 24 24"
+          stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M19.5 14.25v-2.625a3.375 3.375 0 0 0-3.375-3.375h-4.5B" />
+          <path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12H3.75m0 0 3.75 3.75M3.75 12l3.75-3.75" />
+          <path stroke-linecap="round" stroke-linejoin="round"
+            d="M12 2.25c-.621 0-1.125.504-1.125 1.125S11.379 4.5 12 4.5s1.125-.504 1.125-1.125S12.621 2.25 12 2.25Z" />
+        </svg>
+        <p class="text-gray-600 mb-4">
+          @if (searchTerm()) {
+          No se encontraron notas que coincidan con la búsqueda.
+          } @else {
+          No hay notas clínicas para esta sesión.
+          }
+        </p>
+        @if (!searchTerm()) {
+        <button type="button" (click)="onCreateNote()" style="background-color: #d29f67"
+          class="hover:opacity-90 inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium">
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M12 4v16m8-8H4" />
+          </svg>
+          Crear Primera Nota
+        </button>
+        }
+      </div>
+      }
+    </div>
+  </div>
+  }
+
+</app-reusable-modal>
+
+<!-- Confirmation Modal for Cancelled Status -->
+<app-confirmation-modal [isOpen]="showCancelConfirmation()" title="¿Cancelar sesión?"
+  message="Estás a punto de marcar esta sesión como cancelada. Esta acción cambiará el estado de la sesión."
+  confirmText="Sí, cancelar" cancelText="No, mantener estado actual" confirmButtonType="destructive"
+  (onConfirm)="onCancelConfirm()" (onCancel)="onCancelReject()">
+</app-confirmation-modal>
+
+<!-- Confirmation Modal for Delete Note -->
+<app-confirmation-modal [isOpen]="showDeleteNoteConfirmation()" title="¿Eliminar nota clínica?"
+  message="Estás a punto de eliminar esta nota clínica. Esta acción no se puede deshacer." confirmText="Sí, eliminar"
+  cancelText="Cancelar" confirmButtonType="destructive" (onConfirm)="onConfirmDeleteNote()"
+  (onCancel)="onCancelDeleteNote()">
+</app-confirmation-modal>
+
+<!-- Confirmation Modal for Delete Session -->
+<app-confirmation-modal [isOpen]="showDeleteConfirmation()" title="¿Eliminar sesión?"
+  message="Estás a punto de eliminar esta sesión permanentemente. Esta acción no se puede deshacer."
+  confirmText="Sí, eliminar" cancelText="Cancelar" confirmButtonType="destructive"
+  (onConfirm)="onConfirmDeleteSession()" (onCancel)="onCancelDeleteSession()">
+</app-confirmation-modal>

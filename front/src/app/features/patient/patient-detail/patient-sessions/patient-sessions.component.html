@@ -1,0 +1,143 @@
+<div class="h-full overflow-y-auto space-y-6">
+    <!-- Filtros -->
+    <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm mb-4 sm:mb-6">
+      <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+        <div class="flex items-center justify-between">
+          <div class="text-base font-medium flex items-center gap-2">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
+            </svg>
+            Filtros
+          </div>
+          <div class="text-sm text-gray-600">
+            Total: {{ filteredSessions().length }} sesiones
+          </div>
+        </div>
+      </div>
+
+      <div class="px-6">
+        <div class="grid grid-cols-1 md:grid-cols-5 gap-4">
+          <div>
+            <label class="text-sm font-medium block mb-2">Estado</label>
+            <select
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              [value]="statusFilter()"
+              (change)="statusFilter.set($any($event.target).value)">
+              <option value="all">Todos</option>
+              <option value="completada">Completadas</option>
+              <option value="cancelada">Canceladas</option>
+            </select>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium block mb-2">Método de Pago</label>
+            <select
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              [value]="paymentMethodFilter()"
+              (change)="paymentMethodFilter.set($any($event.target).value)">
+              <option value="all">Todos</option>
+              @for (method of paymentMethods; track method) {
+                <option [value]="method" class="capitalize">{{ method }}</option>
+              }
+            </select>
+          </div>
+
+          <div>
+            <label class="text-sm font-medium block mb-2">Fecha Desde</label>
+            <input
+              type="date"
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              [value]="dateFrom()"
+              (change)="dateFrom.set($any($event.target).value)" />
+          </div>
+
+          <div>
+            <label class="text-sm font-medium block mb-2">Fecha Hasta</label>
+            <input
+              type="date"
+              class="flex h-9 w-full rounded-md border border-input bg-transparent px-3 py-1 text-sm shadow-sm transition-colors focus-visible:outline-none focus-visible:ring-1 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+              [value]="dateTo()"
+              (change)="dateTo.set($any($event.target).value)" />
+          </div>
+
+          <div class="flex items-end">
+            <button
+              (click)="clearFilters()"
+              class="border border-gray-300 bg-white hover:text-white inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all"
+              onmouseover="this.style.backgroundColor='#d29f67'; this.style.borderColor='#d29f67'"
+              onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+              Limpiar
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Tabla de Sesiones -->
+    <div class="flex-1 overflow-hidden">
+      <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm h-full">
+        <div class="flex-1 overflow-y-auto min-h-0 px-6">
+          @if (filteredSessions().length > 0) {
+            <table class="w-full">
+              <thead class="sticky top-0 bg-card z-10">
+                <tr class="border-b">
+                  <th class="text-left p-2 text-sm font-medium">
+                    <button
+                      (click)="toggleSortOrder()"
+                      class="flex items-center gap-1 hover:text-primary">
+                      Fecha
+                      <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                        @if (sortOrder() === 'asc') {
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M5 15l7-7 7 7" />
+                        } @else {
+                          <path stroke-linecap="round" stroke-linejoin="round" d="M19 9l-7 7-7-7" />
+                        }
+                      </svg>
+                    </button>
+                  </th>
+                  <th class="text-left p-2 text-sm font-medium">Clínica</th>
+                  <th class="text-left p-2 text-sm font-medium">Estado</th>
+                  <th class="text-left p-2 text-sm font-medium">Precio</th>
+                  <th class="text-left p-2 text-sm font-medium">Neto</th>
+                  <th class="text-left p-2 text-sm font-medium">Pago</th>
+                  <th class="text-left p-2 text-sm font-medium">Notas</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (session of filteredSessions(); track session.id) {
+                  <tr class="border-b hover:bg-muted/50">
+                    <td class="p-2 text-sm">{{ formatDate(session.fecha) }}</td>
+                    <td class="p-2 text-sm">{{ session.clinica }}</td>
+                    <td class="p-2">
+                      <span
+                        class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                        [class]="getStatusColor(session.estado)">
+                        {{ getStatusLabel(session.estado) }}
+                      </span>
+                    </td>
+                    <td class="p-2 text-sm">{{ formatPrice(session.precio) }}</td>
+                    <td class="p-2 text-sm">{{ formatPrice(session.precio_neto) }}</td>
+                    <td class="p-2">
+                      <span
+                        class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent capitalize"
+                        [class]="getPaymentColor(session.tipo_pago)">
+                        {{ session.tipo_pago }}
+                      </span>
+                    </td>
+                    <td class="p-2 text-sm max-w-32 truncate">{{ session.notas || '-' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          } @else {
+            <div class="text-center py-12">
+              <svg class="h-12 w-12 mx-auto mb-4 opacity-50" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+              </svg>
+              <p class="text-muted-foreground">No se encontraron sesiones con los filtros aplicados.</p>
+            </div>
+          }
+        </div>
+      </div>
+    </div>
+  </div>

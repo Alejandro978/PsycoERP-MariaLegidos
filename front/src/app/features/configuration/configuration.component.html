@@ -1,0 +1,196 @@
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">Configuración</h1>
+        <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Gestiona tu perfil profesional y configuración de cuenta
+        </p>
+      </div>
+    </div>
+
+    <!-- Main content -->
+    <div class="flex-1 overflow-y-auto min-h-0">
+
+      @if (isLoading()) {
+        <div class="flex items-center justify-center h-full">
+          <div class="text-muted-foreground">Cargando configuración...</div>
+        </div>
+      } @else {
+
+    <form [formGroup]="configurationForm" (ngSubmit)="handleSave()" class="space-y-6">
+      <div class="bg-gray-50 text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
+        <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6">
+          <div class="leading-none font-semibold flex items-center gap-2">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-5 w-5">
+              <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+              <circle cx="12" cy="7" r="4"></circle>
+            </svg>
+            Información Personal
+          </div>
+        </div>
+
+        <div class="px-6 space-y-6">
+          <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <div class="sm:col-span-2">
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="name">
+                Nombre Completo
+              </label>
+              <input id="name" type="text" formControlName="name"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="isFieldInvalid('name')"
+                [class.focus:ring-red-500]="isFieldInvalid('name')"
+                [class.focus:border-red-500]="isFieldInvalid('name')" />
+              @if (isFieldInvalid('name')) {
+              <p class="text-red-500 text-xs mt-1">{{ getFieldError('name') }}</p>
+              }
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="dni">
+                DNI
+              </label>
+              <input id="dni" type="text" formControlName="dni" placeholder="12345678A"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="isFieldInvalid('dni')"
+                [class.focus:ring-red-500]="isFieldInvalid('dni')"
+                [class.focus:border-red-500]="isFieldInvalid('dni')" />
+              @if (isFieldInvalid('dni')) {
+              <p class="text-red-500 text-xs mt-1">{{ getFieldError('dni') }}</p>
+              }
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="license_number">
+                Número de Colegiado
+              </label>
+              <input id="license_number" type="text" formControlName="license_number" placeholder="Ej: COL-XYZ"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors" />
+            </div>
+
+            <div>
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="irpf">
+                IRPF (%)
+              </label>
+              <input id="irpf" type="text" formControlName="irpf" placeholder="Ej: 7.50"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors" />
+            </div>
+
+            <div class="sm:col-span-2">
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="iban">
+                IBAN (Número de Cuenta)
+              </label>
+              <input id="iban" type="text" formControlName="iban" placeholder="Ej: ES91 2100 0418 4502 0005 1332"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors" />
+            </div>
+          </div>
+
+          <div class="space-y-4">
+            <h3 class="text-lg font-medium text-gray-900">Dirección</h3>
+            <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+              <div>
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="street">
+                  Calle
+                </label>
+                <input id="street" type="text" formControlName="street" placeholder="Ej: Calle Mayor"
+                  class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  [class.border-red-500]="isFieldInvalid('street')"
+                  [class.focus:ring-red-500]="isFieldInvalid('street')"
+                  [class.focus:border-red-500]="isFieldInvalid('street')" />
+                @if (isFieldInvalid('street')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('street') }}</p>
+                }
+              </div>
+              <div>
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="street_number">
+                  Número
+                </label>
+                <input id="street_number" type="text" formControlName="street_number" placeholder="Ej: 123"
+                  class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  [class.border-red-500]="isFieldInvalid('street_number')"
+                  [class.focus:ring-red-500]="isFieldInvalid('street_number')"
+                  [class.focus:border-red-500]="isFieldInvalid('street_number')" />
+                @if (isFieldInvalid('street_number')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('street_number') }}</p>
+                }
+              </div>
+              <div>
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="door">
+                  Puerta
+                </label>
+                <input id="door" type="text" formControlName="door" placeholder="Ej: 2A"
+                  class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors" />
+              </div>
+              <div>
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="city">
+                  Ciudad
+                </label>
+                <input id="city" type="text" formControlName="city" placeholder="Ej: Madrid"
+                  class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  [class.border-red-500]="isFieldInvalid('city')"
+                  [class.focus:ring-red-500]="isFieldInvalid('city')"
+                  [class.focus:border-red-500]="isFieldInvalid('city')" />
+                @if (isFieldInvalid('city')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('city') }}</p>
+                }
+              </div>
+              <div>
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="province">
+                  Provincia
+                </label>
+                <input id="province" type="text" formControlName="province" placeholder="Ej: Madrid"
+                  class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  [class.border-red-500]="isFieldInvalid('province')"
+                  [class.focus:ring-red-500]="isFieldInvalid('province')"
+                  [class.focus:border-red-500]="isFieldInvalid('province')" />
+                @if (isFieldInvalid('province')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('province') }}</p>
+                }
+              </div>
+              <div>
+                <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="postal_code">
+                  Código Postal
+                </label>
+                <input id="postal_code" type="text" formControlName="postal_code" placeholder="Ej: 28001"
+                  class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67] focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                  [class.border-red-500]="isFieldInvalid('postal_code')"
+                  [class.focus:ring-red-500]="isFieldInvalid('postal_code')"
+                  [class.focus:border-red-500]="isFieldInvalid('postal_code')" />
+                @if (isFieldInvalid('postal_code')) {
+                <p class="text-red-500 text-xs mt-1">{{ getFieldError('postal_code') }}</p>
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-6">
+        <button type="submit"
+          class="inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-[#d29f67] text-white hover:bg-[#d29f67]/90 h-10 px-4 py-2 gap-2"
+          [disabled]="configurationForm.invalid || isUpdating()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path
+              d="M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z">
+            </path>
+            <path d="M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7"></path>
+            <path d="M7 3v4a1 1 0 0 0 1 1h7"></path>
+          </svg>
+          @if (isUpdating()) {
+            Guardando...
+          } @else {
+            Guardar Configuración
+          }
+        </button>
+      </div>
+    </form>
+
+      }
+
+    </div>
+  </div>
+</div>

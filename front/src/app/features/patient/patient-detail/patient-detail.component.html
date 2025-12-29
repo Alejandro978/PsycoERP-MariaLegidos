@@ -1,0 +1,179 @@
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+    @if (patient()) {
+      <!-- Header -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+        <div class="flex items-center gap-4">
+          <button
+            (click)="onBack()"
+            class="inline-flex items-center justify-center rounded-xl px-3 py-2 text-sm font-medium transition-all border border-gray-300 bg-white hover:text-white"
+            onmouseover="this.style.backgroundColor='#d29f67'; this.style.borderColor='#d29f67'"
+            onmouseout="this.style.backgroundColor=''; this.style.borderColor='#d1d5db'">
+            <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+              <path stroke-linecap="round" stroke-linejoin="round" d="M15 19l-7-7 7-7" />
+            </svg>
+            Volver
+          </button>
+          <div class="flex-1">
+            <div class="flex items-center gap-4">
+              <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">{{ patient()!.first_name }} {{ patient()!.last_name }}</h1>
+              <span
+                class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                [class]="getStatusColor(patient()!.status)">
+                {{ getStatusLabel(patient()!.status) }}
+              </span>
+            </div>
+            <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+              Ficha #{{ patient()!.id }} • DNI: {{ patient()!.dni }}
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <!-- Tabs -->
+      <div class="flex-1 overflow-y-auto min-h-0">
+        <div class="h-full flex flex-col">
+          <div data-slot="tabs" class="flex flex-col gap-2">
+            <div class="w-full overflow-x-auto">
+              <div data-slot="tabs-list" class="bg-muted text-muted-foreground flex h-9 min-w-fit items-center justify-start sm:justify-center rounded-lg p-[3px] gap-1 sm:w-full">
+              <button
+                (click)="setActiveTab('summary')"
+                data-slot="tabs-trigger"
+                [class]="activeTab() === 'summary'
+                  ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 bg-background text-foreground shadow-sm'
+                  : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4'">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+                </svg>
+                Resumen
+              </button>
+              <button
+                (click)="setActiveTab('data')"
+                data-slot="tabs-trigger"
+                [class]="activeTab() === 'data'
+                  ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 bg-background text-foreground shadow-sm'
+                  : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4'">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" />
+                </svg>
+                Datos
+              </button>
+              <button
+                (click)="setActiveTab('clinical')"
+                data-slot="tabs-trigger"
+                [class]="activeTab() === 'clinical'
+                  ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 bg-background text-foreground shadow-sm'
+                  : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4'">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M14 2v6h6" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 13H8" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M16 17H8" />
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M10 9H8" />
+                </svg>
+                Historia Clínica
+              </button>
+              <button
+                (click)="setActiveTab('sessions')"
+                data-slot="tabs-trigger"
+                [class]="activeTab() === 'sessions'
+                  ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 bg-background text-foreground shadow-sm'
+                  : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4'">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                Sesiones
+              </button>
+              <button
+                (click)="setActiveTab('invoices')"
+                data-slot="tabs-trigger"
+                [class]="activeTab() === 'invoices'
+                  ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 bg-background text-foreground shadow-sm'
+                  : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4'">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+                </svg>
+                Facturas
+              </button>
+              <button
+                (click)="setActiveTab('documentation')"
+                data-slot="tabs-trigger"
+                [class]="activeTab() === 'documentation'
+                  ? 'data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4 bg-background text-foreground shadow-sm'
+                  : 'text-foreground dark:text-muted-foreground inline-flex h-[calc(100%-1px)] flex-shrink-0 sm:flex-1 items-center justify-center gap-1.5 rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*=\'size-\'])]:size-4'">
+                <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M3 7v10a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2h-6l-2-2H5a2 2 0 00-2 2z" />
+                </svg>
+                Documentación
+              </button>
+              </div>
+            </div>
+          </div>
+
+          <div data-slot="tabs-content" class="flex-1 outline-none overflow-y-auto min-h-0 mt-6">
+            @if (activeTab() === 'summary') {
+              <div class="h-full">
+                <app-patient-summary
+                  [patient]="patient()!"
+                  [sessions]="sessions()"
+                  [invoices]="invoices()"
+                  [bonuses]="bonuses()"
+                  [sessionStats]="sessionStats()"
+                  [billingInfo]="billingInfo()"
+                  [sessionType]="sessionType()">
+                </app-patient-summary>
+              </div>
+            }
+
+            @if (activeTab() === 'data') {
+              <div class="h-full">
+                <app-patient-data
+                  [patient]="patient()!"
+                  (patientUpdated)="onPatientDataUpdated()">
+                </app-patient-data>
+              </div>
+            }
+
+            @if (activeTab() === 'clinical') {
+              <div class="h-full">
+                <app-patient-clinical-history
+                  [patient]="patient()!"
+                  [medicalRecords]="patientMedicalRecord()"
+                  (dataChanged)="onClinicalNotesChanged()">
+                </app-patient-clinical-history>
+              </div>
+            }
+
+            @if (activeTab() === 'sessions') {
+              <div class="h-full">
+                <app-patient-sessions
+                  [patient]="patient()!"
+                  [sessions]="patientSessions()">
+                </app-patient-sessions>
+              </div>
+            }
+
+            @if (activeTab() === 'invoices') {
+              <div class="h-full">
+                <div class="text-center py-12">
+                  <p class="text-muted-foreground">Tab Facturas - En desarrollo</p>
+                </div>
+              </div>
+            }
+
+
+            @if (activeTab() === 'documentation') {
+              <div class="h-full">
+                <app-patient-documentation
+                  [patient]="patient()!"
+                  [documents]="patientDocuments()"
+                  (documentsChanged)="onDocumentsChanged()">
+                </app-patient-documentation>
+              </div>
+            }
+          </div>
+        </div>
+      </div>
+    }
+  </div>
+</div>

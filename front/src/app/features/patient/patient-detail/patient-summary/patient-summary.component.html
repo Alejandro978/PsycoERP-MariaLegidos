@@ -1,0 +1,144 @@
+<div class="h-full overflow-y-auto space-y-6">
+  <!-- Client Data Card -->
+  <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
+    <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+        </svg>
+        <h3 class="text-lg font-semibold">Datos del Cliente</h3>
+      </div>
+    </div>
+
+    <div class="px-6">
+      <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+        <div>
+          <p class="text-sm text-muted-foreground">Número de Ficha</p>
+          <p class="font-semibold">#{{ patient.id }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-muted-foreground">Email</p>
+          <p class="font-semibold truncate">{{ patient.email }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-muted-foreground">Teléfono</p>
+          <p class="font-semibold">{{ patient.phone }}</p>
+        </div>
+        <div>
+          <p class="text-sm text-muted-foreground">Tipo de Sesión (por defecto)</p>
+          <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                [class]="getSessionTypeColor(sessionType)">
+            {{ sessionType }}
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Sessions Statistics -->
+  <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
+    <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" />
+        </svg>
+        <h3 class="text-lg font-semibold">Sesiones</h3>
+      </div>
+    </div>
+
+    <div class="px-6">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold text-green-600">{{ completedSessions() }}</div>
+          <p class="text-sm text-muted-foreground">Completadas</p>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold text-red-600">{{ cancelledSessions() }}</div>
+          <p class="text-sm text-muted-foreground">Canceladas</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Session History -->
+  <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
+    <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+        </svg>
+        <h3 class="text-lg font-semibold">Histórico de Sesiones Recientes (10)</h3>
+      </div>
+    </div>
+
+    <div class="px-6">
+      <div class="relative w-full overflow-auto">
+        <table class="w-full caption-bottom text-sm">
+          <thead class="[&_tr]:border-b">
+            <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+              <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Fecha</th>
+              <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Tipo</th>
+              <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Precio</th>
+              <th class="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&:has([role=checkbox])]:pr-0">Método de Pago</th>
+            </tr>
+          </thead>
+          <tbody class="[&_tr:last-child]:border-0">
+            @if (recentSessions().length === 0) {
+              <tr>
+                <td colspan="5" class="p-8 text-center text-muted-foreground">
+                  No hay datos de sesiones disponibles
+
+                </td>
+              </tr>
+            } @else {
+              @for (session of recentSessions(); track $index) {
+                <tr class="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
+                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">{{ formatDate(session.date) }}</td>
+                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0 capitalize">
+                    <span class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent"
+                          [class]="getSessionTypeColor(session.type)">
+                      {{ session.type }}
+                    </span>
+                  </td>
+                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">{{ session.price }}€</td>
+                  <td class="p-4 align-middle [&:has([role=checkbox])]:pr-0">
+                      <span
+                        class="inline-flex items-center justify-center rounded-md border px-2 py-0.5 text-xs font-medium w-fit whitespace-nowrap shrink-0 focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive transition-[color,box-shadow] overflow-hidden border-transparent capitalize"
+                        [class]="getPaymentColor(session.paymentMethod)">
+                        {{ session.paymentMethod }}
+                      </span>
+                    </td>
+                </tr>
+              }
+            }
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <!-- Billing Summary -->
+  <div class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm">
+    <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+      <div class="flex items-center gap-2">
+        <svg class="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+          <path stroke-linecap="round" stroke-linejoin="round" d="M3 10h18M7 15h1m4 0h1m-7 4h12a3 3 0 003-3V8a3 3 0 00-3-3H6a3 3 0 00-3 3v8a3 3 0 003 3z" />
+        </svg>
+        <h3 class="text-lg font-semibold">Facturación</h3>
+      </div>
+    </div>
+
+    <div class="px-6">
+      <div class="grid grid-cols-2 gap-4">
+        <div class="text-center">
+          <div class="text-2xl font-bold" style="color: #d29f67">{{ totalSpent() }}€</div>
+          <p class="text-sm text-muted-foreground">Total Gastado</p>
+        </div>
+        <div class="text-center">
+          <div class="text-2xl font-bold">{{ billingInfo.invoicesIssued }}</div>
+          <p class="text-sm text-muted-foreground">Facturas Emitidas</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

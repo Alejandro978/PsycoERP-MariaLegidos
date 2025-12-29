@@ -1,0 +1,133 @@
+<!-- Main container following project standards -->
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+
+  <!-- Header section (fijo) -->
+  <app-section-header title="Gestión de Pacientes" subtitle="Administra los pacientes registrados en la plataforma"
+    buttonText="Nuevo Paciente" [showButton]="true" (onButtonClick)="openCreateForm()" [showFiltersButton]="true" (onFiltersClick)="openFiltersModal()">
+  </app-section-header>
+
+  <!-- Sistema de pestañas -->
+  <div class="flex-1 overflow-hidden">
+    <div class="gap-2 h-full flex flex-col">
+      <!-- Tabs header -->
+      <div role="tablist"
+        class="bg-muted text-muted-foreground items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-2 h-12 mt-6">
+        <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'active'"
+          [class]="getTabClasses('active')" (click)="setActiveTab('active')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-users h-4 w-4">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+          </svg>
+          Pacientes Activos
+          <span
+            class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap shrink-0 gap-1 ml-1 px-2 py-0.5 text-xs bg-green-50 text-green-700 border-green-200">
+            {{ activePatientsCount() }}
+          </span>
+        </button>
+        <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'inactive'"
+          [class]="getTabClasses('inactive')" (click)="setActiveTab('inactive')">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-user-x h-4 w-4">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <line x1="17" x2="22" y1="8" y2="13"></line>
+            <line x1="22" x2="17" y1="8" y2="13"></line>
+          </svg>
+          Pacientes Inactivos
+          <span
+            class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap shrink-0 gap-1 ml-1 px-2 py-0.5 text-xs bg-gray-50 text-gray-700 border-gray-200">
+            {{ deletedPatientsCount() }}
+          </span>
+        </button>
+      </div>
+
+      <!-- Tab content -->
+      <div class="flex-1 overflow-hidden mt-6">
+        @if (activeTab() === 'active') {
+        <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col relative">
+          <div class="flex-1 overflow-y-auto pb-20">
+            <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId"
+              (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
+              (onRestore)="openRestoreModal($event)" (onViewDetail)="navigateToDetail($event)">
+            </app-patients-list>
+          </div>
+
+          <!-- Paginación para pacientes activos -->
+          @if (paginationData()) {
+          <div class="absolute bottom-0 left-0 right-0">
+            <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
+              [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
+              [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
+              (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
+            </app-pagination>
+          </div>
+          }
+        </div>
+        }
+
+        @if (activeTab() === 'inactive') {
+        <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col relative">
+          <div class="flex-1 overflow-y-auto pb-20">
+            <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId" [isDeletedView]="true"
+              (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
+              (onRestore)="openRestoreModal($event)" (onViewDetail)="navigateToDetail($event)">
+            </app-patients-list>
+          </div>
+
+          <!-- Paginación para pacientes inactivos -->
+          @if (paginationData()) {
+          <div class="absolute bottom-0 left-0 right-0">
+            <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
+              [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
+              [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
+              (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
+            </app-pagination>
+          </div>
+          }
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- Patient Form Modal -->
+<app-patient-form
+  [isOpen]="showForm()"
+  [patient]="editingPatient()"
+  [clinics]="clinics()"
+  (onSave)="handleSave($event)"
+  (onCancel)="closeForm()">
+</app-patient-form>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal [isOpen]="deletingPatient() !== null" title="Confirmar Eliminación"
+  message="¿Estás seguro de que deseas eliminar el paciente " [itemName]="(deletingPatient()?.first_name || '') + ' ' + (deletingPatient()?.last_name || '')"
+  confirmText="Eliminar" cancelText="Cancelar" confirmButtonType="destructive" (onConfirm)="handleDeletePatient()"
+  (onCancel)="closeDeleteModal()">
+</app-confirmation-modal>
+
+<!-- Restore Confirmation Modal -->
+<app-confirmation-modal [isOpen]="restoringPatient() !== null" title="Confirmar Restauración"
+  message="¿Estás seguro de que deseas restaurar el paciente " [itemName]="(restoringPatient()?.first_name || '') + ' ' + (restoringPatient()?.last_name || '')"
+  confirmText="Restaurar" cancelText="Cancelar" confirmButtonType="primary" [isRestore]="true" (onConfirm)="handleRestorePatient()"
+  (onCancel)="closeRestoreModal()">
+</app-confirmation-modal>
+
+<!-- Filters Modal -->
+<app-patient-filters-modal
+  [isOpen]="showFiltersModal()"
+  [currentFilters]="currentFilters()"
+  [showInactiveTab]="activeTab() === 'inactive'"
+  [clinics]="clinics()"
+  (onApplyFilters)="handleApplyFilters($event)"
+  (onClearFilters)="handleClearFilters()"
+  (onCancel)="closeFiltersModal()">
+</app-patient-filters-modal>

@@ -1,0 +1,58 @@
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+
+    <!-- Header -->
+    <app-section-header title="Recordatorios" subtitle="Gestiona los recordatorios de sesión para tus pacientes">
+    </app-section-header>
+
+    <!-- Content -->
+    <div class="flex-1 overflow-y-auto min-h-0">
+
+      <!-- Error State -->
+      @if (error()) {
+      <div class="bg-destructive/10 border border-destructive/20 text-destructive px-4 py-3 rounded-lg mb-4">
+        <div class="flex items-center space-x-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <circle cx="12" cy="12" r="10"></circle>
+            <line x1="15" y1="9" x2="9" y2="15"></line>
+            <line x1="9" y1="9" x2="15" y2="15"></line>
+          </svg>
+          <span>{{ error() }}</span>
+        </div>
+        <button class="mt-2 text-sm underline hover:no-underline" (click)="onRetry()">
+          Retry
+        </button>
+      </div>
+      }
+
+      <!-- Loading State -->
+      @if (isLoading()) {
+      <div class="flex items-center justify-center h-full">
+        <div class="text-muted-foreground">Loading reminders...</div>
+      </div>
+      } @else if (reminders().length > 0) {
+      <!-- Reminders Grid -->
+      <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+        @for (reminder of reminders(); track reminder.id) {
+        <app-reminder-card [reminder]="reminder" [isLoading]="isReminderLoading(reminder.id)"
+          (sendReminder)="onSendReminder($event)">
+        </app-reminder-card>
+        }
+      </div>
+      } @else {
+      <!-- Empty State -->
+      <div class="text-center py-12">
+        <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="w-12 h-12 text-muted-foreground mx-auto mb-4">
+          <path d="M7.9 20A9 9 0 1 0 4 16.1L2 22Z"></path>
+        </svg>
+        <h3 class="text-lg font-semibold text-foreground mb-2">No hay recordatorios pendientes</h3>
+        <p class="text-muted-foreground">Los recordatorios aparecerán aquí cuando tengas sesiones programadas</p>
+      </div>
+      }
+
+    </div>
+  </div>
+</div>

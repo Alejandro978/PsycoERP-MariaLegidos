@@ -1,0 +1,167 @@
+@if (isOpen && clinicInvoiceData) {
+<div class="fixed inset-0 z-[60] bg-black/80 backdrop-blur-sm">
+  <div
+    class="fixed left-[50%] top-[50%] z-[60] w-[95vw] max-w-4xl max-h-[90vh] translate-x-[-50%] translate-y-[-50%] rounded-xl overflow-hidden bg-white shadow-2xl flex flex-col">
+
+    <!-- Header -->
+    <div class="flex items-center justify-between p-6 border-b bg-white">
+      <h2 class="text-xl font-bold">Vista Previa - {{ clinicInvoiceData.invoice_number }}</h2>
+      <div class="flex gap-2">
+        <button data-slot="button" type="button" (click)="onDownload()"
+          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4 mr-2">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" x2="12" y1="15" y2="3"></line>
+          </svg>
+          Descargar PDF
+        </button>
+        <button data-slot="button" type="button" (click)="onClose()"
+          class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </div>
+    </div>
+
+    <!-- Content -->
+    <div class="p-8 overflow-y-auto max-h-[calc(90vh-120px)] bg-gray-50">
+      <div id="clinic-invoice-content" class="max-w-4xl mx-auto bg-white p-8 rounded-lg shadow-sm">
+
+        <!-- Invoice Header -->
+        <div class="mb-8">
+          <div class="flex justify-between items-start">
+            <div>
+              <h1 class="text-4xl font-black text-primary">FACTURA</h1>
+              <div class="text-xl font-bold text-gray-800 mt-2">{{ clinicInvoiceData.invoice_number }}</div>
+            </div>
+            <div class="text-right">
+              <div class="text-lg font-semibold text-gray-600">Fecha</div>
+              <div class="text-xl font-bold text-gray-800">{{ formatDate(clinicInvoiceData.invoice_date) }}</div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Facturar a -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-2">FACTURAR A</h3>
+          <div class="space-y-1 text-gray-700">
+            <div class="font-bold text-xl text-gray-900">{{ clinicInvoiceData.fiscal_name }}</div>
+            <div>{{ clinicInvoiceData.billing_address.toUpperCase() }}</div>
+            <div class="font-medium">{{ clinicInvoiceData.cif }}</div>
+          </div>
+        </div>
+
+        <!-- Datos del Receptor -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-2">DATOS DEL RECEPTOR</h3>
+          @if (userData) {
+          <div class="space-y-1 text-gray-700">
+            <div class="font-bold text-lg text-gray-900">{{ userData.name }}</div>
+            @if (userData.dni) {
+            <div class="font-medium">{{ userData.dni }}</div>
+            }
+            @if (userData.license_number) {
+            <div class="font-medium">Nº Colegiado: {{ userData.license_number }}</div>
+            }
+            @if (userData.street) {
+            <div>{{ userData.street }}@if (userData.street_number) {, {{ userData.street_number }}}@if (userData.door) {, {{ userData.door }}}</div>
+            }
+            @if (userData.postal_code || userData.city || userData.province) {
+            <div>
+              @if (userData.postal_code) {{{ userData.postal_code }} }
+              @if (userData.city) {{{ userData.city }}}@if (userData.province) {, {{ userData.province }}}
+            </div>
+            }
+          </div>
+          } @else {
+          <div class="space-y-1 text-gray-700">
+            <div class="font-semibold">Cargando...</div>
+          </div>
+          }
+        </div>
+
+        <!-- Abono en cuenta -->
+        <div class="mb-8">
+          <h3 class="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-2">ABONO EN CUENTA</h3>
+          @if (userData) {
+          <div class="space-y-1 text-gray-700">
+            <div class="font-mono text-lg font-semibold">{{ userData.iban }}</div>
+          </div>
+          } @else {
+          <div class="space-y-1 text-gray-700">
+            <div class="font-semibold">Cargando...</div>
+          </div>
+          }
+        </div>
+
+        <!-- Tabla de conceptos -->
+        <div class="mb-8">
+          <div class="overflow-hidden rounded-lg border border-gray-200">
+            <table class="w-full">
+              <thead class="bg-gray-50">
+                <tr>
+                  <th class="px-4 py-3 text-center text-sm font-semibold text-gray-700">Cantidad</th>
+                  <th class="px-4 py-3 text-left text-sm font-semibold text-gray-700">Descripción</th>
+                  <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Precio Unitario</th>
+                  <th class="px-4 py-3 text-right text-sm font-semibold text-gray-700">Total</th>
+                </tr>
+              </thead>
+              <tbody class="divide-y divide-gray-200">
+                @for (sessionGroup of clinicInvoiceData.sessions_data; track sessionGroup.unit_price) {
+                <tr class="bg-white">
+                  <td class="px-4 py-3 text-center font-medium text-gray-900">{{ sessionGroup.sessions_count }}</td>
+                  <td class="px-4 py-3 text-gray-700">{{ clinicInvoiceData.concept }}</td>
+                  <td class="px-4 py-3 text-right text-gray-700">{{ formatCurrency(sessionGroup.unit_price) }}</td>
+                  <td class="px-4 py-3 text-right font-medium text-gray-900">{{ formatCurrency(sessionGroup.total_net) }}</td>
+                </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+        </div>
+
+        <!-- Totales finales -->
+        <div class="flex justify-end mb-4">
+          <div class="w-96">
+            <div class="bg-gray-50 rounded-lg p-6">
+              <div class="space-y-3">
+                <div class="flex justify-between text-gray-700">
+                  <span>SERV. DE ATENCIÓN PSICOLÓGICA:</span>
+                  <span class="font-semibold">{{ formatCurrency(clinicInvoiceData.total) }}</span>
+                </div>
+                <div class="flex justify-between text-gray-700">
+                  <span>IVA (EXENTO):</span>
+                  <span>0,00€</span>
+                </div>
+                <div class="flex justify-between text-gray-700">
+                  <span>RETENCIÓN @if (userData) {({{ userData.irpf }}%)}:</span>
+                  <span class="text-red-600">{{ formatCurrency(getRetentionAmount()) }}</span>
+                </div>
+                <div class="border-t border-gray-300 pt-3">
+                  <div class="flex justify-between text-xl font-bold text-gray-900">
+                    <span>TOTAL A INGRESAR:</span>
+                    <span class="text-green-600">{{ formatCurrency(clinicInvoiceData.total - getRetentionAmount())
+                      }}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- Nota legal IVA -->
+        <div class="text-center text-sm text-gray-500 mb-4">
+          <p>Servicio exento de IVA según el artículo 20 3a de la ley 37/1992 del impuesto sobre el Valor Añadido.</p>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+</div>
+}

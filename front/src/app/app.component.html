@@ -1,0 +1,14 @@
+<!-- Spinner global con overlay -->
+@if (loadingService.isLoading()) {
+  <app-spinner 
+    [overlay]="true"
+    text="Procesando..."
+    size="lg">
+  </app-spinner>
+}
+
+<!-- Contenido de la app -->
+<router-outlet></router-outlet>
+
+<!-- Toast Container -->
+<app-toast></app-toast>

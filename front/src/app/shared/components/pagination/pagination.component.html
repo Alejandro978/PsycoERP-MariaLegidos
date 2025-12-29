@@ -1,0 +1,69 @@
+<div
+  class="flex flex-col sm:flex-row items-center justify-between gap-4 p-4 bg-gradient-to-r from-blue-50 to-purple-50 rounded-lg border relative z-10">
+
+  <!-- Info de registros -->
+  @if (showInfo) {
+  <div class="flex items-center gap-2 text-sm text-muted-foreground">
+    <span>Mostrando {{ getEndRecord() }} de {{ totalRecords }} datos</span>
+  </div>
+  }
+
+  <!-- Controles de paginación -->
+  <div class="flex items-center gap-4">
+
+    <!-- Selector de registros por página -->
+    @if (showPageSize) {
+    <div class="flex items-center gap-2">
+      <span class="text-sm text-muted-foreground">Por página:</span>
+      <select
+        class="border border-input rounded-md bg-white px-3 py-2 text-sm shadow-xs transition-colors hover:bg-[#d29f67] hover:text-white focus-visible:ring-2 focus-visible:ring-[#d29f67] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-16"
+        (change)="onPageSizeChanged($event)">
+        <option value="8" [selected]="recordsPerPage === 8" class="bg-white text-black">8</option>
+        <option value="12" [selected]="recordsPerPage === 12" class="bg-white text-black">12</option>
+        <option value="16" [selected]="recordsPerPage === 16" class="bg-white text-black">16</option>
+        <option value="24" [selected]="recordsPerPage === 24" class="bg-white text-black">24</option>
+      </select>
+    </div>
+    }
+
+    <!-- Navegación de páginas -->
+    <div class="flex items-center gap-2">
+
+      <!-- Botón Anterior -->
+      <button type="button"
+        class="inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#d29f67] hover:text-white rounded-md transition-all disabled:pointer-events-none disabled:opacity-50"
+        [disabled]="!hasPrevPage" (click)="onPageChange.emit(currentPage - 1)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-chevron-left h-4 w-4">
+          <path d="m15 18-6-6 6-6"></path>
+        </svg>
+      </button>
+
+      <!-- Números de página -->
+      <div class="flex items-center gap-1">
+        @for (page of getVisiblePages(); track page) {
+        <button type="button"
+          [class]="page === currentPage ?
+              'inline-flex items-center justify-center h-8 w-8 p-0 bg-[#d29f67] text-white shadow-xs hover:bg-[#d29f67]/90 rounded-md transition-all' :
+              'inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#d29f67] hover:text-white rounded-md transition-all'"
+          (click)="onPageChange.emit(page)">
+          {{ page }}
+        </button>
+        }
+      </div>
+
+      <!-- Botón Siguiente -->
+      <button type="button"
+        class="inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#d29f67] hover:text-white rounded-md transition-all disabled:pointer-events-none disabled:opacity-50"
+        [disabled]="!hasNextPage" (click)="onPageChange.emit(currentPage + 1)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-chevron-right h-4 w-4">
+          <path d="m9 18 6-6-6-6"></path>
+        </svg>
+      </button>
+
+    </div>
+  </div>
+</div>

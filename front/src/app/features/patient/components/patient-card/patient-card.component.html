@@ -1,0 +1,110 @@
+<div class="group relative">
+  <div
+    class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border shadow-sm hover:shadow-md transition-shadow p-2 relative overflow-hidden">
+    <!-- Card Header -->
+    <div
+      class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 pt-2">
+      <div class="flex items-start justify-between">
+        <div>
+          <div class="font-semibold text-base">{{ patientFullName }}</div>
+          <p class="text-muted-foreground mt-1 text-xs">DNI: {{ patient.dni }}</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Card Content -->
+    <div class="px-6 pt-0">
+      <div class="space-y-1 text-xs">
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">Email:</span>
+          <span class="truncate ml-2">{{ patient.email }}</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">Teléfono:</span>
+          <span>{{ patient.phone }}</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">Género:</span>
+          <span class="capitalize">{{ patient.gender === 'M' ? 'Masculino' : patient.gender === 'F' ? 'Femenino' :
+            'Otro' }}</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">Edad:</span>
+          <span>{{ patientAge }} años</span>
+        </div>
+        <div class="flex items-center justify-between text-xs">
+          <span class="text-muted-foreground">Tratamiento:</span>
+          <span>{{ formatDate(patient.treatment_start_date) }}</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- Hover overlay with buttons -->
+    <div
+      class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
+      <!-- Ver Detalle button - only for active patients -->
+      @if (!isDeletedView) {
+      <button type="button"
+        class="justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-[#d29f67] text-white shadow-xs hover:bg-[#d29f67]/90 h-8 rounded-md px-3 has-[>svg]:px-2.5 flex items-center gap-2"
+        (click)="$event.stopPropagation(); onViewDetail.emit(patient)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-eye h-4 w-4">
+          <path
+            d="M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0">
+          </path>
+          <circle cx="12" cy="12" r="3"></circle>
+        </svg>
+        Ver Detalle
+      </button>
+      }
+
+      <!-- Edit button - only for active patients -->
+      @if (!isDeletedView) {
+      <button type="button"
+        class="justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 h-8 rounded-md px-3 has-[>svg]:px-2.5 flex items-center gap-2"
+        (click)="$event.stopPropagation(); onEdit.emit(patient)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-square-pen h-4 w-4">
+          <path d="M12 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
+          <path
+            d="M18.375 2.625a1 1 0 0 1 3 3l-9.013 9.014a2 2 0 0 1-.853.505l-2.873.84a.5.5 0 0 1-.62-.62l.84-2.873a2 2 0 0 1.506-.852z">
+          </path>
+        </svg>
+        Editar
+      </button>
+      }
+
+      <!-- Botón condicional: Eliminar para activos, Restaurar para inactivos -->
+      @if (!isDeletedView) {
+      <button type="button"
+        class="justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-destructive text-white shadow-xs hover:bg-destructive/90 focus-visible:ring-destructive/20 dark:focus-visible:ring-destructive/40 dark:bg-destructive/60 h-8 rounded-md px-3 has-[>svg]:px-2.5 flex items-center gap-2"
+        (click)="$event.stopPropagation(); onDelete.emit(patient)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-trash2 h-4 w-4">
+          <path d="M3 6h18"></path>
+          <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+          <path d="M8 6V4c0-1 1-2 2-2h4c1 0 2 1 2 2v2"></path>
+          <line x1="10" x2="10" y1="11" y2="17"></line>
+          <line x1="14" x2="14" y1="11" y2="17"></line>
+        </svg>
+        Eliminar
+      </button>
+      } @else {
+      <button type="button"
+        class="justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-green-600 text-white shadow-xs hover:bg-green-700 h-8 rounded-md px-3 has-[>svg]:px-2.5 flex items-center gap-2"
+        (click)="$event.stopPropagation(); onRestore.emit(patient)">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-undo2 h-4 w-4">
+          <path d="M9 14 4 9l5-5"></path>
+          <path d="M4 9h10.5a5.5 5.5 0 0 1 5.5 5.5v0a5.5 5.5 0 0 1-5.5 5.5H11"></path>
+        </svg>
+        Restaurar
+      </button>
+      }
+    </div>
+  </div>
+</div>

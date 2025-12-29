@@ -1,0 +1,113 @@
+<div class="relative">
+  <label [ngClass]="{
+    'block text-gray-700': true,
+    'text-xs font-medium mb-1': size === 'sm',
+    'text-sm font-semibold leading-none mb-2': size === 'md'
+  }">
+    {{ label }}
+    <span *ngIf="required" class="text-red-500">*</span>
+  </label>
+
+  <div [ngClass]="{
+    'flex w-full rounded-md border border-gray-300 items-center justify-between transition-all duration-200': true,
+    'hover:border-gray-400 focus-within:outline-none focus-within:ring-2 cursor-pointer': !disabled,
+    'h-10 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus-within:ring-[#d29f67] focus-within:bg-white focus-within:border-[#d29f67]': size === 'md',
+    'bg-white px-2 py-1.5 text-xs text-gray-900 focus-within:ring-cyan-500': size === 'sm',
+    'border-red-500': hasError
+  }" (click)="openModal()" [tabindex]="disabled ? -1 : 0" role="button" [attr.aria-expanded]="isModalOpenValue" [attr.aria-disabled]="disabled">
+
+    <div class="flex items-center gap-2 flex-1">
+      <div *ngIf="selectedClinic" class="w-3 h-3 rounded-full flex-shrink-0"
+        [style.background-color]="selectedClinic.clinic_color"></div>
+      <span class="truncate" [class.text-gray-400]="!selectedClinic">
+        {{ selectedClinic ? selectedClinic.name : placeholder }}
+      </span>
+    </div>
+
+    <div class="flex items-center gap-1">
+      <button *ngIf="selectedClinic" type="button"
+        class="flex-shrink-0 p-1 hover:bg-gray-200 rounded-full transition-colors"
+        (click)="handleClearClick($event)">
+        <svg class="h-4 w-4 text-gray-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+        </svg>
+      </button>
+      <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+      </svg>
+    </div>
+  </div>
+
+  <p *ngIf="hasError" class="text-red-600 text-xs mt-2 flex items-center gap-1">
+    <svg class="h-3 w-3" fill="currentColor" viewBox="0 0 20 20">
+      <path fill-rule="evenodd"
+        d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z"
+        clip-rule="evenodd" />
+    </svg>
+    {{ errorMessage }}
+  </p>
+</div>
+
+<div *ngIf="isModalOpenValue" class="fixed inset-0 z-50 overflow-y-auto">
+  <div class="fixed inset-0 bg-black bg-opacity-50 transition-opacity" (click)="closeModal()"></div>
+
+  <div class="flex min-h-full items-end justify-center p-0 sm:items-center sm:p-4 md:p-6">
+    <div
+      class="relative w-full bg-white rounded-t-lg sm:rounded-lg shadow-xl transform transition-all sm:max-w-md md:max-w-lg min-h-[50vh] sm:min-h-0">
+
+      <div class="flex items-center justify-between p-4 border-b border-gray-200">
+        <h3 class="text-lg font-semibold text-gray-900">Seleccionar Clínica</h3>
+        <button type="button" class="p-2 hover:bg-gray-100 rounded-full transition-colors" (click)="closeModal()">
+          <svg class="h-5 w-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+          </svg>
+        </button>
+      </div>
+
+      <div class="p-4 border-b border-gray-200">
+        <div class="relative">
+          <label for="clinic-search" class="sr-only">Buscar clínicas</label>
+          <input #modalSearchInput id="clinic-search" type="text" [value]="searchTermValue"
+            (input)="onSearchInput($event)"
+            class="block w-full h-10 px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg bg-white placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67]/20 focus:border-[#d29f67] transition-all duration-200"
+            placeholder="Buscar clínicas..." autocomplete="off" />
+          <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
+            <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+            </svg>
+          </div>
+        </div>
+      </div>
+
+      <div class="max-h-60 sm:max-h-64 overflow-y-auto">
+        <div *ngFor="let clinic of filteredClinics()"
+          class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 cursor-pointer flex items-center gap-3 border-b border-gray-100 transition-colors"
+          [class.bg-[#d29f67]]="isClinicSelected(clinic)" [class.text-white]="isClinicSelected(clinic)"
+          (click)="selectClinic(clinic)">
+          <div class="w-4 h-4 rounded-full flex-shrink-0" [style.background-color]="clinic.clinic_color"></div>
+          <span class="truncate flex-1">{{ clinic.name }}</span>
+          <svg *ngIf="isClinicSelected(clinic)" class="h-5 w-5 text-white" fill="currentColor" viewBox="0 0 20 20">
+            <path fill-rule="evenodd"
+              d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+              clip-rule="evenodd"></path>
+          </svg>
+        </div>
+        <div *ngIf="filteredClinics().length === 0" class="px-4 py-8 text-center text-gray-500">
+          <p *ngIf="searchTermValue; else noDataTemplate">No se encontraron clínicas</p>
+          <ng-template #noDataTemplate>
+            <p>No hay clínicas disponibles</p>
+          </ng-template>
+        </div>
+      </div>
+
+      <div class="p-4 border-t border-gray-200">
+        <button type="button"
+          class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#d29f67]/20 focus:border-[#d29f67] transition-all duration-200"
+          (click)="closeModal()">
+          Cancelar
+        </button>
+      </div>
+    </div>
+  </div>
+</div>

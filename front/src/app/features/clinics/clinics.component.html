@@ -1,0 +1,56 @@
+<!-- Main container following project standards -->
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+
+    <!-- Header -->
+    <app-section-header
+      title="Gestión de Clínicas"
+      subtitle="Administra las clínicas registradas en la plataforma"
+      buttonText="Nueva Clínica"
+      buttonIcon="plus"
+      (onButtonClick)="openCreateForm()">
+    </app-section-header>
+
+    <!-- Main content -->
+    <div class="flex-1 overflow-y-auto min-h-0">
+      <div class="h-full flex flex-col relative">
+        <div class="flex-1 overflow-y-auto pb-20">
+          <app-clinics-list [clinics]="clinicsList()" [trackByFn]="trackByClinicId" [isDeletedView]="false"
+            (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
+            (onRestore)="openRestoreModal($event)">
+          </app-clinics-list>
+        </div>
+
+        <!-- Pagination -->
+        @if (paginationData()) {
+        <div class="absolute bottom-0 left-0 right-0">
+          <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
+            [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
+            [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
+            (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
+          </app-pagination>
+        </div>
+        }
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Clinic Form Modal -->
+<app-clinica-form [isOpen]="showForm()" [clinica]="editingClinica()" (onSave)="handleSave($event)"
+  (onCancel)="closeForm()">
+</app-clinica-form>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal [isOpen]="deletingClinic() !== null" title="Confirmar Eliminación"
+  message="¿Estás seguro de que deseas eliminar la clínica " [itemName]="deletingClinic()?.name" confirmText="Eliminar"
+  cancelText="Cancelar" confirmButtonType="destructive" (onConfirm)="handleDeleteClinic()"
+  (onCancel)="closeDeleteModal()">
+</app-confirmation-modal>
+
+<!-- Restore Confirmation Modal -->
+<app-confirmation-modal [isOpen]="restoringClinic() !== null" title="Confirmar Restauración"
+  message="¿Estás seguro de que deseas restaurar la clínica " [itemName]="restoringClinic()?.name"
+  confirmText="Restaurar" cancelText="Cancelar" confirmButtonType="primary" (onConfirm)="handleRestoreClinic()"
+  (onCancel)="closeRestoreModal()">
+</app-confirmation-modal>

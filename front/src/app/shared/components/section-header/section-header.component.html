@@ -1,0 +1,52 @@
+<!-- Header section -->
+<div class="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 mb-6">
+  <div>
+    <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">{{ title }}</h1>
+    <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">{{ subtitle }}</p>
+  </div>
+
+  <!-- Action Buttons -->
+  @if (hasAnyButton) {
+    <div class="flex items-center gap-4">
+      <!-- Filters Button -->
+      @if (shouldShowFiltersButton) {
+        <button
+          type="button"
+          class="border border-gray-300 bg-gray-50 hover:bg-primary hover:border-primary hover:text-white inline-flex items-center justify-center px-4 py-2 text-sm font-medium transition-all rounded-md"
+          (click)="handleFiltersClick()">
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
+          </svg>
+          {{ filtersButtonText }}
+        </button>
+      }
+
+      <!-- Main Action Button -->
+      @if (shouldShowButton) {
+        <button
+          type="button"
+          class="bg-primary hover:opacity-90 inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium"
+          (click)="handleButtonClick()">
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            @if (buttonIcon === 'plus') {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            } @else if (buttonIcon === 'download') {
+              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+              <polyline points="7,10 12,15 17,10"></polyline>
+              <line x1="12" y1="15" x2="12" y2="3"></line>
+            } @else if (buttonIcon === 'settings') {
+              <circle cx="12" cy="12" r="3"></circle>
+              <path d="m12 1 0 6m0 4 0 10m10-16-3 2m-4 0-3-2M1 12l6 0m4 0 10 0m-16 10 2-3m0-4-2-3"></path>
+            } @else if (buttonIcon === 'search') {
+              <circle cx="11" cy="11" r="8"></circle>
+              <path d="m21 21-4.35-4.35"></path>
+            } @else {
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/>
+            }
+          </svg>
+          {{ buttonText }}
+        </button>
+      }
+    </div>
+  }
+</div>

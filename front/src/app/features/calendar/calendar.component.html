@@ -1,0 +1,373 @@
+<div class="p-4 sm:p-6 h-screen overflow-hidden">
+  <div class="w-full h-full flex flex-col max-h-full">
+    <!-- Header -->
+    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-4 sm:mb-6">
+      <div>
+        <h1 class="text-2xl sm:text-3xl font-black font-montserrat text-gray-900">Calendario</h1>
+        <p class="text-sm sm:text-base text-gray-600 mt-1 sm:mt-2">
+          Gestión de citas y horarios por clínica
+        </p>
+      </div>
+      <div class="flex items-center gap-4">
+        <button (click)="onNewSessionClick()"
+          class="bg-primary hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium">
+          <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+          </svg>
+          Nueva Cita
+        </button>
+      </div>
+    </div>
+
+    <!-- Controls -->
+    <div class="flex flex-col gap-4 mb-4 sm:mb-6">
+      <!-- Navegación y Toggle -->
+      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 sm:gap-4">
+        <div class="flex items-center gap-2 sm:gap-3">
+          <!-- Navegación de fechas -->
+          <button (click)="navigatePrevious()"
+            class="border border-gray-300 bg-white hover:bg-primary hover:border-primary hover:text-white inline-flex items-center justify-center rounded-xl px-2 sm:px-3 py-2 text-sm font-medium transition-all flex-shrink-0">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7" />
+            </svg>
+          </button>
+
+          @if (currentView() === 'week') {
+            <div class="relative min-w-[140px] sm:min-w-[180px] lg:min-w-[200px]">
+              <div
+                (click)="openWeekDatePicker()"
+                class="text-sm sm:text-base lg:text-lg font-semibold text-center text-gray-900 rounded-lg px-3 py-2 bg-transparent hover:bg-gray-50 transition-all cursor-pointer select-none">
+                {{ formatWeekRange(weekDates()) }}
+              </div>
+              <input
+                #weekDateInput
+                type="date"
+                [value]="getCurrentDateValue()"
+                (change)="onWeekDateSelect($event)"
+                class="absolute inset-0 opacity-0 w-full h-full cursor-pointer pointer-events-none">
+            </div>
+          } @else {
+            <div class="relative min-w-[140px] sm:min-w-[180px] lg:min-w-[200px]">
+              <div
+                (click)="openMonthPicker()"
+                class="text-sm sm:text-base lg:text-lg font-semibold text-center text-gray-900 rounded-lg px-3 py-2 bg-transparent hover:bg-gray-50 transition-all cursor-pointer select-none">
+                {{ formatMonthYear(currentDate()) }}
+              </div>
+              <input
+                #monthInput
+                type="month"
+                [value]="getCurrentMonthValue()"
+                (change)="onDateSelect($event)"
+                class="absolute inset-0 opacity-0 w-full h-full cursor-pointer pointer-events-none">
+            </div>
+          }
+
+          <button (click)="navigateNext()"
+            class="border border-gray-300 bg-white hover:bg-primary hover:border-primary hover:text-white inline-flex items-center justify-center rounded-xl px-2 sm:px-3 py-2 text-sm font-medium transition-all flex-shrink-0">
+            <svg class="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7" />
+            </svg>
+          </button>
+        </div>
+
+        <!-- Toggle Semana/Mes -->
+        <div class="flex rounded-lg border border-gray-300 overflow-hidden w-full sm:w-auto">
+          <button (click)="setView('week')"
+            [class]="currentView() === 'week' ? 'text-white' : 'bg-white hover:bg-gray-50 text-gray-700'"
+            [style.background-color]="currentView() === 'week' ? '#d29f67' : ''"
+            class="rounded-none flex-1 sm:flex-none inline-flex items-center justify-center px-4 sm:px-6 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+            Semana
+          </button>
+          <button (click)="setView('month')"
+            [class]="currentView() === 'month' ? 'text-white' : 'bg-white hover:bg-gray-50 text-gray-700'"
+            [style.background-color]="currentView() === 'month' ? '#d29f67' : ''"
+            class="rounded-none flex-1 sm:flex-none inline-flex items-center justify-center px-4 sm:px-6 py-2 text-sm font-medium transition-colors whitespace-nowrap">
+            Mes
+          </button>
+        </div>
+      </div>
+
+      <!-- Leyenda de clínicas dinámicas -->
+      @if (getVisibleClinics().length > 0) {
+      <div class="bg-gray-50 border border-gray-200 rounded-lg p-2.5 sm:p-3">
+        <div class="flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-3">
+          <span class="text-xs sm:text-sm font-medium text-gray-600 flex-shrink-0">
+            Clínicas ({{ getVisibleClinics().length }}):
+          </span>
+          <div class="overflow-x-auto -mx-2.5 px-2.5 sm:mx-0 sm:px-0">
+            <div class="flex items-center gap-2 sm:gap-3">
+              @for (clinic of getVisibleClinics(); track clinic.id) {
+              <div
+                class="flex items-center gap-1.5 sm:gap-2 bg-white rounded-full px-2.5 sm:px-3 py-1 sm:py-1.5 shadow-sm border border-gray-200 flex-shrink-0">
+                <div class="w-2.5 h-2.5 sm:w-3 sm:h-3 rounded-full flex-shrink-0 border border-gray-300"
+                  [style.background-color]="clinic.color">
+                </div>
+                <span class="text-[11px] sm:text-xs font-medium text-gray-700 whitespace-nowrap">{{ clinic.name }}</span>
+              </div>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+      }
+    </div>
+
+    <!-- Calendar Grid -->
+    <div class="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm flex-1 flex flex-col min-h-0">
+
+      <!-- Week View -->
+      @if (currentView() === 'week') {
+      <div class="h-full overflow-auto">
+        <div class="min-w-[640px] sm:min-w-full h-full">
+          <div class="grid h-full" style="grid-template-columns: 50px repeat(7, 1fr);">
+            <!-- Columna de horas STICKY -->
+            <div class="border-r border-gray-200 bg-white sticky left-0 z-20">
+              <div
+                class="h-10 sm:h-12 border-b border-gray-200 flex items-center justify-center bg-gray-50 sticky top-0 z-30">
+                <span class="text-xs sm:text-sm font-medium text-gray-700">Hora</span>
+              </div>
+              <!-- Slots de tiempo -->
+              @for (hour of hours; track hour) {
+              <div
+                class="h-16 sm:h-20 border-b border-gray-200 flex items-center justify-center bg-gray-50 text-xs sm:text-sm font-medium text-gray-600">
+                {{ hour }}
+              </div>
+              }
+            </div>
+
+            <!-- Columnas de días -->
+            @for (date of weekDates(); track date.getTime()) {
+            <div class="border-r border-gray-200 last:border-r-0 min-w-[80px] sm:min-w-[120px]">
+              <!-- Header día STICKY -->
+              <div
+                class="h-10 sm:h-12 border-b border-gray-200 flex flex-col items-center justify-center bg-gray-50 sticky top-0 z-20 px-1">
+                <div class="text-xs sm:text-sm font-medium text-gray-600">
+                  <span class="sm:hidden">{{ weekDays[$index].charAt(0) }}</span>
+                  <span class="hidden sm:inline">{{ weekDays[$index] }}</span>
+                </div>
+                <div
+                  [class]="isToday(date) ? 'text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm font-semibold' : 'text-gray-900 text-xs sm:text-sm font-semibold'"
+                  [style.background-color]="isToday(date) ? '#d29f67' : ''">
+                  {{ formatDate(date) }}
+                </div>
+              </div>
+              <!-- Slots horarios -->
+              @for (hour of hours; track hour) {
+              <div class="h-16 sm:h-20 border-b border-gray-200 hover:bg-gray-50 transition-colors relative group">
+                <!-- Contenedor con posicionamiento relativo para sesiones absolutas -->
+                <div class="absolute inset-0 p-1">
+                  @for (layout of getSessionLayoutsForSlot(date, hour); track layout.sessionData.SessionDetailData.session_id) {
+                  <div (click)="onSessionClick(layout.sessionData)"
+                    (mouseenter)="onSessionMouseEnter(layout.sessionData, $event)"
+                    (mouseleave)="onSessionMouseLeave()"
+                    [class]="layout.isCancelled ?
+                    'bg-gray-100 border-l-4 border-gray-400 rounded-sm px-2 py-1 text-xs cursor-pointer transition-all duration-200 text-gray-500 opacity-60 hover:opacity-80 line-through' :
+                    'border-l-4 rounded-sm px-2 py-1 text-xs cursor-pointer hover:shadow-md transition-all duration-200 text-white ' + (!getClinicConfigFromSessionData(layout.sessionData).hasCustomColor ? getClinicConfigFromSessionData(layout.sessionData).backgroundColor : '') + (getSessionStatusBadgeClass(layout.sessionData).includes('green') ? ' ring-2 ring-green-500 ring-opacity-50' : '')"
+                    [style.background-color]="!layout.isCancelled && getClinicConfigFromSessionData(layout.sessionData).hasCustomColor ? getClinicColorFromSessionData(layout.sessionData) : ''"
+                    [style.border-left-color]="layout.isCancelled ? '#9ca3af' : (getClinicConfigFromSessionData(layout.sessionData).hasCustomColor ? getClinicColorFromSessionData(layout.sessionData) : getClinicConfigFromSessionData(layout.sessionData).borderColor)"
+                    [style.top.%]="layout.topPercent"
+                    [style.height.%]="layout.heightPercent"
+                    [style.left.%]="layout.leftPercent"
+                    [style.width.%]="layout.widthPercent"
+                    [style.z-index]="layout.zIndex"
+                    class="absolute overflow-hidden">
+                    <!-- Indicador de completado -->
+                    @if (layout.sessionData.SessionDetailData.completed && !layout.isCancelled) {
+                    <div
+                      class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center z-20 shadow-sm">
+                      <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                      </svg>
+                    </div>
+                    }
+                    <div class="flex flex-col space-y-0.5 h-full justify-between">
+                      <div
+                        [class]="layout.isCancelled ? 'font-semibold truncate text-xs leading-tight flex items-center gap-1' : 'truncate font-semibold text-white text-xs leading-tight flex items-center gap-1'">
+                        @if (isSessionPaid(layout.sessionData) && !layout.isCancelled) {
+                        <span class="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></span>
+                        }
+                        <span class="sm:hidden">{{ (getPatientNameFromSessionData(layout.sessionData) || 'Sin nombre').split(' ')[0] }}</span>
+                        <span class="hidden sm:inline">{{ getPatientNameFromSessionData(layout.sessionData) || 'Sin nombre' }}</span>
+                      </div>
+                      <div class="flex items-center gap-1">
+                        <svg class="w-3 h-3 opacity-75 flex-shrink-0"
+                          [class]="layout.isCancelled ? 'text-gray-500' : 'text-white'" fill="none"
+                          stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span
+                          [class]="layout.isCancelled ? 'text-[10px] opacity-90 font-medium' : 'text-[10px] text-white opacity-90 font-medium'">
+                          {{ formatTime(layout.sessionData.SessionDetailData.start_time) }} - {{
+                          formatTime(layout.sessionData.SessionDetailData.end_time) }}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                  }
+                </div>
+
+                <!-- Botón "+" para crear nueva sesión cuando no hay sesiones -->
+                @if (getSessionLayoutsForSlot(date, hour).length === 0) {
+                <button (click)="onNewSessionClickForDateTime(date, hour)"
+                  class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-50 rounded"
+                  title="Crear nueva sesión">
+                  <svg class="w-4 h-4 text-gray-400 hover:text-blue-600 transition-colors" fill="none"
+                    stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </button>
+                }
+
+                <!-- Botón flotante para nueva sesión cuando hay sesiones canceladas -->
+                @if (getSessionLayoutsForSlot(date, hour).length > 0 && !hasActiveSessionInSlot(date, hour)) {
+                <button (click)="onNewSessionClickForDateTime(date, hour)"
+                  class="absolute bottom-1 right-1 w-5 h-5 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 z-30"
+                  title="Añadir nueva sesión">
+                  <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3"
+                      d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                  </svg>
+                </button>
+                }
+              </div>
+              }
+            </div>
+            }
+          </div>
+        </div>
+      </div>
+      }
+
+      <!-- Month View -->
+      @if (currentView() === 'month') {
+      <div class="h-full overflow-auto">
+        <div class="grid grid-cols-7" style="grid-template-rows: auto repeat(auto-fit, minmax(100px, 140px));">
+        <!-- Headers de días -->
+        @for (day of weekDays; track day) {
+        <div class="h-8 sm:h-12 border-b border-gray-200 flex items-center justify-center bg-gray-50">
+          <span class="text-xs sm:text-sm font-medium text-gray-700">
+            <span class="sm:hidden">{{ day.charAt(0) }}</span>
+            <span class="hidden sm:inline">{{ day }}</span>
+          </span>
+        </div>
+        }
+
+        <!-- Celdas de días -->
+        @for (date of monthDates(); track $index) {
+        @if (date === null) {
+        <!-- Celda vacía para días fuera del mes -->
+        <div class="h-[100px] sm:h-[140px] border-b border-r border-gray-200 bg-gray-50"></div>
+        } @else {
+        <div
+          class="h-[100px] sm:h-[140px] border-b border-r border-gray-200 p-1 sm:p-2 group relative overflow-hidden flex flex-col"
+          [style.background-color]="isToday(date) ? 'rgba(8, 145, 178, 0.05)' : ''">
+          <div [class]="'text-xs sm:text-sm font-medium mb-1 sm:mb-2 text-gray-900'"
+            [style.color]="isToday(date) ? '#d29f67' : ''">
+            {{ formatDate(date) }}
+          </div>
+          <div class="space-y-1 flex-1 overflow-y-auto overflow-x-hidden">
+            @for (sessionData of getSortedSessionDataForDate(date); track sessionData.SessionDetailData.session_id) {
+            <div (click)="onSessionClick(sessionData)"
+              (mouseenter)="onSessionMouseEnter(sessionData, $event)"
+              (mouseleave)="onSessionMouseLeave()"
+              [class]="isSessionCancelled(sessionData) ?
+                'bg-gray-100 border-l-4 border-gray-400 rounded-sm px-1 sm:px-2 py-1 text-xs cursor-pointer transition-all duration-200 text-gray-500 opacity-60 hover:opacity-80 relative line-through' :
+                'border-l-4 rounded-sm px-1 sm:px-2 py-1 text-xs cursor-pointer hover:shadow-md transition-all duration-200 text-white ' + (!getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicConfigFromSessionData(sessionData).backgroundColor : '') + (getSessionStatusBadgeClass(sessionData).includes('green') ? ' ring-2 ring-green-500 ring-opacity-50' : '')"
+              [style.background-color]="!isSessionCancelled(sessionData) && getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : ''"
+              [style.border-left-color]="isSessionCancelled(sessionData) ? '#9ca3af' : (getClinicConfigFromSessionData(sessionData).hasCustomColor ? getClinicColorFromSessionData(sessionData) : getClinicConfigFromSessionData(sessionData).borderColor)"
+              class="relative">
+              <!-- Indicador de completado -->
+              @if (sessionData.SessionDetailData.completed && !isSessionCancelled(sessionData)) {
+              <div
+                class="absolute -top-0.5 -right-0.5 w-4 h-4 bg-green-500 rounded-full flex items-center justify-center z-10 shadow-sm">
+                <svg class="w-2.5 h-2.5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7" />
+                </svg>
+              </div>
+              }
+              <!-- Botón para nueva sesión en cancelada (solo si no hay sesión activa en la fecha) -->
+              @if (isSessionCancelled(sessionData) && !hasActiveSessionInDate(date)) {
+              <button (click)="onNewSessionClickForDate(date); $event.stopPropagation()"
+                class="absolute top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2 w-8 h-8 bg-green-500 hover:bg-green-600 rounded-full flex items-center justify-center z-20 transition-all duration-200 shadow-lg hover:shadow-xl hover:scale-110"
+                title="Crear nueva sesión">
+                <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                    d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+                </svg>
+              </button>
+              }
+              <div class="flex flex-col space-y-0.5">
+                <div
+                  [class]="isSessionCancelled(sessionData) ? 'truncate font-medium text-xs' : 'truncate font-medium text-xs text-white'">
+                  {{ formatTime(sessionData.SessionDetailData.start_time) }} - {{
+                  formatTime(sessionData.SessionDetailData.end_time) }}
+                </div>
+                <div [class]="isSessionCancelled(sessionData) ? 'truncate text-xs flex items-center gap-1' : 'truncate text-xs text-white flex items-center gap-1'">
+                  @if (isSessionPaid(sessionData) && !isSessionCancelled(sessionData)) {
+                  <span class="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></span>
+                  }
+                  <span class="sm:hidden">{{ (getPatientNameFromSessionData(sessionData) || 'Sin nombre').split(' ')[0] }}</span>
+                  <span class="hidden sm:inline">{{ getPatientNameFromSessionData(sessionData) || 'Sin nombre' }}</span>
+                </div>
+              </div>
+            </div>
+            }
+
+            <!-- Botón "+" para crear nueva sesión cuando no hay sesiones -->
+            @if (getSessionDataForDate(date).length === 0) {
+            <button (click)="onNewSessionClickForDate(date)"
+              class="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-200 hover:bg-blue-50 rounded m-1"
+              title="Crear nueva sesión">
+              <svg class="w-6 h-6 text-gray-400 hover:text-blue-600 transition-colors" fill="none" stroke="currentColor"
+                viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+            }
+
+            <!-- Botón "+" flotante para crear nueva sesión cuando ya hay sesiones -->
+            @if (getSessionDataForDate(date).length > 0) {
+            <button (click)="onNewSessionClickForDate(date)"
+              class="absolute bottom-1 right-1 w-6 h-6 bg-blue-500 hover:bg-blue-600 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-all duration-200 shadow-md hover:shadow-lg hover:scale-110 z-30"
+              title="Añadir nueva sesión">
+              <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M12 6v6m0 0v6m0-6h6m-6 0H6" />
+              </svg>
+            </button>
+            }
+          </div>
+        </div>
+        }
+        }
+        </div>
+      </div>
+      }
+    </div>
+  </div>
+</div>
+
+<!-- Tooltip -->
+@if (hoveredSession(); as session) {
+<div
+  class="fixed z-50 bg-gray-900 text-white text-sm rounded-lg shadow-xl px-3 py-2 pointer-events-none"
+  [style.left.px]="tooltipPosition().x"
+  [style.top.px]="tooltipPosition().y"
+  title="{{ getTooltipContent(session).patientName }} - {{ getTooltipContent(session).time }}">
+  <div class="font-semibold flex items-center gap-1.5">
+    @if (isSessionPaid(session) && !isSessionCancelled(session)) {
+    <span class="w-1.5 h-1.5 bg-green-400 rounded-full flex-shrink-0"></span>
+    }
+    <span>{{ getTooltipContent(session).patientName }}</span>
+  </div>
+  <div class="text-xs text-gray-300">{{ getTooltipContent(session).time }}</div>
+</div>
+}
+
+<!-- New Session Dialog -->
+@if (showNewSessionDialog()) {
+<app-new-session-dialog [prefilledData]="prefilledSessionData" (close)="onCloseNewSessionDialog()"
+  (sessionDataCreated)="onSessionDataCreated($event)">
+</app-new-session-dialog>
+}

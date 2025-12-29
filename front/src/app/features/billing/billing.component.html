@@ -1,0 +1,129 @@
+<div class="h-full p-3 sm:p-4 lg:p-6 overflow-auto">
+  <div class="h-full flex flex-col">
+
+    <!-- Header usando componente compartido -->
+    <app-section-header title="Facturación" subtitle="Generación masiva de facturas y control financiero">
+    </app-section-header>
+
+    <!-- Componente de Filtros de Período de Análisis y KPIs -->
+    <app-filter-analysis [kpiMonth]="kpiMonth()" [kpiYear]="kpiYear()" [monthNames]="monthNames" [years]="years()"
+      [kpis]="kpis()" [isLoadingKPIs]="isLoadingKPIs()" (monthChange)="onKpiMonthChange($event)"
+      (yearChange)="onKpiYearChange($event)">
+    </app-filter-analysis>
+
+    <!-- Tabs content -->
+    <div data-slot="card"
+      class="bg-card text-card-foreground flex flex-col gap-6 rounded-xl border py-6 shadow-sm flex-1">
+      <div data-slot="card-content" class="p-0 h-full">
+        <div data-slot="tabs" class="gap-2 h-full flex flex-col">
+
+          <!-- Tab Headers -->
+          <div class="border-b px-6 pt-6">
+            <div data-slot="tabs-list"
+              class="bg-muted text-muted-foreground h-9 items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-2">
+              <button type="button" (click)="onTabChange('bulk')"
+                [attr.data-state]="activeTab() === 'bulk' ? 'active' : 'inactive'" data-slot="tabs-trigger"
+                class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] data-[state=active]:shadow-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                  <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+                  <circle cx="9" cy="7" r="4"></circle>
+                  <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+                  <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
+                </svg>
+                Facturación
+              </button>
+              <button type="button" (click)="onTabChange('clinics')"
+                [attr.data-state]="activeTab() === 'clinics' ? 'active' : 'inactive'" data-slot="tabs-trigger"
+                class="data-[state=active]:bg-background dark:data-[state=active]:text-foreground text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 text-sm font-medium whitespace-nowrap transition-[color,box-shadow] data-[state=active]:shadow-sm flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="h-4 w-4">
+                  <path d="M3 21h18"></path>
+                  <path d="M9 8h1"></path>
+                  <path d="M9 12h1"></path>
+                  <path d="M9 16h1"></path>
+                  <path d="M14 8h1"></path>
+                  <path d="M14 12h1"></path>
+                  <path d="M14 16h1"></path>
+                  <path d="M6 21V4a1 1 0 0 1 1-1h10a1 1 0 0 1 1 1v17"></path>
+                </svg>
+                Facturación Clínicas
+              </button>
+            </div>
+          </div>
+
+          <!-- Tab Content -->
+          <div class="flex-1">
+            @if (activeTab() === 'bulk') {
+            <!-- Componente de Facturación con Subtabs -->
+            <app-bulk-invoicing [pendingMonth]="pendingMonth()" [pendingYear]="pendingYear()" [monthNames]="monthNames"
+              [years]="years()" [pendingInvoices]="pendingInvoices()" [isLoadingPending]="isLoadingPending()"
+              [selectedPatients]="selectedPatients()" [invoicePrefix]="invoicePrefix()" [invoiceYear]="invoiceYear()"
+              [invoiceNextNumber]="invoiceNextNumber()" [existingMonth]="existingMonth()"
+              [existingYear]="existingYear()" [existingInvoices]="existingInvoices()"
+              [isLoadingExisting]="isLoadingExisting()" (monthChange)="onPendingMonthChange($event)"
+              (yearChange)="onPendingYearChange($event)" (patientToggle)="togglePatientSelection($event)"
+              (selectAllToggle)="selectAllPatients()" (generateInvoices)="generateBulkInvoices()"
+              (previewInvoice)="previewPendingInvoice($event)" (prefixChange)="invoicePrefix.set($event)"
+              (invoiceYearChange)="invoiceYear.set($event); onInvoiceYearChange()"
+              (invoiceYearValidate)="validateInvoiceYear()" (existingMonthChange)="onExistingMonthChange($event)"
+              (existingYearChange)="onExistingYearChange($event)"
+              (previewExistingInvoice)="previewExistingInvoice($event)"
+              (downloadBulkInvoices)="downloadBulkInvoices($event)"
+              (existingSubTabActivated)="loadExistingInvoices()">
+            </app-bulk-invoicing>
+            } @else {
+            <!-- Componente de Facturación Clínicas -->
+            <app-clinic-invoicing [clinicsMonth]="clinicsMonth()" [clinicsYear]="clinicsYear()"
+              [monthNames]="monthNames" [years]="years()" [clinicInvoices]="clinicInvoices()"
+              [isLoadingClinics]="isLoadingClinics()" [selectedClinicId]="selectedClinicId()"
+              [invoicePrefix]="invoicePrefix()" [invoiceYear]="invoiceYear()" [invoiceNextNumber]="invoiceNextNumber()"
+              [existingClinicMonth]="existingClinicMonth()" [existingClinicYear]="existingClinicYear()"
+              [existingClinicInvoices]="existingClinicInvoices()"
+              [isLoadingExistingClinics]="isLoadingExistingClinics()" (monthChange)="onClinicsMonthChange($event)"
+              (yearChange)="onClinicsYearChange($event)" (clinicSelect)="selectClinic($event)"
+              (generateInvoice)="generateClinicInvoice()" (prefixChange)="invoicePrefix.set($event)"
+              (invoiceYearChange)="invoiceYear.set($event); onInvoiceYearChange()"
+              (invoiceYearValidate)="validateInvoiceYear()"
+              (existingClinicMonthChange)="onExistingClinicMonthChange($event)"
+              (existingClinicYearChange)="onExistingClinicYearChange($event)"
+              (previewClinicInvoice)="previewPendingClinicInvoice($event)"
+              (previewExistingClinicInvoice)="previewExistingClinicInvoice($event)"
+              (existingClinicSubTabActivated)="loadExistingClinicInvoices()">
+            </app-clinic-invoicing>
+            }
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<!-- Modal de generación masiva de facturas -->
+<app-bulk-invoice-modal [isOpen]="isModalOpen()" [invoicesToGenerate]="invoicesToGenerate()"
+  [errorMessage]="errorMessage()" [totalSelectedAmount]="totalSelectedAmount()" (submit)="confirmGenerateInvoices()"
+  (cancel)="closeModal()" (closeError)="closeErrorMessage()" (updateDate)="updateInvoiceDate($event.dni, $event.date)"
+  (preview)="previewInvoice($event)">
+</app-bulk-invoice-modal>
+
+<!-- Modal de generación de factura de clínica -->
+<app-clinic-invoice-modal [isOpen]="isClinicModalOpen()" [clinicInvoiceToGenerate]="clinicInvoiceToGenerate()"
+  [errorMessage]="errorMessage()" [userData]="userData()" (submit)="confirmGenerateClinicInvoice()"
+  (cancel)="closeClinicModal()" (closeError)="closeErrorMessage()" (updateDate)="updateClinicInvoiceDate($event)"
+  (preview)="previewClinicInvoice()">
+</app-clinic-invoice-modal>
+
+<!-- Modal de vista previa de factura -->
+<app-invoice-preview [isOpen]="isPreviewModalOpen()" [invoiceData]="previewInvoiceData()" [userData]="userData()"
+  (onClose)="closePreviewModal()" (onPrint)="printInvoice()">
+</app-invoice-preview>
+
+<!-- Modal de vista previa de factura de clínica -->
+<app-clinic-invoice-preview [isOpen]="isClinicPreviewModalOpen()" [clinicInvoiceData]="clinicInvoiceToGenerate()"
+  [userData]="userData()" (close)="closeClinicPreviewModal()" (download)="downloadClinicInvoicePDF()">
+</app-clinic-invoice-preview>
+
+<!-- Spinner overlay para generación masiva de facturas -->
+<app-invoice-loading-spinner [isLoading]="isGeneratingBulkInvoices()">
+</app-invoice-loading-spinner>

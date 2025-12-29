@@ -1,0 +1,11 @@
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+  @for (clinic of clinics; track trackByFn ? trackByFn($index, clinic) : $index) {
+    <app-clinic-card
+      [clinic]="clinic"
+      [isDeletedView]="isDeletedView"
+      (onEdit)="onEdit.emit($event)"
+      (onDelete)="onDelete.emit($event)"
+      (onRestore)="onRestore.emit($event)">
+    </app-clinic-card>
+  }
+</div>
