@@ -16,7 +16,7 @@
     <div class="flex items-center gap-2">
       <span class="text-sm text-muted-foreground">Por página:</span>
       <select
-        class="border border-input rounded-md bg-white px-3 py-2 text-sm shadow-xs transition-colors hover:bg-[#d29f67] hover:text-white focus-visible:ring-2 focus-visible:ring-[#d29f67] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-16"
+        class="border border-input rounded-md bg-white px-3 py-2 text-sm shadow-xs transition-colors hover:bg-[#6aa591] hover:text-white focus-visible:ring-2 focus-visible:ring-[#6aa591] focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 w-16"
         (change)="onPageSizeChanged($event)">
         <option value="8" [selected]="recordsPerPage === 8" class="bg-white text-black">8</option>
         <option value="12" [selected]="recordsPerPage === 12" class="bg-white text-black">12</option>
@@ -31,7 +31,7 @@
 
       <!-- Botón Anterior -->
       <button type="button"
-        class="inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#d29f67] hover:text-white rounded-md transition-all disabled:pointer-events-none disabled:opacity-50"
+        class="inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#6aa591] hover:text-white rounded-md transition-all disabled:pointer-events-none disabled:opacity-50"
         [disabled]="!hasPrevPage" (click)="onPageChange.emit(currentPage - 1)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
@@ -45,8 +45,8 @@
         @for (page of getVisiblePages(); track page) {
         <button type="button"
           [class]="page === currentPage ?
-              'inline-flex items-center justify-center h-8 w-8 p-0 bg-[#d29f67] text-white shadow-xs hover:bg-[#d29f67]/90 rounded-md transition-all' :
-              'inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#d29f67] hover:text-white rounded-md transition-all'"
+              'inline-flex items-center justify-center h-8 w-8 p-0 bg-[#6aa591] text-white shadow-xs hover:bg-[#6aa591]/90 rounded-md transition-all' :
+              'inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#6aa591] hover:text-white rounded-md transition-all'"
           (click)="onPageChange.emit(page)">
           {{ page }}
         </button>
@@ -55,7 +55,7 @@
 
       <!-- Botón Siguiente -->
       <button type="button"
-        class="inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#d29f67] hover:text-white rounded-md transition-all disabled:pointer-events-none disabled:opacity-50"
+        class="inline-flex items-center justify-center h-8 w-8 p-0 border bg-background shadow-xs hover:bg-[#6aa591] hover:text-white rounded-md transition-all disabled:pointer-events-none disabled:opacity-50"
         [disabled]="!hasNextPage" (click)="onPageChange.emit(currentPage + 1)">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"

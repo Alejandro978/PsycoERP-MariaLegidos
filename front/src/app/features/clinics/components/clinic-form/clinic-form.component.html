@@ -37,9 +37,9 @@
             </label>
             <div class="flex items-center gap-2">
               <input type="color" formControlName="clinic_color"
-                class="w-12 h-10 rounded border border-gray-300 bg-gray-50 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67]">
+                class="w-12 h-10 rounded border border-gray-300 bg-gray-50 cursor-pointer hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6aa591]">
               <input type="text" formControlName="clinic_color"
-                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67]/20 focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+                class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6aa591]/20 focus:border-[#6aa591] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
                 placeholder="#3b82f6">
             </div>
             @if (getFieldError('clinic_color')) {
@@ -58,7 +58,7 @@
         <!-- Checkbox Online -->
         <div class="flex items-center gap-2">
           <input id="is_online" type="checkbox" formControlName="is_online"
-            class="h-4 w-4 rounded border-gray-300 text-[#d29f67] focus:ring-[#d29f67] focus:ring-2">
+            class="h-4 w-4 rounded border-gray-300 text-[#6aa591] focus:ring-[#6aa591] focus:ring-2">
           <label for="is_online" class="text-sm font-medium text-gray-700 cursor-pointer">
             Clínica Online (no requiere dirección física)
           </label>
@@ -96,7 +96,7 @@
           <div class="relative">
             <span class="absolute left-3 top-2.5 text-gray-500 text-sm">€</span>
             <input type="number" formControlName="price" min="0" step="0.01"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 pl-8 pr-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67]/20 focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 pl-8 pr-3 py-2 text-sm text-gray-900 placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6aa591]/20 focus:border-[#6aa591] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
               [class.border-red-500]="getFieldError('price')" [class.focus:ring-red-500]="getFieldError('price')"
               [class.focus:border-red-500]="getFieldError('price')" placeholder="0.00">
           </div>
@@ -120,7 +120,7 @@
           </label>
           <div class="relative">
             <input type="number" formControlName="percentage" min="0" max="100" step="0.1"
-              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 pr-8 py-2 text-sm text-gray-900 placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67]/20 focus:border-[#d29f67] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
+              class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 pr-8 py-2 text-sm text-gray-900 placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6aa591]/20 focus:border-[#6aa591] disabled:cursor-not-allowed disabled:opacity-50 transition-all duration-200"
               [class.border-red-500]="getFieldError('percentage')"
               [class.focus:ring-red-500]="getFieldError('percentage')"
               [class.focus:border-red-500]="getFieldError('percentage')" placeholder="0.0">
@@ -144,7 +144,7 @@
         <!-- Checkbox Es Facturable -->
         <div class="flex items-center gap-2">
           <input id="is_billable" type="checkbox" formControlName="is_billable"
-            class="h-4 w-4 rounded border-gray-300 text-[#d29f67] focus:ring-[#d29f67] focus:ring-2">
+            class="h-4 w-4 rounded border-gray-300 text-[#6aa591] focus:ring-[#6aa591] focus:ring-2">
           <label for="is_billable" class="text-sm font-medium text-gray-700 cursor-pointer">
             Es facturable (requiere CIF)
           </label>

@@ -1215,7 +1215,7 @@ export class BillingComponent implements OnInit {
         <div style="margin-bottom: 32px;">
           <div style="display: flex; justify-content: space-between; align-items: start;">
             <div>
-              <h1 style="font-size: 36px; font-weight: 900; color: #d29f67; margin: 0;">FACTURA</h1>
+              <h1 style="font-size: 36px; font-weight: 900; color: #6aa591; margin: 0;">FACTURA</h1>
             </div>
             <div style="text-align: right;">
               <div style="font-size: 24px; font-weight: bold; color: #1f2937;">${

@@ -11,7 +11,7 @@
   <div [ngClass]="{
     'flex w-full rounded-md border border-gray-300 items-center justify-between transition-all duration-200': true,
     'hover:border-gray-400 focus-within:outline-none focus-within:ring-2 cursor-pointer': !disabled,
-    'h-10 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus-within:ring-[#d29f67] focus-within:bg-white focus-within:border-[#d29f67]': size === 'md',
+    'h-10 bg-gray-50 px-3 py-2 text-sm text-gray-900 focus-within:ring-[#6aa591] focus-within:bg-white focus-within:border-[#6aa591]': size === 'md',
     'bg-white px-2 py-1.5 text-xs text-gray-900 focus-within:ring-cyan-500': size === 'sm',
     'border-red-500': hasError
   }" (click)="openModal()" [tabindex]="disabled ? -1 : 0" role="button" [attr.aria-expanded]="isModalOpenValue" [attr.aria-disabled]="disabled">
@@ -69,7 +69,7 @@
           <label for="clinic-search" class="sr-only">Buscar clínicas</label>
           <input #modalSearchInput id="clinic-search" type="text" [value]="searchTermValue"
             (input)="onSearchInput($event)"
-            class="block w-full h-10 px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg bg-white placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#d29f67]/20 focus:border-[#d29f67] transition-all duration-200"
+            class="block w-full h-10 px-3 py-2 pr-10 text-sm border border-gray-300 rounded-lg bg-white placeholder:text-gray-400 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6aa591]/20 focus:border-[#6aa591] transition-all duration-200"
             placeholder="Buscar clínicas..." autocomplete="off" />
           <div class="absolute inset-y-0 right-0 flex items-center pr-3 pointer-events-none">
             <svg class="h-4 w-4 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -83,7 +83,7 @@
       <div class="max-h-60 sm:max-h-64 overflow-y-auto">
         <div *ngFor="let clinic of filteredClinics()"
           class="w-full px-4 py-3 text-left text-sm hover:bg-gray-50 cursor-pointer flex items-center gap-3 border-b border-gray-100 transition-colors"
-          [class.bg-[#d29f67]]="isClinicSelected(clinic)" [class.text-white]="isClinicSelected(clinic)"
+          [class.bg-[#6aa591]]="isClinicSelected(clinic)" [class.text-white]="isClinicSelected(clinic)"
           (click)="selectClinic(clinic)">
           <div class="w-4 h-4 rounded-full flex-shrink-0" [style.background-color]="clinic.clinic_color"></div>
           <span class="truncate flex-1">{{ clinic.name }}</span>
@@ -103,7 +103,7 @@
 
       <div class="p-4 border-t border-gray-200">
         <button type="button"
-          class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#d29f67]/20 focus:border-[#d29f67] transition-all duration-200"
+          class="w-full px-4 py-2 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 focus:outline-none focus:ring-2 focus:ring-[#6aa591]/20 focus:border-[#6aa591] transition-all duration-200"
           (click)="closeModal()">
           Cancelar
         </button>

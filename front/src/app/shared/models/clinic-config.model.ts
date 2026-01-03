@@ -11,8 +11,8 @@ export const CLINIC_CONFIGS: ClinicConfig[] = [
     id: 1,
     name: "Clínica Norte",
     color: "text-white",
-    backgroundColor: "bg-[#d29f67]",
-    borderColor: "border-[#d29f67]"
+    backgroundColor: "bg-[#6aa591]",
+    borderColor: "border-[#6aa591]"
   },
   {
     id: 2,

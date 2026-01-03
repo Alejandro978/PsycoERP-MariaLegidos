@@ -12,9 +12,9 @@
   --card-foreground: #4b5563;
   --popover: #ffffff;
   --popover-foreground: #4b5563;
-  --primary: #d29f67;
-  --primary-semi-light: #f4bb7e70;
-  --primary-light: #d29e6775;
+  --primary: #6aa591;
+  --primary-semi-light: #6aa59170;
+  --primary-light: #6aa59175;
   --primary-foreground: #ffffff;
   --secondary: #ec4899;
   --secondary-foreground: #ffffff;
@@ -26,12 +26,12 @@
   --destructive-foreground: #ffffff;
   --border: #e5e7eb;
   --input: #ffffff;
-  --ring: #d29f67;
+  --ring: #6aa591;
   --chart-1: #6366f1;
   --chart-2: #ec4899;
   --chart-3: #be123c;
   --chart-4: #4b5563;
-  --chart-5: #d29f67;
+  --chart-5: #6aa591;
   --radius: 0.375rem;
   --radius-sm: 0.125rem;
   --radius-md: 0.375rem;
@@ -46,10 +46,10 @@
   --sidebar-accent: #ec4899;
   --sidebar-accent-foreground: #ffffff;
   --sidebar-border: #e5e7eb;
-  --sidebar-ring: #d29f67;
+  --sidebar-ring: #6aa591;
 
   /* Added clinic color variables for calendar system */
-  --clinic-a: #d29f67;
+  --clinic-a: #6aa591;
   --clinic-b: #ec4899;
   --clinic-c: #6366f1;
   --clinic-private: #be123c;
@@ -57,10 +57,10 @@
   /* Color variables for Tailwind config */
   --color-border: #e5e7eb;
   --color-input: #ffffff;
-  --color-ring: #d29f67;
+  --color-ring: #6aa591;
   --color-background: #ffffff;
   --color-foreground: #4b5563;
-  --color-primary: #d29f67;
+  --color-primary: #6aa591;
   --color-primary-foreground: #ffffff;
   --color-secondary: #ec4899;
   --color-secondary-foreground: #ffffff;
@@ -81,13 +81,13 @@
   --color-sidebar-accent: #ec4899;
   --color-sidebar-accent-foreground: #ffffff;
   --color-sidebar-border: #e5e7eb;
-  --color-sidebar-ring: #d29f67;
+  --color-sidebar-ring: #6aa591;
   --color-chart-1: #6366f1;
   --color-chart-2: #ec4899;
   --color-chart-3: #be123c;
   --color-chart-4: #4b5563;
-  --color-chart-5: #d29f67;
-  --color-clinic-a: #d29f67;
+  --color-chart-5: #6aa591;
+  --color-clinic-a: #6aa591;
   --color-clinic-b: #ec4899;
   --color-clinic-c: #6366f1;
   --color-clinic-private: #be123c;
@@ -117,10 +117,10 @@
     background-color: var(--primary-semi-light);
   }
   .bg-primary\/5 {
-    background-color: rgba(8, 145, 178, 0.05);
+    background-color: rgba(106, 165, 145, 0.05);
   }
   .bg-primary\/90 {
-    background-color: #d29e6772;
+    background-color: #6aa59172;
   }
   .bg-card {
     background-color: var(--card);
@@ -198,7 +198,7 @@
     color: var(--accent-foreground);
   }
   .hover\:bg-primary\/90:hover {
-    background-color: rgba(8, 145, 178, 0.9);
+    background-color: rgba(106, 165, 145, 0.9);
   }
   .hover\:bg-destructive:hover {
     background-color: var(--destructive);

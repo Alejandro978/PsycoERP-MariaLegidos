@@ -96,6 +96,49 @@ export class FormInputComponent {
       return `El valor mínimo es ${errors['min'].min}`;
     }
 
+    // Validaciones personalizadas de DNI
+    if (errors['invalidDniFormat']) {
+      return 'El DNI debe tener 8 dígitos seguidos de una letra (Ej: 12345678A)';
+    }
+    if (errors['invalidDniLetter']) {
+      const expected = errors['invalidDniLetter'].expected;
+      return `La letra del DNI es incorrecta. Debería ser: ${expected}`;
+    }
+
+    // Validaciones personalizadas de teléfono
+    if (errors['invalidPhone']) {
+      return 'El teléfono debe tener exactamente 9 dígitos sin espacios';
+    }
+    if (errors['invalidPhonePrefix']) {
+      return 'El teléfono debe empezar por 6, 7, 8 o 9';
+    }
+
+    // Validaciones personalizadas de fecha de nacimiento
+    if (errors['futureDate']) {
+      return 'La fecha de nacimiento no puede ser futura';
+    }
+    if (errors['ageTooOld']) {
+      const maxAge = errors['ageTooOld'].maxAge;
+      return `La edad no puede superar los ${maxAge} años`;
+    }
+    if (errors['ageTooYoung']) {
+      const minAge = errors['ageTooYoung'].minAge;
+      return `La edad debe ser al menos ${minAge} años`;
+    }
+
+    // Validaciones personalizadas de fecha de tratamiento
+    if (errors['dateTooOld']) {
+      const maxYears = errors['dateTooOld'].maxYears;
+      return `La fecha no puede ser más de ${maxYears} años en el pasado`;
+    }
+    if (errors['dateTooFuture']) {
+      const maxYears = errors['dateTooFuture'].maxYears;
+      return `La fecha no puede ser más de ${maxYears} años en el futuro`;
+    }
+    if (errors['invalidDate']) {
+      return 'La fecha ingresada no es válida';
+    }
+
     // Return first error key as fallback
     return Object.keys(errors)[0];
   }

@@ -381,7 +381,7 @@ export class CalendarComponent implements OnInit {
           // Fallback to hardcoded config
           const config = this.clinicConfigs.find(c => c.id === clinicId) || this.clinicConfigs[0];
           const colorMatch = config.backgroundColor.match(/bg-\[([^\]]+)\]|bg-(\w+-\d+)/);
-          let hexColor = '#d29f67'; // default color
+          let hexColor = '#6aa591'; // default color
 
           if (colorMatch) {
             const colorValue = colorMatch[1] || colorMatch[2];

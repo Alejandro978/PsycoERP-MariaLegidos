@@ -74,13 +74,13 @@
         <div class="flex rounded-lg border border-gray-300 overflow-hidden w-full sm:w-auto">
           <button (click)="setView('week')"
             [class]="currentView() === 'week' ? 'text-white' : 'bg-white hover:bg-gray-50 text-gray-700'"
-            [style.background-color]="currentView() === 'week' ? '#d29f67' : ''"
+            [style.background-color]="currentView() === 'week' ? '#6aa591' : ''"
             class="rounded-none flex-1 sm:flex-none inline-flex items-center justify-center px-4 sm:px-6 py-2 text-sm font-medium transition-colors whitespace-nowrap">
             Semana
           </button>
           <button (click)="setView('month')"
             [class]="currentView() === 'month' ? 'text-white' : 'bg-white hover:bg-gray-50 text-gray-700'"
-            [style.background-color]="currentView() === 'month' ? '#d29f67' : ''"
+            [style.background-color]="currentView() === 'month' ? '#6aa591' : ''"
             class="rounded-none flex-1 sm:flex-none inline-flex items-center justify-center px-4 sm:px-6 py-2 text-sm font-medium transition-colors whitespace-nowrap">
             Mes
           </button>
@@ -147,7 +147,7 @@
                 </div>
                 <div
                   [class]="isToday(date) ? 'text-white rounded-full w-5 h-5 sm:w-6 sm:h-6 flex items-center justify-center text-xs sm:text-sm font-semibold' : 'text-gray-900 text-xs sm:text-sm font-semibold'"
-                  [style.background-color]="isToday(date) ? '#d29f67' : ''">
+                  [style.background-color]="isToday(date) ? '#6aa591' : ''">
                   {{ formatDate(date) }}
                 </div>
               </div>
@@ -264,7 +264,7 @@
           class="h-[100px] sm:h-[140px] border-b border-r border-gray-200 p-1 sm:p-2 group relative overflow-hidden flex flex-col"
           [style.background-color]="isToday(date) ? 'rgba(8, 145, 178, 0.05)' : ''">
           <div [class]="'text-xs sm:text-sm font-medium mb-1 sm:mb-2 text-gray-900'"
-            [style.color]="isToday(date) ? '#d29f67' : ''">
+            [style.color]="isToday(date) ? '#6aa591' : ''">
             {{ formatDate(date) }}
           </div>
           <div class="space-y-1 flex-1 overflow-y-auto overflow-x-hidden">

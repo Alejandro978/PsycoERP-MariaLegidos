@@ -21,6 +21,12 @@ import { Clinic } from '../../../clinics/models/clinic.model';
 import { ClinicSelectorComponent } from '../../../../shared/components/clinic-selector';
 import { ReusableModalComponent } from '../../../../shared/components/reusable-modal/reusable-modal.component';
 import { FormInputComponent } from '../../../../shared/components/form-input/form-input.component';
+import {
+  dniValidator,
+  phoneValidator,
+  ageRangeValidator,
+  treatmentDateValidator,
+} from '../../../../shared/validators/custom-validators';
 
 @Component({
   selector: 'app-patient-form',
@@ -86,9 +92,9 @@ export class PatientFormComponent implements OnInit, OnChanges {
       first_name: ['', [Validators.required, Validators.minLength(2)]],
       last_name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
-      phone: ['', [Validators.required, Validators.minLength(9)]],
-      dni: ['', [Validators.required, Validators.minLength(8)]],
-      birth_date: ['', [Validators.required]],
+      phone: ['', [Validators.required, phoneValidator()]],
+      dni: ['', [Validators.required, dniValidator()]],
+      birth_date: ['', [Validators.required, ageRangeValidator(0, 100)]],
       gender: ['', [Validators.required]],
       occupation: ['', [Validators.required]],
 
@@ -105,7 +111,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
       // Datos del tratamiento
       clinic_id: ['', [Validators.required]],
-      treatment_start_date: ['', [Validators.required]],
+      treatment_start_date: ['', [Validators.required, treatmentDateValidator(100, 100)]],
       status: ['en curso', [Validators.required]],
 
       // Campos automáticos
@@ -215,6 +221,56 @@ export class PatientFormComponent implements OnInit, OnChanges {
       }
       if (field.errors?.['email']) {
         return 'Ingrese un email válido';
+      }
+
+      // Validaciones personalizadas de DNI
+      if (field.errors?.['invalidDniFormat']) {
+        return 'El DNI debe tener 8 dígitos seguidos de una letra (Ej: 12345678A)';
+      }
+      if (field.errors?.['invalidDniLetter']) {
+        const expected = field.errors['invalidDniLetter'].expected;
+        return `La letra del DNI es incorrecta. Debería ser: ${expected}`;
+      }
+
+      // Validaciones personalizadas de teléfono
+      if (field.errors?.['invalidPhone']) {
+        return 'El teléfono debe tener exactamente 9 dígitos sin espacios';
+      }
+      if (field.errors?.['invalidPhonePrefix']) {
+        return 'El teléfono debe empezar por 6, 7, 8 o 9';
+      }
+
+      // Validaciones personalizadas de fecha de nacimiento
+      if (field.errors?.['futureDate']) {
+        return 'La fecha de nacimiento no puede ser futura';
+      }
+      if (field.errors?.['ageTooOld']) {
+        const maxAge = field.errors['ageTooOld'].maxAge;
+        return `La edad no puede superar los ${maxAge} años`;
+      }
+      if (field.errors?.['ageTooYoung']) {
+        const minAge = field.errors['ageTooYoung'].minAge;
+        return `La edad debe ser al menos ${minAge} años`;
+      }
+
+      // Validaciones personalizadas de fecha de tratamiento
+      if (field.errors?.['dateTooOld']) {
+        const maxYears = field.errors['dateTooOld'].maxYears;
+        return `La fecha no puede ser más de ${maxYears} años en el pasado`;
+      }
+      if (field.errors?.['dateTooFuture']) {
+        const maxYears = field.errors['dateTooFuture'].maxYears;
+        return `La fecha no puede ser más de ${maxYears} años en el futuro`;
+      }
+      if (field.errors?.['invalidDate']) {
+        return 'La fecha ingresada no es válida';
+      }
+
+      // Validación de patrón (código postal)
+      if (field.errors?.['pattern']) {
+        if (fieldName === 'postal_code') {
+          return 'El código postal debe tener 5 dígitos';
+        }
       }
     }
     return null;
