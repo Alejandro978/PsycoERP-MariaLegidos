@@ -58,6 +58,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       name: ['', [Validators.required, Validators.minLength(2)]],
       clinic_color: ['#3b82f6', [Validators.required]],
       is_online: [false],
+      external: [false],
       address: ['', [Validators.required, Validators.minLength(5)]],
       price: [0, [Validators.required, Validators.min(0), Validators.max(1000)]],
       percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -70,7 +71,12 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
     // Escuchar cambios en el checkbox is_online
     this.clinicaForm.get('is_online')?.valueChanges.subscribe(isOnline => {
-      this.updateAddressValidation(isOnline);
+      this.handleOnlineChange(isOnline);
+    });
+
+    // Escuchar cambios en el checkbox external
+    this.clinicaForm.get('external')?.valueChanges.subscribe(isExternal => {
+      this.handleExternalChange(isExternal);
     });
 
     // Escuchar cambios en el checkbox is_billable
@@ -83,13 +89,15 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
   private populateForm(): void {
     if (this.clinica) {
-      // Determinar si es online basándose en si tiene dirección
-      const isOnline = !this.clinica.address || this.clinica.address.trim() === '';
+      // Determinar si es online basándose en si tiene dirección y no es externa
+      const isExternal = this.clinica.external || false;
+      const isOnline = !isExternal && (!this.clinica.address || this.clinica.address.trim() === '');
 
       this.clinicaForm.patchValue({
         name: this.clinica.name,
         clinic_color: this.clinica.clinic_color,
         is_online: isOnline,
+        external: isExternal,
         address: this.clinica.address || '',
         price: this.clinica.price || 0,
         percentage: this.clinica.percentage || 0,
@@ -101,7 +109,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       });
 
       // Aplicar la lógica de validación después de poblar el formulario
-      this.updateAddressValidation(isOnline);
+      this.updateAddressValidation(isOnline, isExternal);
       this.updateCifValidation(this.clinica.is_billable || false);
       this.updateFiscalNameValidation(this.clinica.is_billable || false);
       this.updateInvoiceAddressValidation(this.clinica.is_billable || false);
@@ -115,6 +123,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       name: '',
       clinic_color: '#3b82f6',
       is_online: false,
+      external: false,
       address: '',
       price: 0,
       percentage: 0,
@@ -126,27 +135,63 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     });
 
     // Asegurar que las validaciones están correctas al resetear
-    this.updateAddressValidation(false);
+    this.updateAddressValidation(false, false);
     this.updateCifValidation(false);
     this.updateFiscalNameValidation(false);
     this.updateInvoiceAddressValidation(false);
   }
 
-  private updateAddressValidation(isOnline: boolean): void {
-    const addressControl = this.clinicaForm.get('address');
-
+  private handleOnlineChange(isOnline: boolean): void {
     if (isOnline) {
-      // Si es online, eliminar validaciones y limpiar el valor
-      addressControl?.clearValidators();
-      addressControl?.setValue('');
-      addressControl?.disable();
+      // Si se marca como online, desmarcar external
+      this.clinicaForm.get('external')?.setValue(false, { emitEvent: false });
+      // Deshabilitar y limpiar address
+      this.disableAndClearAddress();
     } else {
-      // Si no es online, añadir validaciones requeridas
-      addressControl?.setValidators([Validators.required, Validators.minLength(5)]);
-      addressControl?.enable();
+      // Si se desmarca online, habilitar address solo si external tampoco está marcado
+      const isExternal = this.clinicaForm.get('external')?.value;
+      if (!isExternal) {
+        this.enableAddress();
+      }
     }
+  }
 
+  private handleExternalChange(isExternal: boolean): void {
+    if (isExternal) {
+      // Si se marca como externa, desmarcar is_online
+      this.clinicaForm.get('is_online')?.setValue(false, { emitEvent: false });
+      // Deshabilitar y limpiar address
+      this.disableAndClearAddress();
+    } else {
+      // Si se desmarca externa, habilitar address solo si is_online tampoco está marcado
+      const isOnline = this.clinicaForm.get('is_online')?.value;
+      if (!isOnline) {
+        this.enableAddress();
+      }
+    }
+  }
+
+  private disableAndClearAddress(): void {
+    const addressControl = this.clinicaForm.get('address');
+    addressControl?.clearValidators();
+    addressControl?.setValue('');
+    addressControl?.disable();
     addressControl?.updateValueAndValidity();
+  }
+
+  private enableAddress(): void {
+    const addressControl = this.clinicaForm.get('address');
+    addressControl?.setValidators([Validators.required, Validators.minLength(5)]);
+    addressControl?.enable();
+    addressControl?.updateValueAndValidity();
+  }
+
+  private updateAddressValidation(isOnline: boolean, isExternal: boolean = false): void {
+    if (isOnline || isExternal) {
+      this.disableAndClearAddress();
+    } else {
+      this.enableAddress();
+    }
   }
 
   private updateCifValidation(isBillable: boolean): void {
@@ -223,8 +268,8 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       // Excluir is_online del envío ya que no se almacena en BD
       delete formData.is_online;
 
-      // Si es online, asegurar que address esté vacío
-      if (this.clinicaForm.get('is_online')?.value) {
+      // Si es online o externa, asegurar que address esté vacío
+      if (this.clinicaForm.get('is_online')?.value || formData.external) {
         formData.address = '';
       }
 
@@ -280,6 +325,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       name: 'Nombre de la clínica',
       clinic_color: 'Color identificativo',
       is_online: 'Clínica online',
+      external: 'Clínica externa',
       address: 'Dirección',
       price: 'Precio por sesión',
       percentage: 'Porcentaje de comisión',
