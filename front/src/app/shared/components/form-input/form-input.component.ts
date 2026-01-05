@@ -106,6 +106,9 @@ export class FormInputComponent {
     }
 
     // Validaciones personalizadas de teléfono
+    if (errors['phoneContainsSpaces']) {
+      return 'El teléfono no puede contener espacios';
+    }
     if (errors['invalidPhone']) {
       return 'El teléfono debe tener exactamente 9 dígitos sin espacios';
     }

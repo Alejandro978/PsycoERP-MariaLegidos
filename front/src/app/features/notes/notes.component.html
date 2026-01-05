@@ -1,0 +1,125 @@
+<div class="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+  <!-- Header -->
+  <div class="mb-6 flex items-center justify-between">
+    <div>
+      <h1 class="text-2xl font-bold text-gray-900 flex items-center gap-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-sticky-note h-6 w-6 text-primary">
+          <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"></path>
+          <path d="M15 3v4a2 2 0 0 0 2 2h4"></path>
+        </svg>
+        Notas y Recordatorios
+      </h1>
+      <p class="text-sm text-gray-500 mt-1">Gestiona tus notas y recordatorios</p>
+    </div>
+
+    <button type="button" (click)="openDialog()"
+      class="inline-flex items-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200">
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+        class="lucide lucide-plus h-4 w-4">
+        <path d="M5 12h14"></path>
+        <path d="M12 5v14"></path>
+      </svg>
+      Nueva Nota
+    </button>
+  </div>
+
+  <!-- KPIs Cards -->
+  <div class="grid grid-cols-1 gap-4 sm:grid-cols-3 mb-6">
+    <!-- Total de Notas -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Total de Notas</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">{{ kpis.total_notes }}</p>
+        </div>
+        <div class="p-3 bg-blue-100 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-sticky-note h-6 w-6 text-blue-600">
+            <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"></path>
+            <path d="M15 3v4a2 2 0 0 0 2 2h4"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notas Pendientes -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Pendientes</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">
+            {{ kpis.pending_notes }}
+            @if (kpis.pending_notes > 0) {
+            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+              Activas
+            </span>
+            }
+          </p>
+        </div>
+        <div class="p-3 bg-orange-100 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-clock h-6 w-6 text-orange-600">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+        </div>
+      </div>
+    </div>
+
+    <!-- Notas Completadas -->
+    <div class="bg-white rounded-lg shadow-sm border border-gray-200 p-6">
+      <div class="flex items-center justify-between">
+        <div>
+          <p class="text-sm font-medium text-gray-600">Completadas</p>
+          <p class="text-2xl font-bold text-gray-900 mt-2">{{ kpis.completed_notes }}</p>
+        </div>
+        <div class="p-3 bg-green-100 rounded-lg">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-check-circle h-6 w-6 text-green-600">
+            <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+            <path d="m9 11 3 3L22 4"></path>
+          </svg>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Lista de Notas -->
+  <div class="bg-white rounded-lg shadow-sm border border-gray-200">
+    <div class="p-6 border-b border-gray-200">
+      <h2 class="text-lg font-semibold text-gray-900">Mis Notas</h2>
+      <p class="text-sm text-gray-500 mt-1">Lista de todas tus notas y recordatorios</p>
+    </div>
+
+    <div class="divide-y divide-gray-200">
+      @if (notes.length === 0) {
+      <div class="p-12 text-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-sticky-note h-12 w-12 text-gray-400 mx-auto mb-4">
+          <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"></path>
+          <path d="M15 3v4a2 2 0 0 0 2 2h4"></path>
+        </svg>
+        <h3 class="text-sm font-medium text-gray-900">No hay notas</h3>
+        <p class="text-sm text-gray-500 mt-1">Crea tu primera nota para comenzar</p>
+      </div>
+      } @else {
+      @for (note of notes; track note.id) {
+      <app-note-card [note]="note" (onToggleStatus)="handleToggleStatus($event)"
+        (onDelete)="handleDeleteNote($event)">
+      </app-note-card>
+      }
+      }
+    </div>
+  </div>
+
+  <!-- Dialog Component -->
+  <app-note-dialog [isOpen]="isDialogOpen()" (onClose)="closeDialog()" (onSave)="handleCreateNote($event)">
+  </app-note-dialog>
+</div>
