@@ -58,6 +58,11 @@ const definitions = {
         description: "Indica si la clínica es presencial (tiene dirección) o no. true = Presencial, false = Online",
         example: true,
       },
+      clinicaExterna: {
+        type: "boolean",
+        description: "Indica si la clínica es externa. true = Externa, false = Propia",
+        example: false,
+      },
     },
   },
 

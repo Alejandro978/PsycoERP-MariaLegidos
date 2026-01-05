@@ -106,7 +106,7 @@ const getPatients = async (db, filters = {}) => {
     conditions.push("created_at <= ?");
     params.push(filters.fecha_hasta);
   }
-  
+
   // Aplicar condiciones a ambas queries
   if (conditions.length > 0) {
     const conditionsStr = " AND " + conditions.join(" AND ");
@@ -117,18 +117,18 @@ const getPatients = async (db, filters = {}) => {
   // Agregar ordenamiento y paginación solo a la query de datos
   dataQuery += " ORDER BY created_at DESC";
   dataQuery += " LIMIT ? OFFSET ?";
-  
+
   // Ejecutar ambas queries
   const [countResult] = await db.execute(countQuery, params);
   const totalRecords = countResult[0].total;
-  
+
   const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
-  
+
   // Calcular información de paginación
   const totalPages = Math.ceil(totalRecords / limit);
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
-  
+
   return {
     data: dataRows,
     pagination: {
@@ -206,7 +206,7 @@ const getPatientById = async (db, id) => {
     `;
 
   const [invoiceRows] = await db.execute(invoiceQuery, [id, currentYear]);
-  
+
   // Consulta para obtener datos detallados del paciente con información de clínica
   const patientDataQuery = `
         SELECT
@@ -239,7 +239,7 @@ const getPatientById = async (db, id) => {
     `;
 
   const [patientDataRows] = await db.execute(patientDataQuery, [id]);
-  
+
   // Consulta para obtener sesiones extendidas para PatientSessions
   const patientSessionsQuery = `
         SELECT
@@ -255,9 +255,9 @@ const getPatientById = async (db, id) => {
         WHERE s.patient_id = ? AND s.is_active = 1
         ORDER BY s.session_date DESC
     `;
-  
+
   const [patientSessionsRows] = await db.execute(patientSessionsQuery, [id]);
-  
+
 
   // Consulta para obtener notas clínicas del paciente
   const clinicalNotesQuery = `
@@ -271,7 +271,7 @@ const getPatientById = async (db, id) => {
         WHERE cn.patient_id = ? AND p.is_active = true
         ORDER BY cn.created_at DESC
     `;
-  
+
   const [clinicalNotesRows] = await db.execute(clinicalNotesQuery, [id]);
 
   // Obtener documentos del paciente
@@ -397,7 +397,7 @@ const getInactivePatients = async (db, filters = {}) => {
     conditions.push("created_at <= ?");
     params.push(filters.fecha_hasta);
   }
-  
+
   // Aplicar condiciones a ambas queries
   if (conditions.length > 0) {
     const conditionsStr = " AND " + conditions.join(" AND ");
@@ -408,18 +408,18 @@ const getInactivePatients = async (db, filters = {}) => {
   // Agregar ordenamiento y paginación solo a la query de datos
   dataQuery += " ORDER BY updated_at DESC";
   dataQuery += " LIMIT ? OFFSET ?";
-  
+
   // Ejecutar ambas queries
   const [countResult] = await db.execute(countQuery, params);
   const totalRecords = countResult[0].total;
-  
+
   const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
-  
+
   // Calcular información de paginación
   const totalPages = Math.ceil(totalRecords / limit);
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
-  
+
   return {
     data: dataRows,
     pagination: {
@@ -442,7 +442,7 @@ const deletePatient = async (db, id) => {
     SET is_active = false, updated_at = CURRENT_TIMESTAMP 
     WHERE id = ? AND is_active = true
   `;
-  
+
   const [result] = await db.execute(query, [id]);
   return result.affectedRows > 0;
 };
@@ -669,7 +669,8 @@ const getActivePatientsWithClinicInfo = async (db) => {
       CASE
         WHEN c.address IS NULL OR c.address = '' THEN 0
         ELSE 1
-      END as presencial
+      END as presencial,
+      c.is_external as clinicaExterna
     FROM patients p
     LEFT JOIN clinics c ON p.clinic_id = c.id
     WHERE p.is_active = 1 AND p.status = 'en curso' AND c.is_active = 1
@@ -678,10 +679,11 @@ const getActivePatientsWithClinicInfo = async (db) => {
 
   const [rows] = await db.execute(query);
 
-  // Convert presencial from 0/1 to boolean
+  // Convert presencial and clinicaExterna from 0/1 to boolean
   return rows.map(row => ({
     ...row,
-    presencial: Boolean(row.presencial)
+    presencial: Boolean(row.presencial),
+    clinicaExterna: Boolean(row.clinicaExterna)
   }));
 };
 
