@@ -24,7 +24,7 @@ import { FormInputComponent } from '../../../../shared/components/form-input/for
 import {
   dniValidator,
   phoneValidator,
-  ageRangeValidator,
+  birthDateValidator,
   treatmentDateValidator,
 } from '../../../../shared/validators/custom-validators';
 
@@ -94,9 +94,9 @@ export class PatientFormComponent implements OnInit, OnChanges {
       email: ['', [Validators.required, Validators.email]],
       phone: ['', [Validators.required, phoneValidator()]],
       dni: ['', [Validators.required, dniValidator()]],
-      birth_date: ['', [Validators.required, ageRangeValidator(0, 100)]],
+      birth_date: ['', [Validators.required, birthDateValidator()]],
       gender: ['', [Validators.required]],
-      occupation: ['', [Validators.required]],
+      occupation: [''],
 
       // Dirección completa
       street: ['', [Validators.required]],
@@ -111,11 +111,20 @@ export class PatientFormComponent implements OnInit, OnChanges {
 
       // Datos del tratamiento
       clinic_id: ['', [Validators.required]],
-      treatment_start_date: ['', [Validators.required, treatmentDateValidator(100, 100)]],
+      treatment_start_date: ['', [Validators.required, treatmentDateValidator()]],
       status: ['en curso', [Validators.required]],
+      special_price: [0, [Validators.required, Validators.min(0)]],
 
       // Campos automáticos
       is_minor: [false],
+
+      // Información de progenitores (solo para menores)
+      progenitor1_full_name: [''],
+      progenitor1_dni: [''],
+      progenitor1_phone: [''],
+      progenitor2_full_name: [''],
+      progenitor2_dni: [''],
+      progenitor2_phone: [''],
     });
   }
 
@@ -139,8 +148,17 @@ export class PatientFormComponent implements OnInit, OnChanges {
         clinic_id: this.patient.clinic_id || '',
         treatment_start_date: this.patient.treatment_start_date || '',
         status: this.patient.status || 'en curso',
+        special_price: this.patient.special_price ?? 0,
         is_minor: this.patient.is_minor || false,
+        progenitor1_full_name: this.patient.progenitor1_full_name || '',
+        progenitor1_dni: this.patient.progenitor1_dni || '',
+        progenitor1_phone: this.patient.progenitor1_phone || '',
+        progenitor2_full_name: this.patient.progenitor2_full_name || '',
+        progenitor2_dni: this.patient.progenitor2_dni || '',
+        progenitor2_phone: this.patient.progenitor2_phone || '',
       });
+      // Update validators after populating
+      this.updateProgenitorValidators();
     } else {
       this.resetForm();
     }
@@ -165,8 +183,45 @@ export class PatientFormComponent implements OnInit, OnChanges {
       clinic_id: '',
       treatment_start_date: '',
       status: 'en curso',
+      special_price: 0,
       is_minor: false,
+      progenitor1_full_name: '',
+      progenitor1_dni: '',
+      progenitor1_phone: '',
+      progenitor2_full_name: '',
+      progenitor2_dni: '',
+      progenitor2_phone: '',
     });
+    // Clear validators
+    this.updateProgenitorValidators();
+  }
+
+  /**
+   * Update validators for progenitor fields based on whether patient is minor
+   */
+  private updateProgenitorValidators(): void {
+    const isMinor = this.patientForm.get('is_minor')?.value;
+
+    const progenitor1FullName = this.patientForm.get('progenitor1_full_name');
+    const progenitor1Dni = this.patientForm.get('progenitor1_dni');
+    const progenitor1Phone = this.patientForm.get('progenitor1_phone');
+
+    if (isMinor) {
+      // Progenitor 1 fields are required for minors with custom validators
+      progenitor1FullName?.setValidators([Validators.required, Validators.minLength(2)]);
+      progenitor1Dni?.setValidators([Validators.required, dniValidator()]);
+      progenitor1Phone?.setValidators([Validators.required, phoneValidator()]);
+    } else {
+      // Clear validators if not minor
+      progenitor1FullName?.clearValidators();
+      progenitor1Dni?.clearValidators();
+      progenitor1Phone?.clearValidators();
+    }
+
+    // Update validity
+    progenitor1FullName?.updateValueAndValidity();
+    progenitor1Dni?.updateValueAndValidity();
+    progenitor1Phone?.updateValueAndValidity();
   }
 
   get isEditing(): boolean {
@@ -185,9 +240,46 @@ export class PatientFormComponent implements OnInit, OnChanges {
     return this.patientForm.valid;
   }
 
+  get isMinor(): boolean {
+    return this.patientForm.get('is_minor')?.value || false;
+  }
+
   handleSubmit(): void {
     if (this.patientForm.valid) {
-      const formData = this.patientForm.value;
+      const formData = { ...this.patientForm.value };
+
+      // Ensure is_minor is always a boolean
+      formData.is_minor = Boolean(formData.is_minor);
+
+      // Clean phone numbers and DNI: remove spaces, trim whitespace
+      if (formData.phone) {
+        formData.phone = formData.phone.toString().replace(/\s+/g, '').trim();
+      }
+      if (formData.dni) {
+        formData.dni = formData.dni.toString().replace(/\s+/g, '').trim().toUpperCase();
+      }
+      if (formData.progenitor1_phone) {
+        formData.progenitor1_phone = formData.progenitor1_phone.toString().replace(/\s+/g, '').trim();
+      }
+      if (formData.progenitor1_dni) {
+        formData.progenitor1_dni = formData.progenitor1_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
+      }
+      if (formData.progenitor2_phone) {
+        formData.progenitor2_phone = formData.progenitor2_phone.toString().replace(/\s+/g, '').trim();
+      }
+      if (formData.progenitor2_dni) {
+        formData.progenitor2_dni = formData.progenitor2_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
+      }
+
+      // If not minor, remove progenitor fields from payload
+      if (!formData.is_minor) {
+        delete formData.progenitor1_full_name;
+        delete formData.progenitor1_dni;
+        delete formData.progenitor1_phone;
+        delete formData.progenitor2_full_name;
+        delete formData.progenitor2_dni;
+        delete formData.progenitor2_phone;
+      }
 
       if (this.isEditing && this.patient) {
         const updatedPatient: Patient = {
@@ -196,7 +288,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
         };
         this.onSave.emit(updatedPatient);
       } else {
-        // Para crear nuevo paciente, no incluir el id
+        // Para crear nuevo paciente, no incluir el id si existe
         const { id, ...createData } = formData;
         this.onSave.emit(createData);
       }
@@ -222,55 +314,33 @@ export class PatientFormComponent implements OnInit, OnChanges {
       if (field.errors?.['email']) {
         return 'Ingrese un email válido';
       }
-
-      // Validaciones personalizadas de DNI
       if (field.errors?.['invalidDniFormat']) {
-        return 'El DNI debe tener 8 dígitos seguidos de una letra (Ej: 12345678A)';
+        return 'El DNI debe tener 8 dígitos seguidos de una letra (ej: 12345678A)';
       }
       if (field.errors?.['invalidDniLetter']) {
-        const expected = field.errors['invalidDniLetter'].expected;
-        return `La letra del DNI es incorrecta. Debería ser: ${expected}`;
+        const error = field.errors['invalidDniLetter'];
+        return `La letra del DNI no es válida. Debería ser ${error.expected} en lugar de ${error.actual}`;
       }
-
-      // Validaciones personalizadas de teléfono
       if (field.errors?.['invalidPhone']) {
-        return 'El teléfono debe tener exactamente 9 dígitos sin espacios';
+        return 'El teléfono debe tener exactamente 9 dígitos sin espacios (ej: 666123456)';
       }
       if (field.errors?.['invalidPhonePrefix']) {
-        return 'El teléfono debe empezar por 6, 7, 8 o 9';
+        return 'El teléfono debe comenzar con 6, 7, 8 o 9';
       }
-
-      // Validaciones personalizadas de fecha de nacimiento
-      if (field.errors?.['futureDate']) {
+      if (field.errors?.['futureBirthDate']) {
         return 'La fecha de nacimiento no puede ser futura';
       }
-      if (field.errors?.['ageTooOld']) {
-        const maxAge = field.errors['ageTooOld'].maxAge;
-        return `La edad no puede superar los ${maxAge} años`;
+      if (field.errors?.['tooOld']) {
+        const age = field.errors['tooOld'].age;
+        return `La edad no puede superar los 100 años (calculada: ${age} años)`;
       }
-      if (field.errors?.['ageTooYoung']) {
-        const minAge = field.errors['ageTooYoung'].minAge;
-        return `La edad debe ser al menos ${minAge} años`;
+      if (field.errors?.['treatmentDateTooFarFuture']) {
+        const years = field.errors['treatmentDateTooFarFuture'].years;
+        return `La fecha de inicio de tratamiento no puede ser más de 100 años en el futuro (${years} años)`;
       }
-
-      // Validaciones personalizadas de fecha de tratamiento
-      if (field.errors?.['dateTooOld']) {
-        const maxYears = field.errors['dateTooOld'].maxYears;
-        return `La fecha no puede ser más de ${maxYears} años en el pasado`;
-      }
-      if (field.errors?.['dateTooFuture']) {
-        const maxYears = field.errors['dateTooFuture'].maxYears;
-        return `La fecha no puede ser más de ${maxYears} años en el futuro`;
-      }
-      if (field.errors?.['invalidDate']) {
-        return 'La fecha ingresada no es válida';
-      }
-
-      // Validación de patrón (código postal)
-      if (field.errors?.['pattern']) {
-        if (fieldName === 'postal_code') {
-          return 'El código postal debe tener 5 dígitos';
-        }
+      if (field.errors?.['treatmentDateTooFarPast']) {
+        const years = field.errors['treatmentDateTooFarPast'].years;
+        return `La fecha de inicio de tratamiento no puede ser más de 100 años en el pasado (${years} años)`;
       }
     }
     return null;
@@ -293,6 +363,9 @@ export class PatientFormComponent implements OnInit, OnChanges {
       const isMinor = actualAge < 18;
 
       this.patientForm.patchValue({ is_minor: isMinor });
+
+      // Update validators when minor status changes
+      this.updateProgenitorValidators();
     }
   }
 
@@ -338,6 +411,13 @@ export class PatientFormComponent implements OnInit, OnChanges {
       clinic_id: 'Clínica',
       treatment_start_date: 'Fecha inicio tratamiento',
       status: 'Estado del tratamiento',
+      special_price: 'Precio especial',
+      progenitor1_full_name: 'Nombre completo (Progenitor 1)',
+      progenitor1_dni: 'DNI (Progenitor 1)',
+      progenitor1_phone: 'Teléfono (Progenitor 1)',
+      progenitor2_full_name: 'Nombre completo (Progenitor 2)',
+      progenitor2_dni: 'DNI (Progenitor 2)',
+      progenitor2_phone: 'Teléfono (Progenitor 2)',
     };
     return labels[fieldName] || fieldName;
   }

@@ -1,28 +1,27 @@
 import { AbstractControl, ValidationErrors, ValidatorFn } from '@angular/forms';
 
 /**
- * Validador de DNI español
- * Valida que el DNI tenga 8 dígitos y una letra válida calculada correctamente
+ * Validador para DNI español
+ * Verifica formato (8 dígitos + letra) y letra de control válida
  */
 export function dniValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
 
     if (!value) {
-      return null; // Si está vacío, lo maneja el validador required
+      return null; // No validar si está vacío (usar Validators.required por separado)
     }
 
-    // Eliminar espacios y convertir a mayúsculas
+    // Limpiar espacios y convertir a mayúsculas
     const dni = value.toString().trim().toUpperCase();
 
-    // Patrón: 8 dígitos seguidos de una letra
-    const dniPattern = /^[0-9]{8}[A-Z]$/;
-
-    if (!dniPattern.test(dni)) {
+    // Verificar formato: 8 dígitos + 1 letra
+    const dniRegex = /^[0-9]{8}[A-Z]$/;
+    if (!dniRegex.test(dni)) {
       return { invalidDniFormat: true };
     }
 
-    // Validar que la letra sea correcta
+    // Verificar letra de control
     const letters = 'TRWAGMYFPDXBNJZSQVHLCKE';
     const number = parseInt(dni.substring(0, 8), 10);
     const letter = dni.charAt(8);
@@ -37,29 +36,37 @@ export function dniValidator(): ValidatorFn {
 }
 
 /**
- * Validador de teléfono español
- * Valida que el teléfono tenga exactamente 9 dígitos sin espacios
+ * Validador para teléfono español
+ * Verifica que sean exactamente 9 dígitos sin espacios
  */
 export function phoneValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
 
     if (!value) {
-      return null; // Si está vacío, lo maneja el validador required
+      return null;
     }
 
-    // Eliminar espacios, guiones y paréntesis
-    const phone = value.toString().replace(/[\s\-\(\)\+]/g, '');
+    const phoneStr = value.toString().trim();
 
-    // Patrón: exactamente 9 dígitos
-    const phonePattern = /^[0-9]{9}$/;
+    // Verificar que no contenga espacios
+    if (/\s/.test(phoneStr)) {
+      return { phoneContainsSpaces: true };
+    }
 
-    if (!phonePattern.test(phone)) {
+    // Eliminar guiones y el prefijo +34 si existe para validación
+    const cleanPhone = phoneStr
+      .replace(/-/g, '')
+      .replace(/^\+34/, '');
+
+    // Verificar que sean exactamente 9 dígitos
+    const phoneRegex = /^[0-9]{9}$/;
+    if (!phoneRegex.test(cleanPhone)) {
       return { invalidPhone: true };
     }
 
-    // Validar que empiece con 6, 7, 8 o 9 (números válidos en España)
-    const firstDigit = phone.charAt(0);
+    // Verificar que comience con 6, 7, 8 o 9 (prefijos válidos en España)
+    const firstDigit = cleanPhone.charAt(0);
     if (!['6', '7', '8', '9'].includes(firstDigit)) {
       return { invalidPhonePrefix: true };
     }
@@ -69,46 +76,34 @@ export function phoneValidator(): ValidatorFn {
 }
 
 /**
- * Validador de edad basado en fecha de nacimiento
- * Valida que la edad esté entre 0 y el máximo especificado
+ * Validador para fecha de nacimiento
+ * Verifica que la persona no tenga más de 100 años
  */
-export function ageRangeValidator(minAge: number = 0, maxAge: number = 100): ValidatorFn {
+export function birthDateValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
 
     if (!value) {
-      return null; // Si está vacío, lo maneja el validador required
+      return null;
     }
 
     const birthDate = new Date(value);
     const today = new Date();
 
-    // Validar que la fecha sea válida
-    if (isNaN(birthDate.getTime())) {
-      return { invalidDate: true };
-    }
-
-    // Validar que no sea una fecha futura
+    // Verificar que la fecha no sea en el futuro
     if (birthDate > today) {
-      return { futureDate: true };
+      return { futureBirthDate: true };
     }
 
     // Calcular edad
-    let age = today.getFullYear() - birthDate.getFullYear();
+    const age = today.getFullYear() - birthDate.getFullYear();
     const monthDiff = today.getMonth() - birthDate.getMonth();
     const dayDiff = today.getDate() - birthDate.getDate();
+    const actualAge = age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
 
-    if (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0)) {
-      age--;
-    }
-
-    // Validar rango de edad
-    if (age < minAge) {
-      return { ageTooYoung: { minAge, actualAge: age } };
-    }
-
-    if (age > maxAge) {
-      return { ageTooOld: { maxAge, actualAge: age } };
+    // Verificar que no tenga más de 100 años
+    if (actualAge > 100) {
+      return { tooOld: { age: actualAge } };
     }
 
     return null;
@@ -116,40 +111,31 @@ export function ageRangeValidator(minAge: number = 0, maxAge: number = 100): Val
 }
 
 /**
- * Validador de fecha de inicio de tratamiento
- * Valida que la fecha no esté más de X años en el pasado o futuro
+ * Validador para fecha de inicio de tratamiento
+ * Verifica que la fecha no supere los 100 años hacia adelante o atrás
  */
-export function treatmentDateValidator(maxYearsInPast: number = 100, maxYearsInFuture: number = 100): ValidatorFn {
+export function treatmentDateValidator(): ValidatorFn {
   return (control: AbstractControl): ValidationErrors | null => {
     const value = control.value;
 
     if (!value) {
-      return null; // Si está vacío, lo maneja el validador required
+      return null;
     }
 
     const treatmentDate = new Date(value);
     const today = new Date();
 
-    // Validar que la fecha sea válida
-    if (isNaN(treatmentDate.getTime())) {
-      return { invalidDate: true };
+    // Calcular diferencia en años
+    const yearDiff = treatmentDate.getFullYear() - today.getFullYear();
+
+    // Verificar que no supere los 100 años hacia adelante
+    if (yearDiff > 100) {
+      return { treatmentDateTooFarFuture: { years: yearDiff } };
     }
 
-    // Calcular límites
-    const minDate = new Date(today);
-    minDate.setFullYear(today.getFullYear() - maxYearsInPast);
-
-    const maxDate = new Date(today);
-    maxDate.setFullYear(today.getFullYear() + maxYearsInFuture);
-
-    // Validar que no sea demasiado antigua
-    if (treatmentDate < minDate) {
-      return { dateTooOld: { maxYears: maxYearsInPast } };
-    }
-
-    // Validar que no sea demasiado futura
-    if (treatmentDate > maxDate) {
-      return { dateTooFuture: { maxYears: maxYearsInFuture } };
+    // Verificar que no supere los 100 años hacia atrás
+    if (yearDiff < -100) {
+      return { treatmentDateTooFarPast: { years: Math.abs(yearDiff) } };
     }
 
     return null;
