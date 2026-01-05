@@ -67,9 +67,9 @@
 
         <!-- Checkbox Externa -->
         <div class="flex items-center gap-2">
-          <input id="external" type="checkbox" formControlName="external"
+          <input id="is_external" type="checkbox" formControlName="is_external"
             class="h-4 w-4 rounded border-gray-300 text-[#6aa591] focus:ring-[#6aa591] focus:ring-2">
-          <label for="external" class="text-sm font-medium text-gray-700 cursor-pointer">
+          <label for="is_external" class="text-sm font-medium text-gray-700 cursor-pointer">
             Clínica Externa (no requiere información detallada de las sesiones y pacientes)
           </label>
         </div>
@@ -77,8 +77,8 @@
         <!-- Dirección -->
         <div class="mt-6">
           <app-form-input controlName="address" label="Dirección"
-            [placeholder]="clinicaForm.get('is_online')?.value ? 'Clínica online - No requiere dirección física' : (clinicaForm.get('external')?.value ? 'Clínica externa - No requiere información detallada' : 'Ej: Av. Principal 123, Ciudad')"
-            [required]="!clinicaForm.get('is_online')?.value && !clinicaForm.get('external')?.value">
+            [placeholder]="clinicaForm.get('is_online')?.value ? 'Clínica online - No requiere dirección física' : (clinicaForm.get('is_external')?.value ? 'Clínica externa - No requiere información detallada' : 'Ej: Av. Principal 123, Ciudad')"
+            [required]="!clinicaForm.get('is_online')?.value && !clinicaForm.get('is_external')?.value">
           </app-form-input>
         </div>
       </div>

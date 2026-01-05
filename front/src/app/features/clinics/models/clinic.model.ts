@@ -12,5 +12,5 @@ export interface Clinic {
   status: string;
   created_at?: string;
   updated_at?: string;
-  external: boolean;
+  is_external: boolean;
 }
