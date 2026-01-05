@@ -20,6 +20,7 @@ const getClinics = async (db, filters = {}) => {
             clinic_color,
             price,
             percentage,
+            is_external,
             is_billable,
             billing_address,
             cif,
@@ -41,18 +42,19 @@ const getClinics = async (db, filters = {}) => {
   const totalRecords = countResult[0].total;
 
   const [dataRows] = await db.execute(dataQuery, [...params, limit, offset]);
-  
-  // Mapear datos para convertir is_billable de TINYINT (0/1) a boolean
+
+  // Mapear datos para convertir is_external e is_billable de TINYINT (0/1) a boolean
   const mappedData = dataRows.map(row => ({
     ...row,
+    is_external: row.is_external === 1,
     is_billable: row.is_billable === 1
   }));
-  
+
   // Calcular información de paginación
   const totalPages = Math.ceil(totalRecords / limit);
   const hasNextPage = page < totalPages;
   const hasPrevPage = page > 1;
-  
+
   return {
     data: mappedData,
     pagination: {
@@ -69,7 +71,7 @@ const getClinics = async (db, filters = {}) => {
 };
 
 const updateClinic = async (db, id, data) => {
-  const { name, clinic_color, address, price, percentage, is_billable, billing_address, cif, fiscal_name } = data;
+  const { name, clinic_color, address, price, percentage, is_external, is_billable, billing_address, cif, fiscal_name } = data;
 
   const fields = [];
   const params = [];
@@ -97,6 +99,11 @@ const updateClinic = async (db, id, data) => {
   if (percentage !== undefined) {
     fields.push("percentage = ?");
     params.push(percentage);
+  }
+
+  if (is_external !== undefined) {
+    fields.push("is_external = ?");
+    params.push(is_external);
   }
 
   if (is_billable !== undefined) {
@@ -143,7 +150,7 @@ const deleteClinic = async (db, id) => {
     SET is_active = false
     WHERE id = ? AND is_active = true
   `;
-  
+
   const [result] = await db.execute(query, [id]);
   return result.affectedRows > 0;
 };
@@ -197,7 +204,7 @@ const getClinicBillableStatus = async (db, clinicId) => {
 
 
 const createClinic = async (db, data) => {
-  const { name, clinic_color, address, price, percentage, is_billable, billing_address, cif, fiscal_name } = data;
+  const { name, clinic_color, address, price, percentage, is_external, is_billable, billing_address, cif, fiscal_name } = data;
 
   if (!name) {
     throw new Error("Name is required");
@@ -226,6 +233,12 @@ const createClinic = async (db, data) => {
   if (percentage !== undefined) {
     fields.push("percentage");
     values.push(percentage);
+    placeholders.push("?");
+  }
+
+  if (is_external !== undefined) {
+    fields.push("is_external");
+    values.push(is_external);
     placeholders.push("?");
   }
 

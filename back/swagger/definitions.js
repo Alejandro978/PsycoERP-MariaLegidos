@@ -402,6 +402,12 @@ const definitions = {
         description: "Porcentaje (0.00-100.00)",
         example: 15.50,
       },
+      is_external: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si la clínica es externa",
+        example: false,
+      },
       is_billable: {
         type: "boolean",
         nullable: true,
@@ -694,6 +700,12 @@ const definitions = {
         maximum: 100,
         description: "Porcentaje entre 0.00 y 100.00 (opcional)",
         example: 15.50,
+      },
+      is_external: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si la clínica es externa (opcional, por defecto false)",
+        example: false,
       },
       is_billable: {
         type: "boolean",
@@ -3370,6 +3382,12 @@ const definitions = {
         maximum: 100,
         description: "Porcentaje entre 0.00 y 100.00",
         example: 20.00,
+      },
+      is_external: {
+        type: "boolean",
+        nullable: true,
+        description: "Indica si la clínica es externa (opcional)",
+        example: false,
       },
       is_billable: {
         type: "boolean",
