@@ -69,6 +69,21 @@ export const routes: Routes = [
         },
       },
       {
+        path: 'notes',
+        canActivate: [authGuard],
+        loadComponent: () =>
+          import('./features/notes/notes.component').then(
+            (m) => m.NotesComponent
+          ),
+        data: {
+          menu: {
+            label: 'Notas',
+            icon: 'M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z M15 3v4a2 2 0 0 0 2 2h4',
+            order: 6,
+          },
+        },
+      },
+      {
         path: 'calendar',
         canActivate: [authGuard],
         loadComponent: () =>
