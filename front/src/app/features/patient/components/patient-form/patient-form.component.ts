@@ -5,6 +5,7 @@ import {
   Output,
   OnInit,
   OnChanges,
+  OnDestroy,
   SimpleChanges,
   ChangeDetectionStrategy,
 } from '@angular/core';
@@ -15,6 +16,7 @@ import {
   ReactiveFormsModule,
   FormsModule,
 } from '@angular/forms';
+import { Subscription } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { Patient } from '../../../../shared/models/patient.model';
 import { Clinic } from '../../../clinics/models/clinic.model';
@@ -42,7 +44,7 @@ import {
     FormInputComponent,
   ],
 })
-export class PatientFormComponent implements OnInit, OnChanges {
+export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
   @Input() isOpen: boolean = false;
   @Input() patient: Patient | null = null;
   @Input() clinics: Clinic[] = [];
@@ -51,6 +53,7 @@ export class PatientFormComponent implements OnInit, OnChanges {
   @Output() onCancel = new EventEmitter<void>();
 
   patientForm!: FormGroup;
+  private clinicChangeSubscription?: Subscription;
 
   // Options for selects
   protected genderOptions = [
@@ -74,6 +77,16 @@ export class PatientFormComponent implements OnInit, OnChanges {
   ngOnInit(): void {
     // Form is already initialized in constructor
     // Clinics are now provided via @Input from parent component
+
+    // Subscribe to clinic changes
+    this.clinicChangeSubscription = this.patientForm.get('clinic_id')?.valueChanges.subscribe((clinicId) => {
+      this.onClinicChange(clinicId);
+    });
+  }
+
+  ngOnDestroy(): void {
+    // Unsubscribe to prevent memory leaks
+    this.clinicChangeSubscription?.unsubscribe();
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -159,6 +172,9 @@ export class PatientFormComponent implements OnInit, OnChanges {
       });
       // Update validators after populating
       this.updateProgenitorValidators();
+
+      // Apply field restrictions for external clinics in edit mode
+      this.applyFieldRestrictionsForEditMode();
     } else {
       this.resetForm();
     }
@@ -194,6 +210,11 @@ export class PatientFormComponent implements OnInit, OnChanges {
     });
     // Clear validators
     this.updateProgenitorValidators();
+
+    // Disable all fields except clinic_id when creating a new patient
+    if (!this.isEditing) {
+      this.disableAllFieldsExceptClinic();
+    }
   }
 
   /**
@@ -420,6 +441,187 @@ export class PatientFormComponent implements OnInit, OnChanges {
       progenitor2_phone: 'Teléfono (Progenitor 2)',
     };
     return labels[fieldName] || fieldName;
+  }
+
+  /**
+   * Disable all fields except clinic_id when creating a new patient
+   */
+  private disableAllFieldsExceptClinic(): void {
+    const fieldNames = [
+      'first_name', 'last_name', 'email', 'phone', 'dni', 'birth_date',
+      'gender', 'occupation', 'street', 'street_number', 'door',
+      'postal_code', 'city', 'province', 'treatment_start_date',
+      'status', 'special_price', 'progenitor1_full_name',
+      'progenitor1_dni', 'progenitor1_phone', 'progenitor2_full_name',
+      'progenitor2_dni', 'progenitor2_phone'
+    ];
+
+    fieldNames.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.disable();
+    });
+
+    // Ensure clinic_id is enabled
+    this.patientForm.get('clinic_id')?.enable();
+  }
+
+  /**
+   * Handle clinic selection change
+   */
+  onClinicChange(clinicId: string): void {
+    if (!clinicId) {
+      return;
+    }
+
+    // In edit mode, don't trigger field changes when clinic changes
+    // (clinic field is disabled in edit mode anyway)
+    if (this.isEditing) {
+      return;
+    }
+
+    // Find the selected clinic
+    const selectedClinic = this.clinics.find(clinic => clinic.id === clinicId);
+
+    if (!selectedClinic) {
+      return;
+    }
+
+    if (selectedClinic.is_external) {
+      // External clinic: enable only first_name, last_name, special_price
+      this.enableFieldsForExternalClinic();
+    } else {
+      // Internal clinic: enable all fields and make them required
+      this.enableAllFieldsForInternalClinic();
+    }
+  }
+
+  /**
+   * Apply field restrictions when editing a patient from an external clinic
+   */
+  private applyFieldRestrictionsForEditMode(): void {
+    if (!this.patient || !this.patient.clinic_id) {
+      return;
+    }
+
+    // Find the patient's clinic
+    const patientClinic = this.clinics.find(clinic => {
+      if (!clinic.id) return false;
+      return clinic.id.toString() === this.patient!.clinic_id.toString();
+    });
+
+    if (!patientClinic) {
+      return;
+    }
+
+    if (patientClinic.is_external) {
+      // External clinic in edit mode: disable all fields except first_name, last_name, special_price
+      this.applyExternalClinicEditRestrictions();
+    }
+  }
+
+  /**
+   * Apply restrictions for editing a patient from an external clinic
+   */
+  private applyExternalClinicEditRestrictions(): void {
+    // Disable all fields first
+    const fieldsToDisable = [
+      'email', 'phone', 'dni', 'birth_date', 'gender', 'occupation',
+      'street', 'street_number', 'door', 'postal_code', 'city', 'province',
+      'treatment_start_date', 'status', 'clinic_id',
+      'progenitor1_full_name', 'progenitor1_dni', 'progenitor1_phone',
+      'progenitor2_full_name', 'progenitor2_dni', 'progenitor2_phone'
+    ];
+
+    fieldsToDisable.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.disable();
+    });
+
+    // Enable only first_name, last_name, and special_price
+    this.patientForm.get('first_name')?.enable();
+    this.patientForm.get('last_name')?.enable();
+    this.patientForm.get('special_price')?.enable();
+
+    // Ensure these fields have proper validators
+    this.patientForm.get('first_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('last_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('special_price')?.setValidators([Validators.min(0)]);
+
+    this.patientForm.get('first_name')?.updateValueAndValidity();
+    this.patientForm.get('last_name')?.updateValueAndValidity();
+    this.patientForm.get('special_price')?.updateValueAndValidity();
+  }
+
+  /**
+   * Enable only specific fields for external clinics
+   */
+  private enableFieldsForExternalClinic(): void {
+    // Disable all fields first
+    this.disableAllFieldsExceptClinic();
+
+    // Enable only first_name, last_name, and special_price
+    const fieldsToEnable = ['first_name', 'last_name', 'special_price'];
+    fieldsToEnable.forEach(fieldName => {
+      const control = this.patientForm.get(fieldName);
+      control?.enable();
+    });
+
+    // Update validators: only first_name, last_name are required
+    this.patientForm.get('first_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('last_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('special_price')?.setValidators([Validators.min(0)]);
+
+    // Clear validators for other fields
+    const fieldsToCleanValidators = [
+      'email', 'phone', 'dni', 'birth_date', 'gender', 'street',
+      'street_number', 'postal_code', 'city', 'province',
+      'treatment_start_date', 'status'
+    ];
+    fieldsToCleanValidators.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.clearValidators();
+      this.patientForm.get(fieldName)?.updateValueAndValidity();
+    });
+
+    this.patientForm.get('first_name')?.updateValueAndValidity();
+    this.patientForm.get('last_name')?.updateValueAndValidity();
+    this.patientForm.get('special_price')?.updateValueAndValidity();
+  }
+
+  /**
+   * Enable all fields for internal clinics and make them required
+   */
+  private enableAllFieldsForInternalClinic(): void {
+    // Enable all main fields
+    const allFields = [
+      'first_name', 'last_name', 'email', 'phone', 'dni', 'birth_date',
+      'gender', 'occupation', 'street', 'street_number', 'door',
+      'postal_code', 'city', 'province', 'treatment_start_date',
+      'status', 'special_price'
+    ];
+
+    allFields.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.enable();
+    });
+
+    // Re-apply original validators for required fields
+    this.patientForm.get('first_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('last_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('email')?.setValidators([Validators.required, Validators.email]);
+    this.patientForm.get('phone')?.setValidators([Validators.required, phoneValidator()]);
+    this.patientForm.get('dni')?.setValidators([Validators.required, dniValidator()]);
+    this.patientForm.get('birth_date')?.setValidators([Validators.required, birthDateValidator()]);
+    this.patientForm.get('gender')?.setValidators([Validators.required]);
+    this.patientForm.get('street')?.setValidators([Validators.required]);
+    this.patientForm.get('street_number')?.setValidators([Validators.required]);
+    this.patientForm.get('postal_code')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{5}$/)]);
+    this.patientForm.get('city')?.setValidators([Validators.required]);
+    this.patientForm.get('province')?.setValidators([Validators.required]);
+    this.patientForm.get('treatment_start_date')?.setValidators([Validators.required, treatmentDateValidator()]);
+    this.patientForm.get('status')?.setValidators([Validators.required]);
+    this.patientForm.get('special_price')?.setValidators([Validators.required, Validators.min(0)]);
+
+    // Update validity for all fields
+    allFields.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.updateValueAndValidity();
+    });
   }
 
 }

@@ -10,7 +10,7 @@ import { CommonModule } from '@angular/common';
 import { HttpClient } from '@angular/common/http';
 import { ActivatedRoute, Router } from '@angular/router';
 import { Patient } from '../../../shared/models/patient.model';
-import { PatientDetailResponse, PatientDetailUtils, Session, Invoice, Bonus, PatientSession, PatientDocument } from '../../../shared/models/patient-detail.model';
+import { PatientDetailResponse, PatientDetailUtils, Session, Bonus, PatientSession, PatientDocument } from '../../../shared/models/patient-detail.model';
 import { PatientSummaryComponent } from './patient-summary/patient-summary.component';
 import { PatientDataComponent } from './patient-data/patient-data.component';
 import { PatientClinicalHistoryComponent } from './patient-clinical-history/patient-clinical-history.component';
@@ -89,11 +89,6 @@ export class PatientDetailComponent implements OnInit {
     const resume = data.data.PatientResume as any;
     const preferredMode = resume.preferred_mode || 'presencial';
     return preferredMode.charAt(0).toUpperCase() + preferredMode.slice(1).toLowerCase();
-  });
-
-  readonly invoices = computed(() => {
-    // Empty for now as PatientInvoice is empty in API
-    return [] as Invoice[];
   });
 
   readonly bonuses = computed(() => {
