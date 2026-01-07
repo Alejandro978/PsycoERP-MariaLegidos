@@ -2,9 +2,9 @@ const invoicesPaths = {
   "/api/invoices": {
     get: {
       tags: ["Invoices"],
-      summary: "Obtener facturas emitidas",
+      summary: "Obtener facturas emitidas de pacientes y llamadas",
       description:
-        "Obtiene el listado de facturas emitidas con información completa del paciente (incluyendo dirección), detalles de cada sesión facturada (ID, fecha, precio), número de sesiones y total. Si no se especifica mes/año, usa el mes y año actual.",
+        "Obtiene el listado de facturas emitidas tanto de pacientes como de llamadas. Para pacientes: incluye información completa (incluyendo dirección), detalles de cada sesión facturada (ID, fecha, precio), número de sesiones y total. Si el paciente es menor de edad (is_minor = 1), incluye información de los progenitores para facturación. Para llamadas: incluye información de facturación de la persona que llama y detalles de las llamadas facturadas (estructura similar pero con patient_id null). Si no se especifica mes/año, usa el mes y año actual.",
       parameters: [
         {
           name: "month",
@@ -659,9 +659,9 @@ const invoicesPaths = {
   "/api/invoices/pending": {
     get: {
       tags: ["Invoices"],
-      summary: "Obtener sesiones pendientes de facturar",
+      summary: "Obtener sesiones y llamadas pendientes de facturar",
       description:
-        "Obtiene las sesiones pendientes de facturar agrupadas por paciente. Incluye información del paciente (incluyendo dirección), detalles completos de cada sesión (ID, fecha, precio), número de sesiones y total bruto. Si no se especifica mes/año, usa el mes y año actual.",
+        "Obtiene las sesiones pendientes de facturar agrupadas por paciente y las llamadas facturables pendientes. Incluye información del paciente (incluyendo dirección), detalles completos de cada sesión (ID, fecha, precio), número de sesiones y total bruto. Si el paciente es menor de edad (is_minor = 1), incluye información de los progenitores para facturación. También devuelve las llamadas facturables (is_call = true && is_billable_call = true) con sus datos de facturación. Si no se especifica mes/año, usa el mes y año actual.",
       parameters: [
         {
           name: "month",

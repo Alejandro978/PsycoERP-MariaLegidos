@@ -273,6 +273,12 @@ const crearPaciente = async (req, res) => {
       treatment_start_date,
       status,
       is_minor,
+      progenitor1_full_name,
+      progenitor1_dni,
+      progenitor1_phone,
+      progenitor2_full_name,
+      progenitor2_dni,
+      progenitor2_phone,
     } = req.body;
 
     // Validaciones obligatorias
@@ -326,6 +332,16 @@ const crearPaciente = async (req, res) => {
       });
     }
 
+    // Validación de datos de progenitores para menores
+    if (is_minor === true) {
+      if (!progenitor1_full_name || !progenitor1_phone || !progenitor1_dni) {
+        return res.status(400).json({
+          success: false,
+          error: "Para pacientes menores de edad, es obligatorio proporcionar progenitor1_full_name, progenitor1_dni y progenitor1_phone",
+        });
+      }
+    }
+
     const patientData = {
       first_name,
       last_name,
@@ -345,6 +361,12 @@ const crearPaciente = async (req, res) => {
       treatment_start_date,
       status: status || "en curso",
       is_minor,
+      progenitor1_full_name: is_minor ? progenitor1_full_name : null,
+      progenitor1_dni: is_minor ? progenitor1_dni : null,
+      progenitor1_phone: is_minor ? progenitor1_phone : null,
+      progenitor2_full_name: is_minor ? progenitor2_full_name : null,
+      progenitor2_dni: is_minor ? progenitor2_dni : null,
+      progenitor2_phone: is_minor ? progenitor2_phone : null,
     };
 
     const nuevoPaciente = await createPatient(req.db, patientData);
@@ -458,6 +480,12 @@ const actualizarPaciente = async (req, res) => {
       treatment_start_date,
       status,
       is_minor,
+      progenitor1_full_name,
+      progenitor1_dni,
+      progenitor1_phone,
+      progenitor2_full_name,
+      progenitor2_dni,
+      progenitor2_phone,
     } = req.body;
 
     // Validar que se proporcione el ID y sea un número válido
@@ -488,6 +516,39 @@ const actualizarPaciente = async (req, res) => {
     if (treatment_start_date !== undefined) updateData.treatment_start_date = treatment_start_date;
     if (status !== undefined) updateData.status = status;
     if (is_minor !== undefined) updateData.is_minor = is_minor;
+
+    // Manejar campos de progenitores
+    if (is_minor === false) {
+      // Si cambia a adulto, limpiar campos de progenitores
+      updateData.progenitor1_full_name = null;
+      updateData.progenitor1_dni = null;
+      updateData.progenitor1_phone = null;
+      updateData.progenitor2_full_name = null;
+      updateData.progenitor2_dni = null;
+      updateData.progenitor2_phone = null;
+    } else if (is_minor === true) {
+      // Si cambia a menor, validar campos obligatorios
+      if (!progenitor1_full_name || !progenitor1_phone || !progenitor1_dni) {
+        return res.status(400).json({
+          success: false,
+          error: "Para pacientes menores de edad, es obligatorio proporcionar progenitor1_full_name, progenitor1_dni y progenitor1_phone",
+        });
+      }
+      updateData.progenitor1_full_name = progenitor1_full_name;
+      updateData.progenitor1_dni = progenitor1_dni;
+      updateData.progenitor1_phone = progenitor1_phone;
+      updateData.progenitor2_full_name = progenitor2_full_name || null;
+      updateData.progenitor2_dni = progenitor2_dni || null;
+      updateData.progenitor2_phone = progenitor2_phone || null;
+    } else {
+      // Si no cambia is_minor, actualizar solo los campos que se envíen
+      if (progenitor1_full_name !== undefined) updateData.progenitor1_full_name = progenitor1_full_name;
+      if (progenitor1_dni !== undefined) updateData.progenitor1_dni = progenitor1_dni;
+      if (progenitor1_phone !== undefined) updateData.progenitor1_phone = progenitor1_phone;
+      if (progenitor2_full_name !== undefined) updateData.progenitor2_full_name = progenitor2_full_name;
+      if (progenitor2_dni !== undefined) updateData.progenitor2_dni = progenitor2_dni;
+      if (progenitor2_phone !== undefined) updateData.progenitor2_phone = progenitor2_phone;
+    }
 
     // Validar que se envíe al menos un campo
     if (Object.keys(updateData).length === 0) {

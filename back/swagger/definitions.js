@@ -905,6 +905,49 @@ const definitions = {
         description: "Indica si es menor de edad",
         example: false,
       },
+      progenitor1_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 1 (obligatorio si is_minor es true)",
+        example: "María García Martínez",
+      },
+      progenitor1_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 1 (obligatorio si is_minor es true)",
+        example: "87654321B",
+      },
+      progenitor1_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 1 (obligatorio si is_minor es true)",
+        example: "+34655987654",
+      },
+      progenitor2_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 2",
+        example: "Pedro López González",
+      },
+      progenitor2_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 2",
+        example: "11223344C",
+      },
+      progenitor2_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 2",
+        example: "+34666111222",
+      },
+      special_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio especial para el paciente (opcional)",
+        example: 50.00,
+      },
     },
   },
 
@@ -1632,6 +1675,140 @@ const definitions = {
                   description: "Total bruto a facturar",
                   example: 240.00,
                 },
+                progenitors_data: {
+                  type: "object",
+                  description: "Información de progenitores (solo si el paciente es menor de edad, is_minor = 1)",
+                  properties: {
+                    progenitor1: {
+                      type: "object",
+                      properties: {
+                        full_name: {
+                          type: "string",
+                          nullable: true,
+                          description: "Nombre completo del progenitor 1",
+                          example: "María López García",
+                        },
+                        dni: {
+                          type: "string",
+                          nullable: true,
+                          description: "DNI del progenitor 1",
+                          example: "87654321B",
+                        },
+                        phone: {
+                          type: "string",
+                          nullable: true,
+                          description: "Teléfono del progenitor 1",
+                          example: "+34666777888",
+                        },
+                      },
+                    },
+                    progenitor2: {
+                      type: "object",
+                      properties: {
+                        full_name: {
+                          type: "string",
+                          nullable: true,
+                          description: "Nombre completo del progenitor 2",
+                          example: "Juan Pérez Sánchez",
+                        },
+                        dni: {
+                          type: "string",
+                          nullable: true,
+                          description: "DNI del progenitor 2",
+                          example: "12348765C",
+                        },
+                        phone: {
+                          type: "string",
+                          nullable: true,
+                          description: "Teléfono del progenitor 2",
+                          example: "+34655444333",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          pending_calls: {
+            type: "array",
+            description: "Llamadas facturables pendientes de facturar (misma estructura que pending_invoices pero sin progenitors_data)",
+            items: {
+              type: "object",
+              properties: {
+                patient_id: {
+                  type: "null",
+                  description: "ID del paciente (null para llamadas)",
+                  example: null,
+                },
+                patient_full_name: {
+                  type: "string",
+                  description: "Nombre completo de la persona que llama",
+                  example: "María López Fernández",
+                },
+                dni: {
+                  type: "string",
+                  description: "DNI de la persona que llama",
+                  example: "98765432X",
+                },
+                email: {
+                  type: "null",
+                  description: "Email (null para llamadas)",
+                  example: null,
+                },
+                patient_address_line1: {
+                  type: "string",
+                  description: "Dirección de facturación de la llamada",
+                  example: "Calle Luna 45, Madrid 28015",
+                },
+                patient_address_line2: {
+                  type: "null",
+                  description: "Segunda línea de dirección (null para llamadas)",
+                  example: null,
+                },
+                clinic_name: {
+                  type: "string",
+                  description: "Nombre de la clínica",
+                  example: "Clínica Centro",
+                },
+                sessions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      session_id: {
+                        type: "integer",
+                        format: "int64",
+                        description: "ID de la sesión (llamada)",
+                        example: 789,
+                      },
+                      session_date: {
+                        type: "string",
+                        format: "date",
+                        description: "Fecha de la llamada (YYYY-MM-DD)",
+                        example: "2025-01-12",
+                      },
+                      price: {
+                        type: "number",
+                        format: "decimal",
+                        description: "Precio de la llamada",
+                        example: 60.00,
+                      },
+                    },
+                  },
+                  description: "Detalles de las llamadas pendientes de facturar",
+                },
+                pending_sessions_count: {
+                  type: "integer",
+                  description: "Número de llamadas pendientes",
+                  example: 2,
+                },
+                total_gross: {
+                  type: "number",
+                  format: "decimal",
+                  description: "Total bruto a facturar",
+                  example: 120.00,
+                },
               },
             },
           },
@@ -1805,6 +1982,162 @@ const definitions = {
                   type: "string",
                   description: "Concepto de la factura",
                   example: "Sesiones de psicología - Enero 2025",
+                },
+                progenitors_data: {
+                  type: "object",
+                  description: "Información de progenitores (solo si el paciente es menor de edad, is_minor = 1)",
+                  properties: {
+                    progenitor1: {
+                      type: "object",
+                      properties: {
+                        full_name: {
+                          type: "string",
+                          nullable: true,
+                          description: "Nombre completo del progenitor 1",
+                          example: "María López García",
+                        },
+                        dni: {
+                          type: "string",
+                          nullable: true,
+                          description: "DNI del progenitor 1",
+                          example: "87654321B",
+                        },
+                        phone: {
+                          type: "string",
+                          nullable: true,
+                          description: "Teléfono del progenitor 1",
+                          example: "+34666777888",
+                        },
+                      },
+                    },
+                    progenitor2: {
+                      type: "object",
+                      properties: {
+                        full_name: {
+                          type: "string",
+                          nullable: true,
+                          description: "Nombre completo del progenitor 2",
+                          example: "Juan Pérez Sánchez",
+                        },
+                        dni: {
+                          type: "string",
+                          nullable: true,
+                          description: "DNI del progenitor 2",
+                          example: "12348765C",
+                        },
+                        phone: {
+                          type: "string",
+                          nullable: true,
+                          description: "Teléfono del progenitor 2",
+                          example: "+34655444333",
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+          total_call_invoices: {
+            type: "integer",
+            description: "Número total de facturas de llamadas encontradas",
+            example: 3,
+          },
+          call_invoices: {
+            type: "array",
+            description: "Facturas de llamadas (misma estructura que invoices pero sin progenitors_data y con patient_id null)",
+            items: {
+              type: "object",
+              properties: {
+                id: {
+                  type: "integer",
+                  format: "int64",
+                  description: "ID de la factura",
+                  example: 5,
+                },
+                invoice_number: {
+                  type: "string",
+                  description: "Número de factura",
+                  example: "2025-005",
+                },
+                invoice_date: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de emisión (formato dd/mm/yyyy)",
+                  example: "18/01/2025",
+                },
+                patient_id: {
+                  type: "null",
+                  description: "ID del paciente (null para llamadas)",
+                  example: null,
+                },
+                patient_full_name: {
+                  type: "string",
+                  description: "Nombre completo de la persona que llama",
+                  example: "Laura Martínez Ruiz",
+                },
+                dni: {
+                  type: "string",
+                  description: "DNI de la persona que llama",
+                  example: "87654321X",
+                },
+                email: {
+                  type: "null",
+                  description: "Email (null para llamadas)",
+                  example: null,
+                },
+                patient_address_line1: {
+                  type: "string",
+                  description: "Dirección de facturación",
+                  example: "Calle Sol 45, Madrid 28013",
+                },
+                patient_address_line2: {
+                  type: "null",
+                  description: "Segunda línea de dirección (null para llamadas)",
+                  example: null,
+                },
+                sessions: {
+                  type: "array",
+                  items: {
+                    type: "object",
+                    properties: {
+                      session_id: {
+                        type: "integer",
+                        format: "int64",
+                        description: "ID de la sesión (llamada)",
+                        example: 234,
+                      },
+                      session_date: {
+                        type: "string",
+                        format: "date",
+                        description: "Fecha de la llamada (YYYY-MM-DD)",
+                        example: "2025-01-15",
+                      },
+                      price: {
+                        type: "number",
+                        format: "decimal",
+                        description: "Precio de la llamada",
+                        example: 60.00,
+                      },
+                    },
+                  },
+                  description: "Detalles de las llamadas facturadas",
+                },
+                sessions_count: {
+                  type: "integer",
+                  description: "Número de llamadas facturadas",
+                  example: 2,
+                },
+                total: {
+                  type: "number",
+                  format: "decimal",
+                  description: "Total de la factura",
+                  example: 120.00,
+                },
+                concept: {
+                  type: "string",
+                  description: "Concepto de la factura",
+                  example: "Llamadas de consulta - Enero 2025",
                 },
               },
             },
@@ -2326,6 +2659,49 @@ const definitions = {
         nullable: true,
         description: "Indica si es menor de edad",
         example: false,
+      },
+      progenitor1_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 1 (obligatorio si is_minor es true)",
+        example: "María García Martínez",
+      },
+      progenitor1_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 1",
+        example: "87654321B",
+      },
+      progenitor1_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 1 (obligatorio si is_minor es true)",
+        example: "+34655987654",
+      },
+      progenitor2_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 2",
+        example: "Pedro López González",
+      },
+      progenitor2_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 2",
+        example: "11223344C",
+      },
+      progenitor2_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 2",
+        example: "+34666111222",
+      },
+      special_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio especial para el paciente (opcional)",
+        example: 50.00,
       },
       created_at: {
         type: "string",
@@ -3528,8 +3904,51 @@ const definitions = {
       is_minor: {
         type: "boolean",
         nullable: true,
-        description: "Indica si es menor de edad",
+        description: "Indica si es menor de edad (si se cambia a true, progenitor1_full_name, progenitor1_dni y progenitor1_phone son obligatorios; si se cambia a false, todos los campos de progenitores se limpian)",
         example: false,
+      },
+      progenitor1_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 1 (obligatorio si is_minor es true)",
+        example: "María García Martínez",
+      },
+      progenitor1_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 1 (obligatorio si is_minor es true)",
+        example: "87654321B",
+      },
+      progenitor1_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 1 (obligatorio si is_minor es true)",
+        example: "+34655987654",
+      },
+      progenitor2_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 2",
+        example: "Pedro López González",
+      },
+      progenitor2_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 2",
+        example: "11223344C",
+      },
+      progenitor2_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 2",
+        example: "+34666111222",
+      },
+      special_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio especial para el paciente (opcional)",
+        example: 50.00,
       },
     },
   },
