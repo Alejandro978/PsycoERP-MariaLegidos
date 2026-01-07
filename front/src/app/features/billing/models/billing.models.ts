@@ -33,6 +33,17 @@ export interface SessionDetail {
   price: number;
 }
 
+export interface ProgenitorInfo {
+  full_name: string | null;
+  dni: string | null;
+  phone: string | null;
+}
+
+export interface ProgenitorsData {
+  progenitor1: ProgenitorInfo;
+  progenitor2: ProgenitorInfo;
+}
+
 export interface PendingInvoice {
   patient_id: number;
   patient_full_name: string;
@@ -44,6 +55,7 @@ export interface PendingInvoice {
   sessions: SessionDetail[];
   pending_sessions_count: number;
   total_gross: number;
+  progenitors_data?: ProgenitorsData;
 }
 
 export interface PendingInvoicesResponse {
@@ -68,6 +80,7 @@ export interface ExistingInvoice {
   sessions_count: number;
   total: number;
   concept: string;
+  progenitors_data?: ProgenitorsData;
 }
 
 export interface ExistingInvoicesResponse {

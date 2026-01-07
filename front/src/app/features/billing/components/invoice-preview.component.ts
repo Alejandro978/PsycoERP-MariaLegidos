@@ -3,6 +3,7 @@ import { CommonModule } from '@angular/common';
 import { User } from '../../../core/models/user.model';
 import { PdfGeneratorService } from '../services/pdf-generator.service';
 import { InvoiceTemplateComponent } from './invoice-template.component';
+import { ProgenitorsData } from '../models/billing.models';
 
 export interface InvoicePreviewData {
   patient_full_name: string;
@@ -13,6 +14,7 @@ export interface InvoicePreviewData {
   invoice_number: string;
   invoice_date: string;
   sessions?: { session_id: number; session_date: string; price: number; }[];
+  progenitors_data?: ProgenitorsData;
 }
 
 @Component({
@@ -64,13 +66,19 @@ export class InvoicePreviewComponent {
     if (!this.invoiceData) return;
 
     try {
+      // Si hay información del progenitor, usar su nombre; si no, usar el del paciente
+      const hasProgenitor = this.invoiceData.progenitors_data?.progenitor1?.full_name;
+      const nameToUse = hasProgenitor
+        ? this.invoiceData.progenitors_data!.progenitor1.full_name!
+        : this.invoiceData.patient_full_name;
+
       // Crear nombre de archivo descriptivo: "FACTURA-FAC-2025-0020-Juan_Perez"
-      const patientName = this.invoiceData.patient_full_name
+      const formattedName = nameToUse
         .replace(/\s+/g, '_')  // Reemplazar espacios por guiones bajos
         .normalize('NFD')       // Normalizar caracteres acentuados
         .replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
 
-      const fileName = `FACTURA-${this.invoiceData.invoice_number}-${patientName}`;
+      const fileName = `FACTURA-${this.invoiceData.invoice_number}-${formattedName}`;
 
       await this.pdfGenerator.generatePdfById(
         'invoice-content',

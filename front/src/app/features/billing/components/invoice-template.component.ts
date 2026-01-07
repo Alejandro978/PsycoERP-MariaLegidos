@@ -2,6 +2,7 @@ import { Component, Input, ChangeDetectionStrategy } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { User } from '../../../core/models/user.model';
 import { InvoicePreviewData } from './invoice-preview.component';
+import { ProgenitorInfo } from '../models/billing.models';
 
 /**
  * Componente de plantilla de factura reutilizable
@@ -46,11 +47,24 @@ import { InvoicePreviewData } from './invoice-preview.component';
           </div>
           <div>
             <h3 class="text-lg font-semibold text-gray-800 mb-3 border-b border-gray-200 pb-2">DATOS DEL RECEPTOR</h3>
-            <div class="space-y-1 text-gray-700">
-              <div class="font-semibold">{{ invoiceData.patient_full_name }}</div>
-              <div>DNI: {{ invoiceData.dni }}</div>
-              <div>Email: {{ invoiceData.email }}</div>
-            </div>
+            @if (hasProgenitorInfo()) {
+              <div class="space-y-1 text-gray-700">
+                <div class="font-semibold">{{ invoiceData.progenitors_data!.progenitor1.full_name }}</div>
+                <div>DNI: {{ invoiceData.progenitors_data!.progenitor1.dni }}</div>
+                @if (invoiceData.progenitors_data!.progenitor1.phone) {
+                  <div>Teléfono: {{ invoiceData.progenitors_data!.progenitor1.phone }}</div>
+                }
+                <div class="text-sm text-gray-600 mt-2 pt-2 border-t border-gray-200">
+                  <span class="italic">Tutor de: {{ invoiceData.patient_full_name }}</span>
+                </div>
+              </div>
+            } @else {
+              <div class="space-y-1 text-gray-700">
+                <div class="font-semibold">{{ invoiceData.patient_full_name }}</div>
+                <div>DNI: {{ invoiceData.dni }}</div>
+                <div>Email: {{ invoiceData.email }}</div>
+              </div>
+            }
           </div>
         </div>
 
@@ -126,5 +140,15 @@ export class InvoiceTemplateComponent {
       style: 'currency',
       currency: 'EUR'
     }).format(amount);
+  }
+
+  /**
+   * Verifica si hay información del progenitor
+   */
+  hasProgenitorInfo(): boolean {
+    return !!(
+      this.invoiceData?.progenitors_data?.progenitor1?.full_name &&
+      this.invoiceData?.progenitors_data?.progenitor1?.dni
+    );
   }
 }
