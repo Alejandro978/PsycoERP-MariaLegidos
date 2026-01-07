@@ -245,6 +245,41 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     progenitor1Phone?.updateValueAndValidity();
   }
 
+  /**
+   * Update progenitor fields state (enabled/disabled) based on minor status
+   * This should be called whenever minor status changes or clinic is selected
+   */
+  private updateProgenitorFieldsState(): void {
+    const isMinor = this.patientForm.get('is_minor')?.value;
+
+    const progenitorFields = [
+      'progenitor1_full_name',
+      'progenitor1_dni',
+      'progenitor1_phone',
+      'progenitor2_full_name',
+      'progenitor2_dni',
+      'progenitor2_phone'
+    ];
+
+    if (isMinor) {
+      // Enable progenitor fields for minors
+      progenitorFields.forEach(fieldName => {
+        this.patientForm.get(fieldName)?.enable();
+      });
+
+      // Update validators
+      this.updateProgenitorValidators();
+    } else {
+      // Disable progenitor fields for non-minors
+      progenitorFields.forEach(fieldName => {
+        this.patientForm.get(fieldName)?.disable();
+      });
+
+      // Clear validators
+      this.updateProgenitorValidators();
+    }
+  }
+
   get isEditing(): boolean {
     return this.patient !== null;
   }
@@ -263,6 +298,50 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
 
   get isMinor(): boolean {
     return this.patientForm.get('is_minor')?.value || false;
+  }
+
+  /**
+   * Check if the selected clinic is external
+   */
+  get isExternalClinic(): boolean {
+    const clinicId = this.patientForm.get('clinic_id')?.value;
+    if (!clinicId) {
+      return false;
+    }
+
+    const selectedClinic = this.clinics.find(clinic => clinic.id === clinicId);
+    return selectedClinic?.is_external || false;
+  }
+
+  /**
+   * Determine if a field should show as required based on clinic type
+   */
+  isFieldRequired(fieldName: string): boolean {
+    // Fields that are always required
+    const alwaysRequired = ['clinic_id', 'first_name', 'last_name'];
+    if (alwaysRequired.includes(fieldName)) {
+      return true;
+    }
+
+    // If external clinic, only the above fields are required
+    if (this.isExternalClinic) {
+      return false;
+    }
+
+    // For internal clinics, check the field's validators
+    const field = this.patientForm.get(fieldName);
+    if (!field) {
+      return false;
+    }
+
+    // Check if the field has the required validator
+    const validator = field.validator;
+    if (validator) {
+      const validationResult = validator({} as any);
+      return validationResult && validationResult['required'];
+    }
+
+    return false;
   }
 
   handleSubmit(): void {
@@ -411,6 +490,8 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   onBirthDateChange(): void {
     this.calculateIsMinor();
+    // Update progenitor fields state based on minor status
+    this.updateProgenitorFieldsState();
   }
 
   private getFieldLabel(fieldName: string): string {
@@ -465,6 +546,34 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
   }
 
   /**
+   * Clear fields that will be disabled for external clinics
+   */
+  private clearFieldsForExternalClinic(): void {
+    const fieldsToClear = [
+      'email', 'phone', 'dni', 'birth_date', 'gender', 'occupation',
+      'street', 'street_number', 'door', 'postal_code', 'city', 'province',
+      'treatment_start_date', 'status'
+    ];
+
+    fieldsToClear.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.setValue('');
+    });
+
+    // Reset is_minor to false when clearing fields
+    this.patientForm.patchValue({ is_minor: false });
+
+    // Clear progenitor fields as well since is_minor is now false
+    const progenitorFields = [
+      'progenitor1_full_name', 'progenitor1_dni', 'progenitor1_phone',
+      'progenitor2_full_name', 'progenitor2_dni', 'progenitor2_phone'
+    ];
+
+    progenitorFields.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.setValue('');
+    });
+  }
+
+  /**
    * Handle clinic selection change
    */
   onClinicChange(clinicId: string): void {
@@ -486,12 +595,17 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     }
 
     if (selectedClinic.is_external) {
+      // Clear fields that will be disabled for external clinics
+      this.clearFieldsForExternalClinic();
       // External clinic: enable only first_name, last_name, special_price
       this.enableFieldsForExternalClinic();
     } else {
       // Internal clinic: enable all fields and make them required
       this.enableAllFieldsForInternalClinic();
     }
+
+    // Update progenitor fields state based on minor status
+    this.updateProgenitorFieldsState();
   }
 
   /**
@@ -512,9 +626,19 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
       return;
     }
 
+    // Always disable clinic_id in edit mode
+    this.patientForm.get('clinic_id')?.disable();
+
     if (patientClinic.is_external) {
       // External clinic in edit mode: disable all fields except first_name, last_name, special_price
       this.applyExternalClinicEditRestrictions();
+      // Update progenitor fields state based on minor status
+      this.updateProgenitorFieldsState();
+    } else {
+      // Internal clinic in edit mode: enable all fields except clinic_id
+      this.enableAllFieldsForInternalClinicEditMode();
+      // Update progenitor fields state based on minor status
+      this.updateProgenitorFieldsState();
     }
   }
 
@@ -522,13 +646,11 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
    * Apply restrictions for editing a patient from an external clinic
    */
   private applyExternalClinicEditRestrictions(): void {
-    // Disable all fields first
+    // Disable all fields except basic info, special_price, and progenitor fields (handled separately)
     const fieldsToDisable = [
       'email', 'phone', 'dni', 'birth_date', 'gender', 'occupation',
       'street', 'street_number', 'door', 'postal_code', 'city', 'province',
-      'treatment_start_date', 'status', 'clinic_id',
-      'progenitor1_full_name', 'progenitor1_dni', 'progenitor1_phone',
-      'progenitor2_full_name', 'progenitor2_dni', 'progenitor2_phone'
+      'treatment_start_date', 'status', 'clinic_id'
     ];
 
     fieldsToDisable.forEach(fieldName => {
@@ -548,6 +670,8 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     this.patientForm.get('first_name')?.updateValueAndValidity();
     this.patientForm.get('last_name')?.updateValueAndValidity();
     this.patientForm.get('special_price')?.updateValueAndValidity();
+
+    // Note: Progenitor fields will be handled by updateProgenitorFieldsState()
   }
 
   /**
@@ -590,6 +714,45 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
    */
   private enableAllFieldsForInternalClinic(): void {
     // Enable all main fields
+    const allFields = [
+      'first_name', 'last_name', 'email', 'phone', 'dni', 'birth_date',
+      'gender', 'occupation', 'street', 'street_number', 'door',
+      'postal_code', 'city', 'province', 'treatment_start_date',
+      'status', 'special_price'
+    ];
+
+    allFields.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.enable();
+    });
+
+    // Re-apply original validators for required fields
+    this.patientForm.get('first_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('last_name')?.setValidators([Validators.required, Validators.minLength(2)]);
+    this.patientForm.get('email')?.setValidators([Validators.required, Validators.email]);
+    this.patientForm.get('phone')?.setValidators([Validators.required, phoneValidator()]);
+    this.patientForm.get('dni')?.setValidators([Validators.required, dniValidator()]);
+    this.patientForm.get('birth_date')?.setValidators([Validators.required, birthDateValidator()]);
+    this.patientForm.get('gender')?.setValidators([Validators.required]);
+    this.patientForm.get('street')?.setValidators([Validators.required]);
+    this.patientForm.get('street_number')?.setValidators([Validators.required]);
+    this.patientForm.get('postal_code')?.setValidators([Validators.required, Validators.pattern(/^[0-9]{5}$/)]);
+    this.patientForm.get('city')?.setValidators([Validators.required]);
+    this.patientForm.get('province')?.setValidators([Validators.required]);
+    this.patientForm.get('treatment_start_date')?.setValidators([Validators.required, treatmentDateValidator()]);
+    this.patientForm.get('status')?.setValidators([Validators.required]);
+    this.patientForm.get('special_price')?.setValidators([Validators.required, Validators.min(0)]);
+
+    // Update validity for all fields
+    allFields.forEach(fieldName => {
+      this.patientForm.get(fieldName)?.updateValueAndValidity();
+    });
+  }
+
+  /**
+   * Enable all fields for internal clinics in edit mode (except clinic_id)
+   */
+  private enableAllFieldsForInternalClinicEditMode(): void {
+    // Enable all main fields (clinic_id is already disabled)
     const allFields = [
       'first_name', 'last_name', 'email', 'phone', 'dni', 'birth_date',
       'gender', 'occupation', 'street', 'street_number', 'door',

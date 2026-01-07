@@ -24,15 +24,15 @@
         </app-clinic-selector>
 
         <app-form-input controlName="treatment_start_date" label="Fecha Inicio Tratamiento" type="date"
-          [required]="true">
+          [required]="isFieldRequired('treatment_start_date')">
         </app-form-input>
 
         <app-form-input controlName="status" label="Estado del Tratamiento" type="select" [options]="statusOptions"
-          [required]="true">
+          [required]="isFieldRequired('status')">
         </app-form-input>
 
         <app-form-input controlName="special_price" label="Precio Especial" type="number" placeholder="Ej: 50.00"
-          [required]="true">
+          [required]="false">
         </app-form-input>
       </div>
     </section>
@@ -59,7 +59,7 @@
           <app-form-input controlName="last_name" label="Apellidos" placeholder="Ej: Pérez García" [required]="true">
           </app-form-input>
 
-          <app-form-input controlName="dni" label="DNI" placeholder="Ej: 12345678A" [required]="true">
+          <app-form-input controlName="dni" label="DNI" placeholder="Ej: 12345678A" [required]="isFieldRequired('dni')">
           </app-form-input>
 
           <app-form-input controlName="occupation" label="Escuela/Trabajo"
@@ -69,12 +69,12 @@
 
         <!-- Datos demográficos -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <app-form-input controlName="birth_date" label="Fecha de nacimiento" type="date" [required]="true"
+          <app-form-input controlName="birth_date" label="Fecha de nacimiento" type="date" [required]="isFieldRequired('birth_date')"
             (onChange)="onBirthDateChange()">
           </app-form-input>
 
           <app-form-input controlName="gender" label="Género" type="select" [options]="genderOptions"
-            selectPlaceholder="Seleccionar género..." [required]="true">
+            selectPlaceholder="Seleccionar género..." [required]="isFieldRequired('gender')">
           </app-form-input>
 
           <!-- Indicador de edad -->
@@ -177,11 +177,11 @@
 
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <app-form-input controlName="email" label="Email" placeholder="Ej: juan.perez@email.com" type="email"
-          [required]="true">
+          [required]="isFieldRequired('email')">
         </app-form-input>
 
         <app-form-input controlName="phone" label="Teléfono" placeholder="Ej: +34 666 123 456" type="tel"
-          [required]="true">
+          [required]="isFieldRequired('phone')">
         </app-form-input>
       </div>
     </section>
@@ -203,25 +203,25 @@
       <div class="space-y-4">
         <!-- Primera fila de dirección -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <app-form-input controlName="street" label="Calle" placeholder="Ej: Calle Mayor" [required]="true">
+          <app-form-input controlName="street" label="Calle" placeholder="Ej: Calle Mayor" [required]="isFieldRequired('street')">
           </app-form-input>
 
-          <app-form-input controlName="street_number" label="Número" placeholder="123" [required]="true">
+          <app-form-input controlName="street_number" label="Número" placeholder="123" [required]="isFieldRequired('street_number')">
           </app-form-input>
 
           <app-form-input controlName="door" label="Puerta" placeholder="2º A">
           </app-form-input>
 
-          <app-form-input controlName="postal_code" label="Código Postal" placeholder="28001" [required]="true">
+          <app-form-input controlName="postal_code" label="Código Postal" placeholder="28001" [required]="isFieldRequired('postal_code')">
           </app-form-input>
         </div>
 
         <!-- Segunda fila de dirección -->
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          <app-form-input controlName="city" label="Ciudad" placeholder="Madrid" [required]="true">
+          <app-form-input controlName="city" label="Ciudad" placeholder="Madrid" [required]="isFieldRequired('city')">
           </app-form-input>
 
-          <app-form-input controlName="province" label="Provincia" placeholder="Madrid" [required]="true">
+          <app-form-input controlName="province" label="Provincia" placeholder="Madrid" [required]="isFieldRequired('province')">
           </app-form-input>
 
           <!-- Campos vacíos para completar las 4 columnas -->
