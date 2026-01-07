@@ -58,7 +58,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       name: ['', [Validators.required, Validators.minLength(2)]],
       clinic_color: ['#3b82f6', [Validators.required]],
       is_online: [false],
-      external: [false],
+      is_external: [false],
       address: ['', [Validators.required, Validators.minLength(5)]],
       price: [0, [Validators.required, Validators.min(0), Validators.max(1000)]],
       percentage: [0, [Validators.required, Validators.min(0), Validators.max(100)]],
@@ -74,8 +74,8 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       this.handleOnlineChange(isOnline);
     });
 
-    // Escuchar cambios en el checkbox external
-    this.clinicaForm.get('external')?.valueChanges.subscribe(isExternal => {
+    // Escuchar cambios en el checkbox is_external
+    this.clinicaForm.get('is_external')?.valueChanges.subscribe(isExternal => {
       this.handleExternalChange(isExternal);
     });
 
@@ -90,14 +90,14 @@ export class ClinicFormComponent implements OnInit, OnChanges {
   private populateForm(): void {
     if (this.clinica) {
       // Determinar si es online basándose en si tiene dirección y no es externa
-      const isExternal = this.clinica.external || false;
+      const isExternal = this.clinica.is_external || false;
       const isOnline = !isExternal && (!this.clinica.address || this.clinica.address.trim() === '');
 
       this.clinicaForm.patchValue({
         name: this.clinica.name,
         clinic_color: this.clinica.clinic_color,
         is_online: isOnline,
-        external: isExternal,
+        is_external: isExternal,
         address: this.clinica.address || '',
         price: this.clinica.price || 0,
         percentage: this.clinica.percentage || 0,
@@ -143,13 +143,13 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
   private handleOnlineChange(isOnline: boolean): void {
     if (isOnline) {
-      // Si se marca como online, desmarcar external
-      this.clinicaForm.get('external')?.setValue(false, { emitEvent: false });
+      // Si se marca como online, desmarcar is_external
+      this.clinicaForm.get('is_external')?.setValue(false, { emitEvent: false });
       // Deshabilitar y limpiar address
       this.disableAndClearAddress();
     } else {
-      // Si se desmarca online, habilitar address solo si external tampoco está marcado
-      const isExternal = this.clinicaForm.get('external')?.value;
+      // Si se desmarca online, habilitar address solo si is_external tampoco está marcado
+      const isExternal = this.clinicaForm.get('is_external')?.value;
       if (!isExternal) {
         this.enableAddress();
       }
@@ -269,7 +269,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       delete formData.is_online;
 
       // Si es online o externa, asegurar que address esté vacío
-      if (this.clinicaForm.get('is_online')?.value || formData.external) {
+      if (this.clinicaForm.get('is_online')?.value || formData.is_external) {
         formData.address = '';
       }
 
@@ -325,7 +325,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       name: 'Nombre de la clínica',
       clinic_color: 'Color identificativo',
       is_online: 'Clínica online',
-      external: 'Clínica externa',
+      is_external: 'Clínica externa',
       address: 'Dirección',
       price: 'Precio por sesión',
       percentage: 'Porcentaje de comisión',

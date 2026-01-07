@@ -28,6 +28,7 @@ export interface Patient {
     | 'en pausa'
     | 'abandono'
     | 'derivación';
+  special_price?: number; // Precio especial para el paciente
 
   // Información adicional de la clínica
   nombre_clinica?: string;
@@ -35,6 +36,14 @@ export interface Patient {
 
   // Campos calculados/automáticos
   is_minor: boolean;
+
+  // Información de progenitores (solo para menores de edad)
+  progenitor1_full_name?: string;
+  progenitor1_dni?: string;
+  progenitor1_phone?: string;
+  progenitor2_full_name?: string;
+  progenitor2_dni?: string;
+  progenitor2_phone?: string;
 
   // Timestamps del sistema
   created_at?: string; // ISO string format
@@ -50,6 +59,7 @@ export interface PatientSelector {
   precioSesion: number;
   porcentaje: number;
   presencial?: boolean; // Added to handle mode selection
+  special_price?: number; // Precio especial del paciente
 }
 
 // Backward compatibility interface for existing code

@@ -5,6 +5,38 @@
   <!-- Todo el contenido del formulario va aquí -->
   <form id="patient-form" [formGroup]="patientForm" (ngSubmit)="handleSubmit()" class="p-4 sm:p-6 space-y-6">
 
+    <!-- Información del Tratamiento -->
+    <section class="space-y-4">
+      <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+        <div class="p-1.5 bg-orange-100 rounded-md">
+          <svg class="h-4 w-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">Información del Tratamiento</h3>
+      </div>
+
+      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
+        <!-- Clinic Selector -->
+        <app-clinic-selector [control]="$any(patientForm.get('clinic_id'))" [clinics]="clinics" [required]="true"
+          [disabled]="isEditing" label="Clínica" placeholder="Buscar clínica...">
+        </app-clinic-selector>
+
+        <app-form-input controlName="treatment_start_date" label="Fecha Inicio Tratamiento" type="date"
+          [required]="true">
+        </app-form-input>
+
+        <app-form-input controlName="status" label="Estado del Tratamiento" type="select" [options]="statusOptions"
+          [required]="true">
+        </app-form-input>
+
+        <app-form-input controlName="special_price" label="Precio Especial" type="number" placeholder="Ej: 50.00"
+          [required]="true">
+        </app-form-input>
+      </div>
+    </section>
+
     <!-- Información Personal Básica -->
     <section class="space-y-4">
       <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
@@ -31,7 +63,7 @@
           </app-form-input>
 
           <app-form-input controlName="occupation" label="Escuela/Trabajo"
-            placeholder="Ej: Estudiante, Ingeniero, Médico, etc." [required]="true">
+            placeholder="Ej: Estudiante, Ingeniero, Médico, etc." [required]="false">
           </app-form-input>
         </div>
 
@@ -71,6 +103,65 @@
         </div>
       </div>
     </section>
+
+    <!-- Información de Progenitores (solo para menores) -->
+    @if (isMinor) {
+    <section class="space-y-4">
+      <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
+        <div class="p-1.5 bg-amber-100 rounded-md">
+          <svg class="h-4 w-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+        </div>
+        <h3 class="text-lg font-semibold text-gray-900">Información de Progenitores</h3>
+      </div>
+
+      <!-- Progenitor 1 (Requerido) -->
+      <div class="space-y-4">
+        <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <span class="text-amber-600">Progenitor 1</span>
+          <span class="text-red-500 text-xs">(Obligatorio)</span>
+        </h4>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <app-form-input controlName="progenitor1_full_name" label="Nombre completo"
+            placeholder="Ej: María González López" [required]="true">
+          </app-form-input>
+
+          <app-form-input controlName="progenitor1_dni" label="DNI / NIE"
+            placeholder="Ej: 98765432B" [required]="true">
+          </app-form-input>
+
+          <app-form-input controlName="progenitor1_phone" label="Teléfono" type="tel"
+            placeholder="Ej: +34 677 888 999" [required]="true">
+          </app-form-input>
+        </div>
+      </div>
+
+      <!-- Progenitor 2 (Opcional) -->
+      <div class="space-y-4 pt-2">
+        <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
+          <span class="text-amber-600">Progenitor 2</span>
+          <span class="text-gray-500 text-xs">(Opcional)</span>
+        </h4>
+
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+          <app-form-input controlName="progenitor2_full_name" label="Nombre completo"
+            placeholder="Ej: Carlos Martínez Ruiz" [required]="false">
+          </app-form-input>
+
+          <app-form-input controlName="progenitor2_dni" label="DNI / NIE"
+            placeholder="Ej: 87654321C" [required]="false">
+          </app-form-input>
+
+          <app-form-input controlName="progenitor2_phone" label="Teléfono" type="tel"
+            placeholder="Ej: +34 688 777 666" [required]="false">
+          </app-form-input>
+        </div>
+      </div>
+    </section>
+    }
 
     <!-- Información de Contacto -->
     <section class="space-y-4">
@@ -140,32 +231,5 @@
       </div>
     </section>
 
-    <!-- Información del Tratamiento -->
-    <section class="space-y-4">
-      <div class="flex items-center gap-3 pb-3 border-b border-gray-100">
-        <div class="p-1.5 bg-orange-100 rounded-md">
-          <svg class="h-4 w-4 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
-              d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
-          </svg>
-        </div>
-        <h3 class="text-lg font-semibold text-gray-900">Información del Tratamiento</h3>
-      </div>
-
-      <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
-
-        <app-form-input controlName="treatment_start_date" label="Fecha Inicio Tratamiento" type="date"
-          [required]="true">
-        </app-form-input>
-
-        <app-form-input controlName="status" label="Estado del Tratamiento" type="select" [options]="statusOptions"
-          [required]="true">
-        </app-form-input>
-        <!-- Clinic Selector -->
-        <app-clinic-selector [control]="$any(patientForm.get('clinic_id'))" [clinics]="clinics" [required]="true"
-          [disabled]="isEditing" label="Clínica" placeholder="Buscar clínica...">
-        </app-clinic-selector>
-      </div>
-    </section>
   </form>
 </app-reusable-modal>
