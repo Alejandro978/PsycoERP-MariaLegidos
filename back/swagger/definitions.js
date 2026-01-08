@@ -2994,6 +2994,42 @@ const definitions = {
         description: "Tipo de clínica basado en si tiene dirección. Online si no tiene dirección, Presencial si la tiene.",
         example: "Presencial",
       },
+      progenitor1_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 1 (solo para menores)",
+        example: "María García López",
+      },
+      progenitor1_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 1 (solo para menores)",
+        example: "87654321B",
+      },
+      progenitor1_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 1 (solo para menores)",
+        example: "600987654",
+      },
+      progenitor2_full_name: {
+        type: "string",
+        nullable: true,
+        description: "Nombre completo del progenitor 2 (solo para menores)",
+        example: "Carlos Pérez Martín",
+      },
+      progenitor2_dni: {
+        type: "string",
+        nullable: true,
+        description: "DNI del progenitor 2 (solo para menores)",
+        example: "11223344C",
+      },
+      progenitor2_phone: {
+        type: "string",
+        nullable: true,
+        description: "Teléfono del progenitor 2 (solo para menores)",
+        example: "600111222",
+      },
     },
   },
 
