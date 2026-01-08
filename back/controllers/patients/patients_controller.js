@@ -340,6 +340,18 @@ const crearPaciente = async (req, res) => {
           error: "Para pacientes menores de edad, es obligatorio proporcionar progenitor1_full_name, progenitor1_dni y progenitor1_phone",
         });
       }
+
+      // Validar que si viene algún dato del progenitor2, vengan todos los campos obligatorios
+      const hasAnyProgenitor2Data = progenitor2_full_name || progenitor2_dni || progenitor2_phone;
+
+      if (hasAnyProgenitor2Data) {
+        if (!progenitor2_full_name || !progenitor2_dni || !progenitor2_phone) {
+          return res.status(400).json({
+            success: false,
+            error: "Si proporciona algún dato del segundo progenitor... se debe incluir todos los datos del mismo",
+          });
+        }
+      }
     }
 
     const patientData = {
