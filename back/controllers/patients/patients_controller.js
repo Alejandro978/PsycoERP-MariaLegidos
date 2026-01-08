@@ -272,7 +272,9 @@ const crearPaciente = async (req, res) => {
       clinic_id,
       treatment_start_date,
       status,
+      special_price,
       is_minor,
+      is_external,
       progenitor1_full_name,
       progenitor1_dni,
       progenitor1_phone,
@@ -281,41 +283,37 @@ const crearPaciente = async (req, res) => {
       progenitor2_phone,
     } = req.body;
 
-    // Validaciones obligatorias
-    if (!first_name || !last_name || !email || !phone || !dni) {
+    // Validación de is_external
+    const isExternalPatient = is_external === true;
+
+    // Validaciones obligatorias (condicionales según tipo de paciente)
+    if (!first_name || !last_name) {
       return res.status(400).json({
         success: false,
-        error: "Los campos first_name, last_name, email, phone y dni son obligatorios",
+        error: "Los campos first_name y last_name son obligatorios",
       });
     }
 
-    // Validación de email
-    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(email)) {
-      return res.status(400).json({
-        success: false,
-        error: "El formato del email no es válido",
-      });
+    // Para pacientes NO externos, validar campos completos
+    if (!isExternalPatient) {
+      if (!email || !phone || !dni) {
+        return res.status(400).json({
+          success: false,
+          error: "Los campos email, phone y dni son obligatorios para pacientes no externos",
+        });
+      }
+
+      // Validación de email
+      const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailRegex.test(email)) {
+        return res.status(400).json({
+          success: false,
+          error: "El formato del email no es válido",
+        });
+      }
     }
 
-    // Validación de género
-    if (gender && !["M", "F", "O"].includes(gender)) {
-      return res.status(400).json({
-        success: false,
-        error: "El género debe ser M, F o O",
-      });
-    }
-
-    // Validación de status
-    const validStatuses = ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"];
-    if (status && !validStatuses.includes(status)) {
-      return res.status(400).json({
-        success: false,
-        error: "El status debe ser uno de: " + validStatuses.join(", "),
-      });
-    }
-
-    // Validación de clinic_id
+    // Validación de clinic_id (para ambos tipos de pacientes)
     if (clinic_id && isNaN(clinic_id)) {
       return res.status(400).json({
         success: false,
@@ -323,63 +321,91 @@ const crearPaciente = async (req, res) => {
       });
     }
 
-
-    // Validación de is_minor
-    if (is_minor !== undefined && typeof is_minor !== "boolean") {
-      return res.status(400).json({
-        success: false,
-        error: "El campo is_minor debe ser un valor booleano",
-      });
-    }
-
-    // Validación de datos de progenitores para menores
-    if (is_minor === true) {
-      if (!progenitor1_full_name || !progenitor1_phone || !progenitor1_dni) {
+    // Validaciones solo para pacientes NO externos
+    if (!isExternalPatient) {
+      // Validación de género
+      if (gender && !["M", "F", "O"].includes(gender)) {
         return res.status(400).json({
           success: false,
-          error: "Para pacientes menores de edad, es obligatorio proporcionar progenitor1_full_name, progenitor1_dni y progenitor1_phone",
+          error: "El género debe ser M, F o O",
         });
       }
 
-      // Validar que si viene algún dato del progenitor2, vengan todos los campos obligatorios
-      const hasAnyProgenitor2Data = progenitor2_full_name || progenitor2_dni || progenitor2_phone;
+      // Validación de status
+      const validStatuses = ["en curso", "fin del tratamiento", "en pausa", "abandono", "derivación"];
+      if (status && !validStatuses.includes(status)) {
+        return res.status(400).json({
+          success: false,
+          error: "El status debe ser uno de: " + validStatuses.join(", "),
+        });
+      }
 
-      if (hasAnyProgenitor2Data) {
-        if (!progenitor2_full_name || !progenitor2_dni || !progenitor2_phone) {
+      // Validación de is_minor
+      if (is_minor !== undefined && typeof is_minor !== "boolean") {
+        return res.status(400).json({
+          success: false,
+          error: "El campo is_minor debe ser un valor booleano",
+        });
+      }
+
+      // Validación de datos de progenitores para menores
+      if (is_minor === true) {
+        if (!progenitor1_full_name || !progenitor1_phone || !progenitor1_dni) {
           return res.status(400).json({
             success: false,
-            error: "Si proporciona algún dato del segundo progenitor... se debe incluir todos los datos del mismo",
+            error: "Para pacientes menores de edad, es obligatorio proporcionar progenitor1_full_name, progenitor1_dni y progenitor1_phone",
           });
+        }
+
+        // Validar que si viene algún dato del progenitor2, vengan todos los campos obligatorios
+        const hasAnyProgenitor2Data = progenitor2_full_name || progenitor2_dni || progenitor2_phone;
+
+        if (hasAnyProgenitor2Data) {
+          if (!progenitor2_full_name || !progenitor2_dni || !progenitor2_phone) {
+            return res.status(400).json({
+              success: false,
+              error: "Si proporciona algún dato del segundo progenitor... se debe incluir todos los datos del mismo",
+            });
+          }
         }
       }
     }
 
+    // Construir patientData según tipo de paciente
     const patientData = {
       first_name,
       last_name,
-      email,
-      phone,
-      dni,
-      gender: gender || "O",
-      occupation,
-      birth_date,
-      street,
-      street_number,
-      door,
-      postal_code,
-      city,
-      province,
       clinic_id,
-      treatment_start_date,
-      status: status || "en curso",
-      is_minor,
-      progenitor1_full_name: is_minor ? progenitor1_full_name : null,
-      progenitor1_dni: is_minor ? progenitor1_dni : null,
-      progenitor1_phone: is_minor ? progenitor1_phone : null,
-      progenitor2_full_name: is_minor ? progenitor2_full_name : null,
-      progenitor2_dni: is_minor ? progenitor2_dni : null,
-      progenitor2_phone: is_minor ? progenitor2_phone : null,
+      special_price: special_price || null,
+      is_external: isExternalPatient ? 1 : 0,
     };
+
+    // Si NO es paciente externo, añadir todos los campos adicionales
+    if (!isExternalPatient) {
+      Object.assign(patientData, {
+        email,
+        phone,
+        dni,
+        gender: gender || "O",
+        occupation,
+        birth_date,
+        street,
+        street_number,
+        door,
+        postal_code,
+        city,
+        province,
+        treatment_start_date,
+        status: status || "en curso",
+        is_minor,
+        progenitor1_full_name: is_minor ? progenitor1_full_name : null,
+        progenitor1_dni: is_minor ? progenitor1_dni : null,
+        progenitor1_phone: is_minor ? progenitor1_phone : null,
+        progenitor2_full_name: is_minor ? progenitor2_full_name : null,
+        progenitor2_dni: is_minor ? progenitor2_dni : null,
+        progenitor2_phone: is_minor ? progenitor2_phone : null,
+      });
+    }
 
     const nuevoPaciente = await createPatient(req.db, patientData);
 
@@ -491,7 +517,9 @@ const actualizarPaciente = async (req, res) => {
       clinic_id,
       treatment_start_date,
       status,
+      special_price,
       is_minor,
+      is_external,
       progenitor1_full_name,
       progenitor1_dni,
       progenitor1_phone,
@@ -527,7 +555,9 @@ const actualizarPaciente = async (req, res) => {
     if (clinic_id !== undefined) updateData.clinic_id = clinic_id;
     if (treatment_start_date !== undefined) updateData.treatment_start_date = treatment_start_date;
     if (status !== undefined) updateData.status = status;
+    if (special_price !== undefined) updateData.special_price = special_price;
     if (is_minor !== undefined) updateData.is_minor = is_minor;
+    if (is_external !== undefined) updateData.is_external = is_external === true ? 1 : 0;
 
     // Manejar campos de progenitores
     if (is_minor === false) {

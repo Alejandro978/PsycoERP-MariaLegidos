@@ -26,6 +26,7 @@ const getPatients = async (db, filters = {}) => {
             gender,
             occupation,
             status,
+            special_price,
             DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date,
             street,
             street_number,
@@ -42,6 +43,7 @@ const getPatients = async (db, filters = {}) => {
             clinic_id,
             DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
             is_minor,
+            is_external,
             DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
             DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
         FROM patients
@@ -329,6 +331,7 @@ const getInactivePatients = async (db, filters = {}) => {
             gender,
             occupation,
             status,
+            special_price,
             DATE_FORMAT(birth_date, '%Y-%m-%d') as birth_date,
             street,
             street_number,
@@ -339,6 +342,7 @@ const getInactivePatients = async (db, filters = {}) => {
             clinic_id,
             DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
             is_minor,
+            is_external,
             progenitor1_full_name,
             progenitor1_dni,
             progenitor1_phone,
@@ -484,91 +488,56 @@ const hasFutureSessions = async (db, patientId) => {
 
 // Crear un nuevo paciente
 const createPatient = async (db, patientData) => {
-  const {
-    first_name,
-    last_name,
-    email,
-    phone,
-    dni,
-    gender,
-    occupation,
-    birth_date,
-    street,
-    street_number,
-    door,
-    postal_code,
-    city,
-    province,
-    progenitor1_full_name,
-    progenitor1_dni,
-    progenitor1_phone,
-    progenitor2_full_name,
-    progenitor2_dni,
-    progenitor2_phone,
-    clinic_id,
-    treatment_start_date,
-    status,
-    is_minor,
-  } = patientData;
+  // Construir INSERT dinámicamente solo con campos definidos
+  const fields = ['is_active'];
+  const placeholders = ['true'];
+  const values = [];
+
+  // Función auxiliar para añadir campos solo si están definidos
+  const addField = (fieldName, value) => {
+    if (value !== undefined) {
+      fields.push(fieldName);
+      placeholders.push('?');
+      values.push(value);
+    }
+  };
+
+  // Campos obligatorios
+  addField('first_name', patientData.first_name);
+  addField('last_name', patientData.last_name);
+
+  // Campos opcionales
+  addField('email', patientData.email);
+  addField('phone', patientData.phone);
+  addField('dni', patientData.dni);
+  addField('gender', patientData.gender);
+  addField('occupation', patientData.occupation);
+  addField('birth_date', patientData.birth_date);
+  addField('street', patientData.street);
+  addField('street_number', patientData.street_number);
+  addField('door', patientData.door);
+  addField('postal_code', patientData.postal_code);
+  addField('city', patientData.city);
+  addField('province', patientData.province);
+  addField('progenitor1_full_name', patientData.progenitor1_full_name);
+  addField('progenitor1_dni', patientData.progenitor1_dni);
+  addField('progenitor1_phone', patientData.progenitor1_phone);
+  addField('progenitor2_full_name', patientData.progenitor2_full_name);
+  addField('progenitor2_dni', patientData.progenitor2_dni);
+  addField('progenitor2_phone', patientData.progenitor2_phone);
+  addField('clinic_id', patientData.clinic_id);
+  addField('treatment_start_date', patientData.treatment_start_date);
+  addField('status', patientData.status);
+  addField('special_price', patientData.special_price);
+  addField('is_minor', patientData.is_minor);
+  addField('is_external', patientData.is_external);
 
   const query = `
-    INSERT INTO patients (
-      first_name,
-      last_name,
-      email,
-      phone,
-      dni,
-      gender,
-      occupation,
-      birth_date,
-      street,
-      street_number,
-      door,
-      postal_code,
-      city,
-      province,
-      progenitor1_full_name,
-      progenitor1_dni,
-      progenitor1_phone,
-      progenitor2_full_name,
-      progenitor2_dni,
-      progenitor2_phone,
-      clinic_id,
-      treatment_start_date,
-      status,
-      is_minor,
-      is_active
-    ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, true)
+    INSERT INTO patients (${fields.join(', ')})
+    VALUES (${placeholders.join(', ')})
   `;
 
-  const params = [
-    first_name,
-    last_name,
-    email,
-    phone,
-    dni,
-    gender,
-    occupation,
-    birth_date,
-    street,
-    street_number,
-    door,
-    postal_code,
-    city,
-    province,
-    progenitor1_full_name,
-    progenitor1_dni,
-    progenitor1_phone,
-    progenitor2_full_name,
-    progenitor2_dni,
-    progenitor2_phone,
-    clinic_id,
-    treatment_start_date,
-    status,
-    is_minor,
-  ];
-
-  const [result] = await db.execute(query, params);
+  const [result] = await db.execute(query, values);
 
   // Obtener el paciente recién creado
   const getPatientQuery = `
@@ -597,7 +566,9 @@ const createPatient = async (db, patientData) => {
       clinic_id,
       DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
       status,
+      special_price,
       is_minor,
+      is_external,
       DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
       DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
     FROM patients
@@ -693,7 +664,9 @@ const updatePatient = async (db, id, updateData) => {
       clinic_id,
       DATE_FORMAT(treatment_start_date, '%Y-%m-%d') as treatment_start_date,
       status,
+      special_price,
       is_minor,
+      is_external,
       DATE_FORMAT(created_at,'%Y-%m-%d') as created_at,
       DATE_FORMAT(updated_at,'%Y-%m-%d') as updated_at
     FROM patients
