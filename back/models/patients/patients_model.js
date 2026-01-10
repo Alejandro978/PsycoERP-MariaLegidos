@@ -237,6 +237,7 @@ const getPatientById = async (db, id) => {
             p.progenitor2_full_name,
             p.progenitor2_dni,
             p.progenitor2_phone,
+            p.special_price,
             p.gender as genero,
             p.occupation as ocupacion,
             p.clinic_id,
@@ -687,6 +688,7 @@ const getActivePatientsWithClinicInfo = async (db) => {
       c.name as nombreClinica,
       c.price as precioSesion,
       c.percentage as porcentaje,
+      p.special_price,
       CASE
         WHEN c.address IS NULL OR c.address = '' THEN 0
         ELSE 1

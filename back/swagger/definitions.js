@@ -53,6 +53,13 @@ const definitions = {
         description: "Porcentaje de la clínica",
         example: 15.50,
       },
+      special_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio especial para el paciente (opcional)",
+        example: 50.00,
+      },
       presencial: {
         type: "boolean",
         description: "Indica si la clínica es presencial (tiene dirección) o no. true = Presencial, false = Online",
@@ -2993,6 +3000,13 @@ const definitions = {
         nullable: true,
         description: "Tipo de clínica basado en si tiene dirección. Online si no tiene dirección, Presencial si la tiene.",
         example: "Presencial",
+      },
+      special_price: {
+        type: "number",
+        format: "decimal",
+        nullable: true,
+        description: "Precio especial para el paciente (opcional)",
+        example: 50.00,
       },
       progenitor1_full_name: {
         type: "string",
