@@ -50,9 +50,11 @@ const getSessions = async (db, filters = {}) => {
     params.push(filters.status);
   }
 
-  if (filters.clinic_id) {
-    conditions.push("s.clinic_id = ?");
-    params.push(filters.clinic_id);
+  // Soporte para múltiples clinic_ids
+  if (filters.clinic_ids && filters.clinic_ids.length > 0) {
+    const placeholders = filters.clinic_ids.map(() => '?').join(',');
+    conditions.push(`s.clinic_id IN (${placeholders})`);
+    params.push(...filters.clinic_ids);
   }
 
   if (filters.session_date) {

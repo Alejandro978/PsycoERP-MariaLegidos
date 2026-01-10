@@ -20,10 +20,12 @@ const sessionsPaths = {
           in: "query",
           required: false,
           schema: {
-            type: "integer",
-            format: "int64",
+            type: "array",
+            items: {
+              type: "integer",
+            },
           },
-          description: "ID de la clínica para filtrar",
+          description: "ID(s) de la(s) clínica(s) para filtrar. Puede ser uno o múltiples IDs. En query params: ?clinic_id=1&clinic_id=2&clinic_id=3",
         },
         {
           name: "status",

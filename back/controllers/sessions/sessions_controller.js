@@ -48,7 +48,26 @@ const obtenerSesiones = async (req, res) => {
     const filters = {};
     if (patient_id) filters.patient_id = patient_id;
     if (status) filters.status = status;
-    if (clinic_id) filters.clinic_id = clinic_id;
+
+    // Parsear clinic_id como array de integers
+    if (clinic_id) {
+      // Si es array, mapear a integers
+      if (Array.isArray(clinic_id)) {
+        filters.clinic_ids = clinic_id.map(id => parseInt(id)).filter(id => !isNaN(id));
+      } else {
+        // Si es un solo valor, convertir a array de 1 elemento
+        const parsedId = parseInt(clinic_id);
+        if (!isNaN(parsedId)) {
+          filters.clinic_ids = [parsedId];
+        }
+      }
+
+      // Solo aplicar filtro si hay IDs válidos
+      if (!filters.clinic_ids || filters.clinic_ids.length === 0) {
+        delete filters.clinic_ids;
+      }
+    }
+
     if (payment_method) filters.payment_method = payment_method;
 
     // Parámetros de paginación
@@ -455,8 +474,8 @@ const obtenerEnlaceWhatsApp = async (req, res) => {
     // Obtener plantilla aleatoria y formatear mensaje
     const randomTemplate = getRandomTemplate();
     const message = randomTemplate.template(
-      sessionData.patient_name, 
-      dateStr, 
+      sessionData.patient_name,
+      dateStr,
       sessionData.start_time
     );
 
