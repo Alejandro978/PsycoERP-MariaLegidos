@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { obtenerNotas, crearNota, completarNota } = require("../../controllers/notes/notes_controller");
+const { obtenerNotas, crearNota, completarNota, eliminarNota } = require("../../controllers/notes/notes_controller");
 
 /**
  * @swagger
@@ -157,5 +157,48 @@ router.post("/", crearNota);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.patch("/:id/complete", completarNota);
+
+/**
+ * @swagger
+ * /api/notes/{id}:
+ *   delete:
+ *     tags:
+ *       - Notes
+ *     summary: Eliminar una nota (soft delete)
+ *     description: Marca una nota como inactiva (is_active = false). La nota no se elimina físicamente de la base de datos.
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la nota a eliminar
+ *     responses:
+ *       200:
+ *         description: Nota eliminada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/DeleteNoteResponse'
+ *       400:
+ *         description: Error de validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Nota no encontrada o ya eliminada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.delete("/:id", eliminarNota);
 
 module.exports = router;

@@ -115,8 +115,26 @@ const completeNote = async (db, id) => {
     return { success: true };
 };
 
+// Eliminar una nota (soft delete)
+const deleteNote = async (db, id) => {
+    const query = `
+    UPDATE notes 
+    SET is_active = false
+    WHERE id = ? AND is_active = true
+  `;
+
+    const [result] = await db.execute(query, [id]);
+
+    if (result.affectedRows === 0) {
+        return null;
+    }
+
+    return { success: true };
+};
+
 module.exports = {
     getNotes,
     createNote,
     completeNote,
+    deleteNote,
 }

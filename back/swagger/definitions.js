@@ -859,6 +859,20 @@ const definitions = {
     },
   },
 
+  DeleteNoteResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Nota eliminada exitosamente",
+      },
+    },
+  },
+
   CreatePatientRequest: {
     type: "object",
     required: ["first_name", "last_name", "email", "phone", "dni"],

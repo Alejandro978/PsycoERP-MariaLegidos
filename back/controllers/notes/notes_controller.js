@@ -1,4 +1,4 @@
-const { getNotes, createNote, completeNote } = require("../../models/notes/notes_model");
+const { getNotes, createNote, completeNote, deleteNote } = require("../../models/notes/notes_model");
 const logger = require("../../utils/logger");
 
 const obtenerNotas = async (req, res) => {
@@ -133,8 +133,43 @@ const completarNota = async (req, res) => {
     }
 };
 
+const eliminarNota = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validar que se proporcione el ID y sea un número válido
+        if (!id || isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                error: "ID es requerido y debe ser un número válido",
+            });
+        }
+
+        const resultado = await deleteNote(req.db, parseInt(id));
+
+        if (!resultado) {
+            return res.status(404).json({
+                success: false,
+                error: "Nota no encontrada o ya está eliminada",
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Nota eliminada exitosamente",
+        });
+    } catch (err) {
+        logger.error("Error al eliminar nota:", err.message);
+        res.status(500).json({
+            success: false,
+            error: "Error al eliminar la nota",
+        });
+    }
+};
+
 module.exports = {
     obtenerNotas,
     crearNota,
     completarNota,
+    eliminarNota,
 }

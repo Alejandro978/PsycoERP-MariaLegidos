@@ -180,6 +180,66 @@ const notesPaths = {
             },
         },
     },
+    "/api/notes/{id}": {
+        delete: {
+            tags: ["Notes"],
+            summary: "Eliminar una nota (soft delete)",
+            description: "Marca una nota como inactiva (is_active = false). La nota no se elimina físicamente de la base de datos.",
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    schema: {
+                        type: "integer",
+                    },
+                    description: "ID de la nota a eliminar",
+                },
+            ],
+            responses: {
+                200: {
+                    description: "Nota eliminada exitosamente",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/DeleteNoteResponse",
+                            },
+                        },
+                    },
+                },
+                400: {
+                    description: "Error de validación (ID inválido)",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse",
+                            },
+                        },
+                    },
+                },
+                404: {
+                    description: "Nota no encontrada o ya eliminada",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse",
+                            },
+                        },
+                    },
+                },
+                500: {
+                    description: "Error interno del servidor",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse",
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
 };
 
 module.exports = notesPaths;
