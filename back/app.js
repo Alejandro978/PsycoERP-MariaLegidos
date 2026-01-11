@@ -126,7 +126,7 @@ app.use("/api/auth", authRoutes);
 // Ruta pública para OAuth callback de Google (usado por get_gcal_token.js)
 app.get("/oauth/callback", (req, res) => {
   const code = req.query.code;
-  
+
   if (!code) {
     return res.status(400).json({
       success: false,

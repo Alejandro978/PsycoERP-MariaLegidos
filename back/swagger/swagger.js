@@ -30,21 +30,21 @@ const swaggerDefinition = {
   servers:
     process.env.NODE_ENV === "production"
       ? [
-          {
-            url: "https://test.millopsicologia.com",
-            description: "Test Environment (TEST)",
-          },
-          {
-            url: "https://millopsicologia.com",
-            description: "Production Environment (PROD)",
-          },
-        ]
+        {
+          url: "https://test.millopsicologia.com",
+          description: "Test Environment (TEST)",
+        },
+        {
+          url: "https://millopsicologia.com",
+          description: "Production Environment (PROD)",
+        },
+      ]
       : [
-          {
-            url: "http://localhost:3000",
-            description: "Local Development",
-          },
-        ],
+        {
+          url: "http://localhost:3000",
+          description: "Local Development",
+        },
+      ],
   components: {
     schemas: definitions,
     securitySchemes: {

@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { obtenerNotas } = require("../../controllers/notes/notes_controller");
+const { obtenerNotas, crearNota } = require("../../controllers/notes/notes_controller");
 
 /**
  * @swagger
@@ -78,5 +78,41 @@ const { obtenerNotas } = require("../../controllers/notes/notes_controller");
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.get("/", obtenerNotas);
+
+/**
+ * @swagger
+ * /api/notes:
+ *   post:
+ *     tags:
+ *       - Notes
+ *     summary: Crear una nueva nota
+ *     description: Crea una nota con estado pending por defecto
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             $ref: '#/components/schemas/CreateNoteRequest'
+ *     responses:
+ *       201:
+ *         description: Nota creada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CreateNoteResponse'
+ *       400:
+ *         description: Error de validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.post("/", crearNota);
 
 module.exports = router;

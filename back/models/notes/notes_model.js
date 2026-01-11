@@ -1,12 +1,12 @@
 // Obtener todas las notas con filtros opcionales, paginación y KPIs
 const getNotes = async (db, filters = {}) => {
-  // Extraer parámetros de paginación
-  const page = parseInt(filters.page) || 1;
-  const limit = parseInt(filters.limit) || 10;
-  const offset = (page - 1) * limit;
+    // Extraer parámetros de paginación
+    const page = parseInt(filters.page) || 1;
+    const limit = parseInt(filters.limit) || 10;
+    const offset = (page - 1) * limit;
 
-  // Query base para contar registros totales y KPIs
-  let countQuery = `
+    // Query base para contar registros totales y KPIs
+    let countQuery = `
     SELECT 
       COUNT(*) as total,
       SUM(CASE WHEN status = 'pending' THEN 1 ELSE 0 END) as pending_notes,
@@ -15,8 +15,8 @@ const getNotes = async (db, filters = {}) => {
     WHERE is_active = true
   `;
 
-  // Query principal para obtener datos
-  let dataQuery = `
+    // Query principal para obtener datos
+    let dataQuery = `
     SELECT
       id,
       message,
@@ -27,24 +27,24 @@ const getNotes = async (db, filters = {}) => {
     WHERE is_active = true
   `;
 
-  const params = [];
-  const conditions = [];
+    const params = [];
+    const conditions = [];
 
-  // Filtro por status
-  if (filters.status) {
-    conditions.push("status = ?");
-    params.push(filters.status);
-  }
+    // Filtro por status
+    if (filters.status) {
+        conditions.push("status = ?");
+        params.push(filters.status);
+    }
 
-  // Aplicar condiciones adicionales a ambas queries
-  if (conditions.length > 0) {
-    const conditionsStr = " AND " + conditions.join(" AND ");
-    countQuery += conditionsStr;
-    dataQuery += conditionsStr;
-  }
+    // Aplicar condiciones adicionales a ambas queries
+    if (conditions.length > 0) {
+        const conditionsStr = " AND " + conditions.join(" AND ");
+        countQuery += conditionsStr;
+        dataQuery += conditionsStr;
+    }
 
-  // Ordenamiento: pending primero, completed después, por fecha de creación descendente
-  dataQuery += `
+    // Ordenamiento: pending primero, completed después, por fecha de creación descendente
+    dataQuery += `
     ORDER BY 
       CASE 
         WHEN status = 'pending' THEN 1 
@@ -53,40 +53,52 @@ const getNotes = async (db, filters = {}) => {
       created_at DESC
   `;
 
-  // Paginación
-  dataQuery += " LIMIT ? OFFSET ?";
+    // Paginación
+    dataQuery += " LIMIT ? OFFSET ?";
 
-  // Ejecutar query de conteo y KPIs
-  const [countResult] = await db.execute(countQuery, params);
-  const totalRecords = countResult[0].total;
-  const pendingNotes = countResult[0].pending_notes || 0;
-  const completedNotes = countResult[0].completed_notes || 0;
+    // Ejecutar query de conteo y KPIs
+    const [countResult] = await db.execute(countQuery, params);
+    const totalRecords = countResult[0].total;
+    const pendingNotes = countResult[0].pending_notes || 0;
+    const completedNotes = countResult[0].completed_notes || 0;
 
-  // Ejecutar query de datos con paginación
-  const dataParams = [...params, limit, offset];
-  const [rows] = await db.execute(dataQuery, dataParams);
+    // Ejecutar query de datos con paginación
+    const dataParams = [...params, limit, offset];
+    const [rows] = await db.execute(dataQuery, dataParams);
 
-  // Calcular información de paginación
-  const totalPages = Math.ceil(totalRecords / limit);
+    // Calcular información de paginación
+    const totalPages = Math.ceil(totalRecords / limit);
 
-  return {
-    kpis: {
-      total_notes: totalRecords,
-      pending_notes: pendingNotes,
-      completed_notes: completedNotes,
-    },
-    pagination: {
-      current_page: page,
-      total_pages: totalPages,
-      total_records: totalRecords,
-      records_per_page: limit,
-      has_next_page: page < totalPages,
-      has_previous_page: page > 1,
-    },
-    data: rows,
-  };
+    return {
+        kpis: {
+            total_notes: totalRecords,
+            pending_notes: pendingNotes,
+            completed_notes: completedNotes,
+        },
+        pagination: {
+            current_page: page,
+            total_pages: totalPages,
+            total_records: totalRecords,
+            records_per_page: limit,
+            has_next_page: page < totalPages,
+            has_previous_page: page > 1,
+        },
+        data: rows,
+    };
+};
+
+// Crear una nueva nota
+const createNote = async (db, noteData) => {
+    const query = `
+    INSERT INTO notes (message)
+    VALUES (?)
+  `;
+
+    const [result] = await db.execute(query, [noteData.message]);
+    return { id: result.insertId };
 };
 
 module.exports = {
-  getNotes,
+    getNotes,
+    createNote,
 };

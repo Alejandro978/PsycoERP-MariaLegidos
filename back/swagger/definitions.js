@@ -808,6 +808,43 @@ const definitions = {
     },
   },
 
+  CreateNoteRequest: {
+    type: "object",
+    required: ["message"],
+    properties: {
+      message: {
+        type: "string",
+        description: "Contenido de la nota (máximo 5000 caracteres)",
+        example: "Revisar historial del paciente antes de la próxima sesión",
+      },
+    },
+  },
+
+  CreateNoteResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Nota creada exitosamente",
+      },
+      data: {
+        type: "object",
+        properties: {
+          id: {
+            type: "integer",
+            format: "int64",
+            description: "ID de la nota creada",
+            example: 1,
+          },
+        },
+      },
+    },
+  },
+
   CreatePatientRequest: {
     type: "object",
     required: ["first_name", "last_name", "email", "phone", "dni"],
