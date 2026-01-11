@@ -1,4 +1,4 @@
-const { getNotes, createNote } = require("../../models/notes/notes_model");
+const { getNotes, createNote, completeNote } = require("../../models/notes/notes_model");
 const logger = require("../../utils/logger");
 
 const obtenerNotas = async (req, res) => {
@@ -99,7 +99,42 @@ const crearNota = async (req, res) => {
     }
 };
 
+const completarNota = async (req, res) => {
+    try {
+        const { id } = req.params;
+
+        // Validar que se proporcione el ID y sea un número válido
+        if (!id || isNaN(id)) {
+            return res.status(400).json({
+                success: false,
+                error: "ID es requerido y debe ser un número válido",
+            });
+        }
+
+        const resultado = await completeNote(req.db, parseInt(id));
+
+        if (!resultado) {
+            return res.status(404).json({
+                success: false,
+                error: "Nota no encontrada, no está activa o ya está completada",
+            });
+        }
+
+        res.json({
+            success: true,
+            message: "Nota completada exitosamente",
+        });
+    } catch (err) {
+        logger.error("Error al completar nota:", err.message);
+        res.status(500).json({
+            success: false,
+            error: "Error al completar la nota",
+        });
+    }
+};
+
 module.exports = {
     obtenerNotas,
     crearNota,
-};
+    completarNota,
+}

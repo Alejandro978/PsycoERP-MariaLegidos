@@ -1,7 +1,7 @@
 const express = require("express");
 const router = express.Router();
 
-const { obtenerNotas, crearNota } = require("../../controllers/notes/notes_controller");
+const { obtenerNotas, crearNota, completarNota } = require("../../controllers/notes/notes_controller");
 
 /**
  * @swagger
@@ -114,5 +114,48 @@ router.get("/", obtenerNotas);
  *               $ref: '#/components/schemas/ErrorResponse'
  */
 router.post("/", crearNota);
+
+/**
+ * @swagger
+ * /api/notes/{id}/complete:
+ *   patch:
+ *     tags:
+ *       - Notes
+ *     summary: Completar una nota
+ *     description: Marca una nota como completada (cambia el status de pending a completed)
+ *     parameters:
+ *       - name: id
+ *         in: path
+ *         required: true
+ *         schema:
+ *           type: integer
+ *         description: ID de la nota a completar
+ *     responses:
+ *       200:
+ *         description: Nota completada exitosamente
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/CompleteNoteResponse'
+ *       400:
+ *         description: Error de validación
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       404:
+ *         description: Nota no encontrada o ya completada
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ *       500:
+ *         description: Error interno del servidor
+ *         content:
+ *           application/json:
+ *             schema:
+ *               $ref: '#/components/schemas/ErrorResponse'
+ */
+router.patch("/:id/complete", completarNota);
 
 module.exports = router;

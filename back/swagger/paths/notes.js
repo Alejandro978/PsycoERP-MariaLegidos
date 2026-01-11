@@ -120,6 +120,66 @@ const notesPaths = {
             },
         },
     },
+    "/api/notes/{id}/complete": {
+        patch: {
+            tags: ["Notes"],
+            summary: "Marcar nota como completada",
+            description: "Cambia el estado de una nota de pending a completed. Solo funciona si la nota existe, está activa y en estado pending.",
+            parameters: [
+                {
+                    name: "id",
+                    in: "path",
+                    required: true,
+                    schema: {
+                        type: "integer",
+                    },
+                    description: "ID de la nota a completar",
+                },
+            ],
+            responses: {
+                200: {
+                    description: "Nota completada exitosamente",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/CompleteNoteResponse",
+                            },
+                        },
+                    },
+                },
+                400: {
+                    description: "Error de validación (ID inválido)",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse",
+                            },
+                        },
+                    },
+                },
+                404: {
+                    description: "Nota no encontrada, no activa o ya completada",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse",
+                            },
+                        },
+                    },
+                },
+                500: {
+                    description: "Error interno del servidor",
+                    content: {
+                        "application/json": {
+                            schema: {
+                                $ref: "#/components/schemas/ErrorResponse",
+                            },
+                        },
+                    },
+                },
+            },
+        },
+    },
 };
 
 module.exports = notesPaths;

@@ -98,7 +98,25 @@ const createNote = async (db, noteData) => {
     return { id: result.insertId };
 };
 
+// Completar una nota (cambiar status a 'completed')
+const completeNote = async (db, id) => {
+    const query = `
+    UPDATE notes 
+    SET status = 'completed'
+    WHERE id = ? AND is_active = true AND status = 'pending'
+  `;
+
+    const [result] = await db.execute(query, [id]);
+
+    if (result.affectedRows === 0) {
+        return null;
+    }
+
+    return { success: true };
+};
+
 module.exports = {
     getNotes,
     createNote,
-};
+    completeNote,
+}

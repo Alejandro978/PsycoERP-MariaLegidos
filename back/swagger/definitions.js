@@ -845,6 +845,20 @@ const definitions = {
     },
   },
 
+  CompleteNoteResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Nota completada exitosamente",
+      },
+    },
+  },
+
   CreatePatientRequest: {
     type: "object",
     required: ["first_name", "last_name", "email", "phone", "dni"],
