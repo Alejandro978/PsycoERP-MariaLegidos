@@ -29,6 +29,7 @@ const documentsRoutes = require("./routes/documents/documents_routes");
 const remindersRoutes = require("./routes/reminders/reminders_routes");
 const usersRoutes = require("./routes/users/users_routes");
 const invoicesRoutes = require("./routes/invoices/invoices_routes");
+const notesRoutes = require("./routes/notes/notes_routes");
 
 // Middlewares globales
 app.use(cors());
@@ -214,6 +215,7 @@ app.use("/api/documents", documentsRoutes);
 app.use("/api/reminders", remindersRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/invoices", invoicesRoutes);
+app.use("/api/notes", notesRoutes);
 
 // Iniciar servidor
 app.listen(PORT, async () => {

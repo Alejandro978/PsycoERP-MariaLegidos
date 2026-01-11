@@ -2503,6 +2503,84 @@ const definitions = {
     },
   },
 
+  Note: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la nota",
+        example: 1,
+      },
+      message: {
+        type: "string",
+        description: "Contenido de la nota",
+        example: "Revisar historial del paciente antes de la próxima sesión",
+      },
+      status: {
+        type: "string",
+        enum: ["pending", "completed"],
+        description: "Estado de la nota",
+        example: "pending",
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de creación del registro",
+        example: "2024-01-15 10:30:00",
+      },
+      updated_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de última actualización",
+        example: "2024-01-15 14:20:00",
+      },
+    },
+  },
+
+  NotesKPIs: {
+    type: "object",
+    properties: {
+      total_notes: {
+        type: "integer",
+        description: "Total de notas activas",
+        example: 25,
+      },
+      pending_notes: {
+        type: "integer",
+        description: "Total de notas pendientes",
+        example: 10,
+      },
+      completed_notes: {
+        type: "integer",
+        description: "Total de notas completadas",
+        example: 15,
+      },
+    },
+  },
+
+  NotesResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      kpis: {
+        $ref: "#/components/schemas/NotesKPIs",
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Note",
+        },
+      },
+    },
+  },
+
   PaginationInfo: {
     type: "object",
     properties: {
