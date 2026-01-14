@@ -94,10 +94,10 @@ node scripts/get_gcal_token.js production
 # - Pegar código de autorización
 
 # 5. Reiniciar aplicación con el código nuevo
-pm2 restart millopsicologia-api
+pm2 restart psicoandante-api
 
 # 6. Verificar logs
-pm2 logs millopsicologia-api --lines 50
+pm2 logs psicoandante-api --lines 50
 ```
 
 ## 💡 Preguntas Frecuentes

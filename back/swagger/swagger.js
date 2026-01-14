@@ -31,11 +31,11 @@ const swaggerDefinition = {
     process.env.NODE_ENV === "production"
       ? [
         {
-          url: "https://test.millopsicologia.com",
+          url: "https://test.psicoandante.com",
           description: "Test Environment (TEST)",
         },
         {
-          url: "https://millopsicologia.com",
+          url: "https://psicoandante.com",
           description: "Production Environment (PROD)",
         },
       ]

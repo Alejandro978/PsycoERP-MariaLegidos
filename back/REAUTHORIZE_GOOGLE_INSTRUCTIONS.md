@@ -30,7 +30,7 @@ node scripts/get_gcal_token.js production
 #    - Pegarlo en la terminal
 
 # 5. Reiniciar la aplicación
-pm2 restart millopsicologia-api
+pm2 restart psicoandante-api
 ```
 
 ## 📋 Detalles Técnicos
