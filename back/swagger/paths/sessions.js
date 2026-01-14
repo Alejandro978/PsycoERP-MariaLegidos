@@ -139,7 +139,7 @@ const sessionsPaths = {
     post: {
       tags: ["Sessions"],
       summary: "Crear nueva sesión",
-      description: "Crea una nueva sesión en el sistema. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones.",
+      description: "Crea una nueva sesión en el sistema. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones. **IMPORTANTE**: Para pacientes externos (is_external=1), los campos 'mode', 'payment_method' y 'notes' son opcionales y no se trackearán.",
       requestBody: {
         required: true,
         content: {
@@ -152,7 +152,6 @@ const sessionsPaths = {
                 "session_date",
                 "start_time",
                 "end_time",
-                "mode",
                 "type",
               ],
               properties: {
@@ -186,7 +185,7 @@ const sessionsPaths = {
                 mode: {
                   type: "string",
                   enum: ["presencial", "online"],
-                  description: "Modalidad de la sesión",
+                  description: "Modalidad de la sesión. **Obligatorio solo si el paciente NO es externo**",
                 },
                 type: {
                   type: "string",
@@ -208,11 +207,11 @@ const sessionsPaths = {
                   type: "string",
                   enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
                   default: "pendiente",
-                  description: "Método de pago",
+                  description: "Método de pago. **Opcional si el paciente es externo**",
                 },
                 notes: {
                   type: "string",
-                  description: "Notas adicionales de la sesión",
+                  description: "Notas adicionales de la sesión. **Opcional si el paciente es externo**",
                 },
               },
             },
@@ -245,6 +244,16 @@ const sessionsPaths = {
         },
         400: {
           description: "Campos obligatorios faltantes o datos inválidos",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Paciente no encontrado o inactivo",
           content: {
             "application/json": {
               schema: {

@@ -8,6 +8,7 @@ const {
   getSessionsKPIs,
 } = require("../../models/sessions/sessions_model");
 
+const { isPatientExternal } = require("../../models/patients/patients_model");
 const { getRandomTemplate } = require("../../constants/whatsapp-templates");
 const logger = require("../../utils/logger");
 
@@ -111,18 +112,17 @@ const crearSesion = async (req, res) => {
       mode,
       status = "completada",
       price = 0.0,
-      payment_method = "tarjeta",
+      payment_method,
       notes,
     } = req.body;
 
-    // Validar campos obligatorios
+    // Validar campos obligatorios básicos
     if (
       !patient_id ||
       !clinic_id ||
       !session_date ||
       !start_time ||
-      !end_time ||
-      !mode
+      !end_time
     ) {
       return res.status(400).json({
         success: false,
@@ -133,8 +133,27 @@ const crearSesion = async (req, res) => {
           "session_date",
           "start_time",
           "end_time",
-          "mode",
         ],
+      });
+    }
+
+    // Verificar si el paciente es externo
+    const patientIsExternal = await isPatientExternal(req.db, patient_id);
+
+    // Si el paciente no existe o está inactivo
+    if (patientIsExternal === null) {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado o inactivo",
+      });
+    }
+
+    // Validar campos obligatorios adicionales solo si el paciente NO es externo
+    if (!patientIsExternal && !mode) {
+      return res.status(400).json({
+        success: false,
+        error: "El campo 'mode' es obligatorio para pacientes no externos",
+        required_fields: ["mode"],
       });
     }
 
@@ -198,18 +217,21 @@ const crearSesion = async (req, res) => {
       });
     }
 
-    const nuevaSesion = await createSession(req.db, {
+    // Convertir undefined a null para campos opcionales (requerido por MariaDB)
+    const sessionData = {
       patient_id,
       clinic_id,
       session_date,
       start_time,
       end_time,
-      mode,
+      mode: mode !== undefined ? mode : null,
       status,
       price,
-      payment_method,
-      notes,
-    });
+      payment_method: payment_method !== undefined ? payment_method : null,
+      notes: notes !== undefined ? notes : null,
+    };
+
+    const nuevaSesion = await createSession(req.db, sessionData);
 
     res.status(201).json({
       success: true,
