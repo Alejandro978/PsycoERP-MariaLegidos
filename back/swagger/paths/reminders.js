@@ -3,7 +3,7 @@ const remindersPaths = {
     get: {
       tags: ["Reminders"],
       summary: "Obtener recordatorios pendientes",
-      description: "Obtiene las sesiones del día siguiente con información de recordatorios. Lógica especial: Lunes-Jueves muestra sesiones del día siguiente, Viernes-Domingo muestra sesiones del lunes siguiente.",
+      description: "Obtiene las sesiones del día siguiente con información de recordatorios. **Solo incluye pacientes no externos (is_external=0)**. Lógica especial: Lunes-Jueves muestra sesiones del día siguiente, Viernes-Domingo muestra sesiones del lunes siguiente.",
       responses: {
         200: {
           description: "Lista de recordatorios pendientes obtenida exitosamente",
@@ -32,7 +32,7 @@ const remindersPaths = {
     post: {
       tags: ["Reminders"],
       summary: "Crear recordatorio con WhatsApp deeplink",
-      description: "Crea un recordatorio para una sesión específica y genera un deeplink de WhatsApp personalizado. Incluye información completa del paciente, sesión, clínica (si es presencial) o enlace de Google Meet (si es online). El mensaje está optimizado para recordatorios automáticos.",
+      description: "Crea un recordatorio para una sesión específica y genera un deeplink de WhatsApp personalizado. **Solo permite crear recordatorios para pacientes no externos (is_external=0)**. Incluye información completa del paciente, sesión, clínica (si es presencial) o enlace de Google Meet (si es online). El mensaje está optimizado para recordatorios automáticos.",
       requestBody: {
         required: true,
         content: {
