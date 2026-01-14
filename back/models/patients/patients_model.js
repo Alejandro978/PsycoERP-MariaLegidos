@@ -710,6 +710,26 @@ const getActivePatientsWithClinicInfo = async (db) => {
   }));
 };
 
+// Verificar si un paciente pertenece a una clínica externa
+const isPatientExternal = async (db, patientId) => {
+  const query = `
+    SELECT c.is_external
+    FROM patients p
+    INNER JOIN clinics c ON p.clinic_id = c.id
+    WHERE p.id = ? 
+      AND p.is_active = true 
+      AND c.is_active = true
+  `;
+
+  const [rows] = await db.execute(query, [patientId]);
+
+  if (rows.length === 0) {
+    return null; // Paciente no encontrado o inactivo
+  }
+
+  return rows[0].is_external === 1;
+};
+
 module.exports = {
   getPatients,
   getPatientById,
@@ -720,4 +740,5 @@ module.exports = {
   updatePatient,
   getActivePatientsWithClinicInfo,
   hasFutureSessions,
+  isPatientExternal,
 };

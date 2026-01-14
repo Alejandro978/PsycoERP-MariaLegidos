@@ -10,6 +10,7 @@ const {
   restaurarPaciente,
   actualizarPaciente,
   obtenerPacientesActivosConClinica,
+  verificarSiPacienteEsExterno,
 } = require("../../controllers/patients/patients_controller");
 
 router.get("/", obtenerPacientes);
@@ -17,6 +18,7 @@ router.post("/", crearPaciente);
 router.get("/active-with-clinic", obtenerPacientesActivosConClinica);
 router.get("/inactive", obtenerPacientesInactivos);
 router.get("/:id", obtenerPacientePorId);
+router.get("/:id/is-external", verificarSiPacienteEsExterno);
 router.put("/:id", actualizarPaciente);
 router.put("/:id/restore", restaurarPaciente);
 router.delete("/:id", eliminarPaciente);

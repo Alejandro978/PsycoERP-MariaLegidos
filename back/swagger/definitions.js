@@ -1449,6 +1449,33 @@ const definitions = {
     },
   },
 
+  IsPatientExternalResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        description: "Indica si la operación fue exitosa",
+        example: true,
+      },
+      data: {
+        type: "object",
+        properties: {
+          patient_id: {
+            type: "integer",
+            format: "int64",
+            description: "ID del paciente verificado",
+            example: 15,
+          },
+          is_external: {
+            type: "boolean",
+            description: "Indica si el paciente pertenece a una clínica externa (is_external = 1)",
+            example: true,
+          },
+        },
+      },
+    },
+  },
+
   InvoicesResponse: {
     type: "object",
     properties: {

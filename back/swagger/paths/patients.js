@@ -732,6 +732,67 @@ const patientsPaths = {
       },
     },
   },
+  "/api/patients/{id}/is-external": {
+    get: {
+      tags: ["Patients"],
+      summary: "Verificar si un paciente es externo",
+      description: "Verifica si un paciente pertenece a una clínica externa. Retorna true si la clínica asociada al paciente tiene is_external = 1, false en caso contrario.",
+      parameters: [
+        {
+          name: "id",
+          in: "path",
+          required: true,
+          schema: {
+            type: "integer",
+            format: "int64",
+          },
+          description: "ID único del paciente a verificar",
+        },
+      ],
+      responses: {
+        200: {
+          description: "Verificación realizada exitosamente",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/IsPatientExternalResponse",
+              },
+            },
+          },
+        },
+        400: {
+          description: "ID del paciente inválido o no proporcionado",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        404: {
+          description: "Paciente no encontrado o inactivo",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = patientsPaths;

@@ -8,6 +8,7 @@ const {
   updatePatient,
   getActivePatientsWithClinicInfo,
   hasFutureSessions,
+  isPatientExternal,
 } = require("../../models/patients/patients_model");
 const logger = require("../../utils/logger");
 
@@ -696,6 +697,44 @@ const obtenerPacientesActivosConClinica = async (req, res) => {
   }
 };
 
+const verificarSiPacienteEsExterno = async (req, res) => {
+  try {
+    const { id } = req.params;
+
+    // Validar que el ID sea un número
+    if (!id || isNaN(id)) {
+      return res.status(400).json({
+        success: false,
+        error: "El ID del paciente debe ser un número válido",
+      });
+    }
+
+    const isExternal = await isPatientExternal(req.db, parseInt(id));
+
+    // Si devuelve null, el paciente no existe o está inactivo
+    if (isExternal === null) {
+      return res.status(404).json({
+        success: false,
+        error: "Paciente no encontrado o inactivo",
+      });
+    }
+
+    res.json({
+      success: true,
+      data: {
+        patient_id: parseInt(id),
+        is_external: isExternal,
+      },
+    });
+  } catch (err) {
+    logger.error("Error al verificar si el paciente es externo:", err.message);
+    res.status(500).json({
+      success: false,
+      error: "Error al verificar si el paciente es externo",
+    });
+  }
+};
+
 module.exports = {
   obtenerPacientes,
   obtenerPacientePorId,
@@ -705,4 +744,5 @@ module.exports = {
   restaurarPaciente,
   actualizarPaciente,
   obtenerPacientesActivosConClinica,
+  verificarSiPacienteEsExterno,
 };
