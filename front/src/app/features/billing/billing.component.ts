@@ -577,6 +577,7 @@ export class BillingComponent implements OnInit {
         )}`,
         invoice_date: new Date().toISOString().split('T')[0],
         sessions: inv.sessions,
+        progenitors_data: inv.progenitors_data,
       })
     );
 
