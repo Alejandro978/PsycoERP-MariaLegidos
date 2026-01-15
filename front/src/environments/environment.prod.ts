@@ -1,7 +1,7 @@
 export const environment = {
   production: true,
   api: {
-    baseUrl: 'https://millopsicologia.com/api',
+    baseUrl: 'https://psycoerp.psicoandante.com/api',
     timeout: 30000,
     version: 'v1',
   },

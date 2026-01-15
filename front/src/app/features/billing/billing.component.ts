@@ -137,9 +137,11 @@ export class BillingComponent implements OnInit {
   // Preview modal state
   isPreviewModalOpen = signal(false);
   previewInvoiceData = signal<InvoiceToGenerate | null>(null);
+  isPreviewingExistingInvoice = signal(false); // Indica si se está previsualizando una factura existente
 
   // Preview modal state for clinic invoices
   isClinicPreviewModalOpen = signal(false);
+  isPreviewingExistingClinicInvoice = signal(false); // Indica si se está previsualizando una factura de clínica existente
 
   // User data for invoice
   userData = signal<User | null>(null);
@@ -728,6 +730,7 @@ export class BillingComponent implements OnInit {
     const invoice = this.invoicesToGenerate().find((inv) => inv.dni === dni);
     if (invoice) {
       this.previewInvoiceData.set(invoice);
+      this.isPreviewingExistingInvoice.set(false); // Factura pendiente
       this.isPreviewModalOpen.set(true);
     }
   }
@@ -752,6 +755,7 @@ export class BillingComponent implements OnInit {
     };
 
     this.previewInvoiceData.set(previewData);
+    this.isPreviewingExistingInvoice.set(false); // Factura pendiente
     this.isPreviewModalOpen.set(true);
   }
 
@@ -773,6 +777,7 @@ export class BillingComponent implements OnInit {
     };
 
     this.previewInvoiceData.set(previewData);
+    this.isPreviewingExistingInvoice.set(true); // Factura existente
     this.isPreviewModalOpen.set(true);
   }
 
@@ -851,6 +856,7 @@ export class BillingComponent implements OnInit {
     };
 
     this.clinicInvoiceToGenerate.set(clinicInvoiceData);
+    this.isPreviewingExistingClinicInvoice.set(true); // Factura de clínica existente
     this.isClinicPreviewModalOpen.set(true);
   }
 
@@ -864,6 +870,7 @@ export class BillingComponent implements OnInit {
     }
 
     this.clinicInvoiceToGenerate.set(clinicInvoice);
+    this.isPreviewingExistingClinicInvoice.set(false); // Factura de clínica pendiente
     this.isClinicPreviewModalOpen.set(true);
   }
 
@@ -873,6 +880,7 @@ export class BillingComponent implements OnInit {
   closePreviewModal() {
     this.isPreviewModalOpen.set(false);
     this.previewInvoiceData.set(null);
+    this.isPreviewingExistingInvoice.set(false);
   }
 
   /**
@@ -1053,6 +1061,7 @@ export class BillingComponent implements OnInit {
   previewClinicInvoice() {
     const invoice = this.clinicInvoiceToGenerate();
     if (invoice) {
+      this.isPreviewingExistingClinicInvoice.set(false); // Desde modal de generación
       this.isClinicPreviewModalOpen.set(true);
     }
   }
@@ -1062,6 +1071,7 @@ export class BillingComponent implements OnInit {
    */
   closeClinicPreviewModal() {
     this.isClinicPreviewModalOpen.set(false);
+    this.isPreviewingExistingClinicInvoice.set(false);
   }
 
   /**

@@ -1,16 +1,16 @@
 export const environment = {
   production: false,
   api: {
-    baseUrl: 'https://test.millopsicologia.com/api',
+    baseUrl: 'https://test.psycoerp.psicoandante.com/api',
     timeout: 30000,
-    version: 'v1'
+    version: 'v1',
   },
   app: {
     name: 'PsycoERP (Test)',
-    version: '1.0.0'
+    version: '1.0.0',
   },
   features: {
     enableLogging: true,
-    enableMockData: false
-  }
+    enableMockData: false,
+  },
 };

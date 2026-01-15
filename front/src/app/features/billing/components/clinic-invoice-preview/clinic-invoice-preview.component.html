@@ -7,6 +7,7 @@
     <div class="flex items-center justify-between p-6 border-b bg-white">
       <h2 class="text-xl font-bold">Vista Previa - {{ clinicInvoiceData.invoice_number }}</h2>
       <div class="flex gap-2">
+        @if (isExistingInvoice) {
         <button data-slot="button" type="button" (click)="onDownload()"
           class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 border bg-background shadow-xs hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -17,6 +18,7 @@
           </svg>
           Descargar PDF
         </button>
+        }
         <button data-slot="button" type="button" (click)="onClose()"
           class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 hover:bg-accent hover:text-accent-foreground h-8 rounded-md gap-1.5 px-3">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"

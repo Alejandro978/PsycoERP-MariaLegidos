@@ -46,6 +46,7 @@ export class ClinicInvoicePreviewComponent {
   @Input({ required: true })
   clinicInvoiceData!: ClinicInvoicePreviewData | null;
   @Input({ required: true }) userData!: User | null;
+  @Input() isExistingInvoice: boolean = false; // Indica si es una factura existente o pendiente
 
   @Output() close = new EventEmitter<void>();
   @Output() download = new EventEmitter<void>();

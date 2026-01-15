@@ -30,6 +30,7 @@ export class InvoicePreviewComponent {
   @Input() isOpen: boolean = false;
   @Input() invoiceData: InvoicePreviewData | null = null;
   @Input() userData: User | null = null;
+  @Input() isExistingInvoice: boolean = false; // Indica si es una factura existente o pendiente
 
   @Output() onClose = new EventEmitter<void>();
   @Output() onPrint = new EventEmitter<void>();

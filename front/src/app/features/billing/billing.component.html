@@ -116,12 +116,12 @@
 
 <!-- Modal de vista previa de factura -->
 <app-invoice-preview [isOpen]="isPreviewModalOpen()" [invoiceData]="previewInvoiceData()" [userData]="userData()"
-  (onClose)="closePreviewModal()" (onPrint)="printInvoice()">
+  [isExistingInvoice]="isPreviewingExistingInvoice()" (onClose)="closePreviewModal()" (onPrint)="printInvoice()">
 </app-invoice-preview>
 
 <!-- Modal de vista previa de factura de clínica -->
 <app-clinic-invoice-preview [isOpen]="isClinicPreviewModalOpen()" [clinicInvoiceData]="clinicInvoiceToGenerate()"
-  [userData]="userData()" (close)="closeClinicPreviewModal()" (download)="downloadClinicInvoicePDF()">
+  [userData]="userData()" [isExistingInvoice]="isPreviewingExistingClinicInvoice()" (close)="closeClinicPreviewModal()" (download)="downloadClinicInvoicePDF()">
 </app-clinic-invoice-preview>
 
 <!-- Spinner overlay para generación masiva de facturas -->
