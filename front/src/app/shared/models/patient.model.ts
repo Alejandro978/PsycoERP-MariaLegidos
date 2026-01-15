@@ -33,9 +33,10 @@ export interface Patient {
   // Información adicional de la clínica
   nombre_clinica?: string;
   tipo_clinica?: string;
+  is_external?: boolean; // Indica si la clínica es externa
 
   // Campos calculados/automáticos
-  is_minor: boolean;
+  is_minor?: boolean;
 
   // Información de progenitores (solo para menores de edad)
   progenitor1_full_name?: string;
@@ -60,6 +61,7 @@ export interface PatientSelector {
   porcentaje: number;
   presencial?: boolean; // Added to handle mode selection
   special_price?: number; // Precio especial del paciente
+  clinicaExterna?: boolean; // Indica si la clínica del paciente es externa
 }
 
 // Backward compatibility interface for existing code

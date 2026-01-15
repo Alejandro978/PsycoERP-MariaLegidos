@@ -54,6 +54,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
 
   patientForm!: FormGroup;
   private clinicChangeSubscription?: Subscription;
+  private progenitor2Subscriptions: Subscription[] = [];
 
   // Options for selects
   protected genderOptions = [
@@ -82,11 +83,23 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     this.clinicChangeSubscription = this.patientForm.get('clinic_id')?.valueChanges.subscribe((clinicId) => {
       this.onClinicChange(clinicId);
     });
+
+    // Subscribe to progenitor 2 field changes for conditional validation
+    const progenitor2Fields = ['progenitor2_full_name', 'progenitor2_dni', 'progenitor2_phone'];
+    progenitor2Fields.forEach(fieldName => {
+      const subscription = this.patientForm.get(fieldName)?.valueChanges.subscribe(() => {
+        this.updateProgenitor2Validators();
+      });
+      if (subscription) {
+        this.progenitor2Subscriptions.push(subscription);
+      }
+    });
   }
 
   ngOnDestroy(): void {
     // Unsubscribe to prevent memory leaks
     this.clinicChangeSubscription?.unsubscribe();
+    this.progenitor2Subscriptions.forEach(sub => sub.unsubscribe());
   }
 
   ngOnChanges(changes: SimpleChanges): void {
@@ -243,6 +256,50 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     progenitor1FullName?.updateValueAndValidity();
     progenitor1Dni?.updateValueAndValidity();
     progenitor1Phone?.updateValueAndValidity();
+
+    // Also update progenitor 2 validators
+    this.updateProgenitor2Validators();
+  }
+
+  /**
+   * Update validators for progenitor 2 fields conditionally
+   * If any field has a value, all fields become required
+   */
+  private updateProgenitor2Validators(): void {
+    const isMinor = this.patientForm.get('is_minor')?.value;
+
+    // Only apply conditional validation if the patient is a minor
+    if (!isMinor) {
+      return;
+    }
+
+    const progenitor2FullName = this.patientForm.get('progenitor2_full_name');
+    const progenitor2Dni = this.patientForm.get('progenitor2_dni');
+    const progenitor2Phone = this.patientForm.get('progenitor2_phone');
+
+    // Check if any field has a value
+    const fullNameValue = progenitor2FullName?.value?.trim() || '';
+    const dniValue = progenitor2Dni?.value?.trim() || '';
+    const phoneValue = progenitor2Phone?.value?.trim() || '';
+
+    const hasAnyValue = fullNameValue || dniValue || phoneValue;
+
+    if (hasAnyValue) {
+      // If any field has value, all become required
+      progenitor2FullName?.setValidators([Validators.required, Validators.minLength(2)]);
+      progenitor2Dni?.setValidators([Validators.required, dniValidator()]);
+      progenitor2Phone?.setValidators([Validators.required, phoneValidator()]);
+    } else {
+      // If all are empty, remove required validators
+      progenitor2FullName?.clearValidators();
+      progenitor2Dni?.clearValidators();
+      progenitor2Phone?.clearValidators();
+    }
+
+    // Update validity without emitting events to avoid infinite loops
+    progenitor2FullName?.updateValueAndValidity({ emitEvent: false });
+    progenitor2Dni?.updateValueAndValidity({ emitEvent: false });
+    progenitor2Phone?.updateValueAndValidity({ emitEvent: false });
   }
 
   /**
@@ -323,9 +380,10 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
       return true;
     }
 
-    // If external clinic, only the above fields are required
+    // If external clinic, check if it's one of the editable required fields
     if (this.isExternalClinic) {
-      return false;
+      const externalRequired = ['status'];
+      return externalRequired.includes(fieldName);
     }
 
     // For internal clinics, check the field's validators
@@ -348,8 +406,12 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     if (this.patientForm.valid) {
       const formData = { ...this.patientForm.value };
 
-      // Ensure is_minor is always a boolean
-      formData.is_minor = Boolean(formData.is_minor);
+      // Add is_external from the selected clinic
+      const clinicId = formData.clinic_id || this.patientForm.get('clinic_id')?.value;
+      if (clinicId) {
+        const selectedClinic = this.clinics.find(clinic => clinic.id === clinicId);
+        formData.is_external = selectedClinic?.is_external || false;
+      }
 
       // Clean phone numbers and DNI: remove spaces, trim whitespace
       if (formData.phone) {
@@ -371,8 +433,14 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
         formData.progenitor2_dni = formData.progenitor2_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
       }
 
+      // Get is_minor value before deleting it
+      const isMinor = Boolean(formData.is_minor);
+
+      // Remove is_minor from payload (backend calculates this from birth_date)
+      delete formData.is_minor;
+
       // If not minor, remove progenitor fields from payload
-      if (!formData.is_minor) {
+      if (!isMinor) {
         delete formData.progenitor1_full_name;
         delete formData.progenitor1_dni;
         delete formData.progenitor1_phone;
@@ -382,8 +450,10 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
       }
 
       if (this.isEditing && this.patient) {
+        // Merge patient data with form data, excluding is_minor
+        const { is_minor: _, ...patientWithoutIsMinor } = this.patient;
         const updatedPatient: Patient = {
-          ...this.patient,
+          ...patientWithoutIsMinor,
           ...formData,
         };
         this.onSave.emit(updatedPatient);
@@ -552,7 +622,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     const fieldsToClear = [
       'email', 'phone', 'dni', 'birth_date', 'gender', 'occupation',
       'street', 'street_number', 'door', 'postal_code', 'city', 'province',
-      'treatment_start_date', 'status'
+      'treatment_start_date'
     ];
 
     fieldsToClear.forEach(fieldName => {
@@ -646,30 +716,33 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
    * Apply restrictions for editing a patient from an external clinic
    */
   private applyExternalClinicEditRestrictions(): void {
-    // Disable all fields except basic info, special_price, and progenitor fields (handled separately)
+    // Disable all fields except basic info, special_price, status, and progenitor fields (handled separately)
     const fieldsToDisable = [
       'email', 'phone', 'dni', 'birth_date', 'gender', 'occupation',
       'street', 'street_number', 'door', 'postal_code', 'city', 'province',
-      'treatment_start_date', 'status', 'clinic_id'
+      'treatment_start_date', 'clinic_id'
     ];
 
     fieldsToDisable.forEach(fieldName => {
       this.patientForm.get(fieldName)?.disable();
     });
 
-    // Enable only first_name, last_name, and special_price
+    // Enable first_name, last_name, special_price, and status
     this.patientForm.get('first_name')?.enable();
     this.patientForm.get('last_name')?.enable();
     this.patientForm.get('special_price')?.enable();
+    this.patientForm.get('status')?.enable();
 
     // Ensure these fields have proper validators
     this.patientForm.get('first_name')?.setValidators([Validators.required, Validators.minLength(2)]);
     this.patientForm.get('last_name')?.setValidators([Validators.required, Validators.minLength(2)]);
     this.patientForm.get('special_price')?.setValidators([Validators.min(0)]);
+    this.patientForm.get('status')?.setValidators([Validators.required]);
 
     this.patientForm.get('first_name')?.updateValueAndValidity();
     this.patientForm.get('last_name')?.updateValueAndValidity();
     this.patientForm.get('special_price')?.updateValueAndValidity();
+    this.patientForm.get('status')?.updateValueAndValidity();
 
     // Note: Progenitor fields will be handled by updateProgenitorFieldsState()
   }
@@ -681,23 +754,24 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     // Disable all fields first
     this.disableAllFieldsExceptClinic();
 
-    // Enable only first_name, last_name, and special_price
-    const fieldsToEnable = ['first_name', 'last_name', 'special_price'];
+    // Enable only first_name, last_name, special_price, and status
+    const fieldsToEnable = ['first_name', 'last_name', 'special_price', 'status'];
     fieldsToEnable.forEach(fieldName => {
       const control = this.patientForm.get(fieldName);
       control?.enable();
     });
 
-    // Update validators: only first_name, last_name are required
+    // Update validators: first_name, last_name, and status are required
     this.patientForm.get('first_name')?.setValidators([Validators.required, Validators.minLength(2)]);
     this.patientForm.get('last_name')?.setValidators([Validators.required, Validators.minLength(2)]);
     this.patientForm.get('special_price')?.setValidators([Validators.min(0)]);
+    this.patientForm.get('status')?.setValidators([Validators.required]);
 
     // Clear validators for other fields
     const fieldsToCleanValidators = [
       'email', 'phone', 'dni', 'birth_date', 'gender', 'street',
       'street_number', 'postal_code', 'city', 'province',
-      'treatment_start_date', 'status'
+      'treatment_start_date'
     ];
     fieldsToCleanValidators.forEach(fieldName => {
       this.patientForm.get(fieldName)?.clearValidators();
@@ -707,6 +781,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     this.patientForm.get('first_name')?.updateValueAndValidity();
     this.patientForm.get('last_name')?.updateValueAndValidity();
     this.patientForm.get('special_price')?.updateValueAndValidity();
+    this.patientForm.get('status')?.updateValueAndValidity();
   }
 
   /**

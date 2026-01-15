@@ -139,24 +139,24 @@
         </div>
       </div>
 
-      <!-- Progenitor 2 (Opcional) -->
+      <!-- Progenitor 2 (Opcional, pero si se añade algo, todo es obligatorio) -->
       <div class="space-y-4 pt-2">
         <h4 class="text-sm font-semibold text-gray-700 flex items-center gap-2">
           <span class="text-amber-600">Progenitor 2</span>
-          <span class="text-gray-500 text-xs">(Opcional)</span>
+          <span class="text-gray-500 text-xs">(Opcional - Si añades algo, todos los campos son obligatorios)</span>
         </h4>
 
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
           <app-form-input controlName="progenitor2_full_name" label="Nombre completo"
-            placeholder="Ej: Carlos Martínez Ruiz" [required]="false">
+            placeholder="Ej: Carlos Martínez Ruiz" [required]="isFieldRequired('progenitor2_full_name')">
           </app-form-input>
 
           <app-form-input controlName="progenitor2_dni" label="DNI / NIE"
-            placeholder="Ej: 87654321C" [required]="false">
+            placeholder="Ej: 87654321C" [required]="isFieldRequired('progenitor2_dni')">
           </app-form-input>
 
           <app-form-input controlName="progenitor2_phone" label="Teléfono" type="tel"
-            placeholder="Ej: +34 688 777 666" [required]="false">
+            placeholder="Ej: +34 688 777 666" [required]="isFieldRequired('progenitor2_phone')">
           </app-form-input>
         </div>
       </div>
