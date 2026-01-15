@@ -114,6 +114,9 @@ export class NewSessionFormComponent implements OnInit {
   /** Net price signal for reactivity */
   netPrice = signal<number>(0);
 
+  /** External clinic flag */
+  isExternalClinic = signal<boolean>(false);
+
   /** Tab state */
   activeTab = signal<'details' | 'clinical-notes'>('details');
 
@@ -391,28 +394,31 @@ export class NewSessionFormComponent implements OnInit {
         { value: formValues.patient_id, disabled: isEditMode },
         [Validators.required],
       ],
-      session_date: [formValues.session_date, [Validators.required]],
+      session_date: [
+        { value: formValues.session_date, disabled: !isEditMode },
+        [Validators.required]
+      ],
       start_time: [
-        formValues.start_time,
+        { value: formValues.start_time, disabled: !isEditMode },
         [Validators.required, this.timeRangeValidator],
       ],
       end_time: [
-        formValues.end_time,
+        { value: formValues.end_time, disabled: !isEditMode },
         [Validators.required, this.timeRangeValidator],
       ],
       mode: [
-        { value: formValues.mode, disabled: false },
+        { value: formValues.mode, disabled: !isEditMode },
         [Validators.required],
       ],
       base_price: [
-        formValues.base_price,
+        { value: formValues.base_price, disabled: !isEditMode },
         [Validators.required, Validators.min(0.01)],
       ],
       payment_method: [
         { value: formValues.payment_method, disabled: !isEditMode },
         [Validators.required],
       ],
-      notes: [formValues.notes],
+      notes: [{ value: formValues.notes, disabled: !isEditMode }],
     });
 
     // Add value changes listener to validate time order and duration
@@ -433,18 +439,30 @@ export class NewSessionFormComponent implements OnInit {
       const patient = this.patients().find((p) => p.idPaciente === patientId);
       this.selectedPatient.set(patient || null);
 
+      // Update isExternalClinic signal
+      const isExternal = patient?.clinicaExterna || false;
+      this.isExternalClinic.set(isExternal);
+
       // Update base_price and mode when patient changes (only in create mode)
       if (patient && !isEditMode) {
         const mode = patient.presencial ? 'presencial' : 'online';
+
+        // Use special_price if it exists and is > 0, otherwise use clinic price
+        const priceToUse = (patient.special_price && patient.special_price > 0)
+          ? patient.special_price
+          : patient.precioSesion;
+
         this.sessionForm.patchValue({
-          base_price: patient.precioSesion,
+          base_price: priceToUse,
           mode: mode,
         });
 
         // Calculate and set net price for new sessions
-        const calculatedNetPrice =
-          patient.precioSesion * (patient.porcentaje / 100);
+        const calculatedNetPrice = priceToUse * (patient.porcentaje / 100);
         this.netPrice.set(calculatedNetPrice);
+
+        // Apply field restrictions based on clinic type
+        this.applyFieldRestrictions(isExternal);
       }
     });
 
@@ -473,6 +491,36 @@ export class NewSessionFormComponent implements OnInit {
     this.basePrice.set(this.sessionForm.get('base_price')?.value || 0);
   }
 
+  /**
+   * Apply field restrictions based on clinic type
+   */
+  private applyFieldRestrictions(isExternal: boolean): void {
+    if (isExternal) {
+      // For external clinics: enable date, times, base_price and notes
+      // mode and payment_method are shown as disabled in template ("No aplica")
+      this.sessionForm.get('session_date')?.enable();
+      this.sessionForm.get('start_time')?.enable();
+      this.sessionForm.get('end_time')?.enable();
+      this.sessionForm.get('base_price')?.enable();
+      this.sessionForm.get('notes')?.enable();
+    } else {
+      // Enable all fields for internal clinics
+      this.sessionForm.get('session_date')?.enable();
+      this.sessionForm.get('start_time')?.enable();
+      this.sessionForm.get('end_time')?.enable();
+      this.sessionForm.get('mode')?.enable();
+      this.sessionForm.get('base_price')?.enable();
+      this.sessionForm.get('notes')?.enable();
+
+      // payment_method should remain disabled in create mode, enabled in edit mode
+      if (this.isEditMode) {
+        this.sessionForm.get('payment_method')?.enable();
+      } else {
+        this.sessionForm.get('payment_method')?.disable();
+      }
+    }
+  }
+
   private loadPatients(): void {
     this.http
       .get<{ data: PatientSelector[] }>(
@@ -492,6 +540,10 @@ export class NewSessionFormComponent implements OnInit {
             if (patient) {
               this.selectedPatient.set(patient);
 
+              // Update isExternalClinic signal
+              const isExternal = patient.clinicaExterna || false;
+              this.isExternalClinic.set(isExternal);
+
               // Set the mode based on patient's presencial setting
               const mode = patient.presencial ? 'presencial' : 'online';
 
@@ -504,6 +556,9 @@ export class NewSessionFormComponent implements OnInit {
               // Update basePrice and netPrice signals from backend
               this.basePrice.set(sessionData.SessionDetailData.price);
               this.netPrice.set(sessionData.SessionDetailData.net_price);
+
+              // Apply field restrictions in edit mode
+              this.applyFieldRestrictions(isExternal);
             }
           }
         },
@@ -1017,6 +1072,9 @@ export class NewSessionFormComponent implements OnInit {
    * Close the modal and navigate to the selected patient's detail page
    */
   viewPatientDetail(): void {
+    // Prevent navigation for external clinics
+    if (this.isExternalClinic()) return;
+
     const patient = this.selectedPatientData;
     if (!patient) return;
 

@@ -5,8 +5,15 @@
     <div
       class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-2 pt-2">
       <div class="flex items-start justify-between">
-        <div>
-          <div class="font-semibold text-base">{{ patientFullName }}</div>
+        <div class="flex-1">
+          <div class="flex items-center gap-2">
+            <div class="font-semibold text-base">{{ patientFullName }}</div>
+            @if (patient.is_external) {
+            <span class="inline-flex items-center rounded-md bg-orange-50 px-2 py-1 text-xs font-medium text-orange-700 ring-1 ring-inset ring-orange-600/20">
+              Clínica Externa
+            </span>
+            }
+          </div>
           <p class="text-muted-foreground mt-1 text-xs">DNI: {{ patient.dni }}</p>
         </div>
       </div>
@@ -42,8 +49,8 @@
     <!-- Hover overlay with buttons -->
     <div
       class="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity duration-300 flex items-center justify-center gap-2">
-      <!-- Ver Detalle button - only for active patients -->
-      @if (!isDeletedView) {
+      <!-- Ver Detalle button - only for active patients and internal clinics -->
+      @if (!isDeletedView && !patient.is_external) {
       <button type="button"
         class="justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:ring-[3px] aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 aria-invalid:border-destructive bg-[#6aa591] text-white shadow-xs hover:bg-[#6aa591]/90 h-8 rounded-md px-3 has-[>svg]:px-2.5 flex items-center gap-2"
         (click)="$event.stopPropagation(); onViewDetail.emit(patient)">

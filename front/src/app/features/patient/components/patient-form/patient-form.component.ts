@@ -321,7 +321,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     if (isMinor) {
       // Enable progenitor fields for minors
       progenitorFields.forEach(fieldName => {
-        this.patientForm.get(fieldName)?.enable();
+        this.patientForm.get(fieldName)?.enable({ emitEvent: false });
       });
 
       // Update validators
@@ -329,7 +329,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     } else {
       // Disable progenitor fields for non-minors
       progenitorFields.forEach(fieldName => {
-        this.patientForm.get(fieldName)?.disable();
+        this.patientForm.get(fieldName)?.disable({ emitEvent: false });
       });
 
       // Clear validators
@@ -608,11 +608,11 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     ];
 
     fieldNames.forEach(fieldName => {
-      this.patientForm.get(fieldName)?.disable();
+      this.patientForm.get(fieldName)?.disable({ emitEvent: false });
     });
 
     // Ensure clinic_id is enabled
-    this.patientForm.get('clinic_id')?.enable();
+    this.patientForm.get('clinic_id')?.enable({ emitEvent: false });
   }
 
   /**
@@ -724,14 +724,14 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     ];
 
     fieldsToDisable.forEach(fieldName => {
-      this.patientForm.get(fieldName)?.disable();
+      this.patientForm.get(fieldName)?.disable({ emitEvent: false });
     });
 
     // Enable first_name, last_name, special_price, and status
-    this.patientForm.get('first_name')?.enable();
-    this.patientForm.get('last_name')?.enable();
-    this.patientForm.get('special_price')?.enable();
-    this.patientForm.get('status')?.enable();
+    this.patientForm.get('first_name')?.enable({ emitEvent: false });
+    this.patientForm.get('last_name')?.enable({ emitEvent: false });
+    this.patientForm.get('special_price')?.enable({ emitEvent: false });
+    this.patientForm.get('status')?.enable({ emitEvent: false });
 
     // Ensure these fields have proper validators
     this.patientForm.get('first_name')?.setValidators([Validators.required, Validators.minLength(2)]);
@@ -758,7 +758,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     const fieldsToEnable = ['first_name', 'last_name', 'special_price', 'status'];
     fieldsToEnable.forEach(fieldName => {
       const control = this.patientForm.get(fieldName);
-      control?.enable();
+      control?.enable({ emitEvent: false });
     });
 
     // Update validators: first_name, last_name, and status are required
@@ -797,7 +797,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     ];
 
     allFields.forEach(fieldName => {
-      this.patientForm.get(fieldName)?.enable();
+      this.patientForm.get(fieldName)?.enable({ emitEvent: false });
     });
 
     // Re-apply original validators for required fields
@@ -836,7 +836,7 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
     ];
 
     allFields.forEach(fieldName => {
-      this.patientForm.get(fieldName)?.enable();
+      this.patientForm.get(fieldName)?.enable({ emitEvent: false });
     });
 
     // Re-apply original validators for required fields

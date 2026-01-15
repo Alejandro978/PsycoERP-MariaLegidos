@@ -5,7 +5,7 @@
   [deleteButtonText]="isEditMode ? 'Borrar sesión' : null" [isCancelled]="isCancelledSession()"
   (onCancelSession)="onCancelSession()" (onDeleteSession)="onDeleteSession()">
 
-  <!-- Tabs Navigation (only in edit mode) -->
+  <!-- Tabs Navigation (only in edit mode and not external clinic) -->
   @if (isEditMode) {
   <div class="border-b border-gray-200 px-4 sm:px-6 pt-4">
     <nav class="flex gap-4" aria-label="Tabs">
@@ -14,6 +14,7 @@
         class="whitespace-nowrap py-2 px-1 border-b-2 text-sm transition-colors">
         Detalles de la sesión
       </button>
+      @if (!isExternalClinic()) {
       <button type="button" (click)="activeTab.set('clinical-notes')"
         [class]="activeTab() === 'clinical-notes' ? 'border-cyan-500 text-cyan-600 font-medium' : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'"
         class="whitespace-nowrap py-2 px-1 border-b-2 text-sm transition-colors">
@@ -22,6 +23,7 @@
         <span class="ml-2 bg-gray-100 text-gray-600 py-0.5 px-2 rounded-full text-xs">{{ notes().length }}</span>
         }
       </button>
+      }
     </nav>
   </div>
   }
@@ -59,8 +61,9 @@
 
         <!-- View patient detail button -->
         <div class="pl-3">
-          <button type="button" (click)="viewPatientDetail()"
-            class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors">
+          <button type="button" (click)="viewPatientDetail()" [disabled]="isExternalClinic()"
+            class="inline-flex items-center gap-2 px-3 py-1.5 bg-white border border-gray-200 rounded-md text-sm text-gray-700 hover:bg-gray-50 transition-colors disabled:opacity-50 disabled:cursor-not-allowed disabled:hover:bg-white"
+            [title]="isExternalClinic() ? 'No disponible para clínicas externas' : 'Ver ficha del paciente'">
             <svg class="h-4 w-4 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
               <path stroke-linecap="round" stroke-linejoin="round" d="M15 12H3m0 0l4-4m-4 4l4 4M21 12v6a2 2 0 0 1-2 2H7" />
             </svg>
@@ -174,12 +177,36 @@
 
         <!-- Modalidad -->
         <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+          @if (isExternalClinic()) {
+          <!-- Modalidad - External Clinic (Disabled) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Modalidad
+            </label>
+            <div class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+              <span class="text-gray-500">No aplica</span>
+            </div>
+          </div>
+
+          <!-- Método de pago - External Clinic (Disabled) -->
+          <div>
+            <label class="block text-sm font-medium text-gray-700 mb-2">
+              Método de pago
+            </label>
+            <div class="flex h-10 w-full rounded-md border border-gray-300 bg-gray-50 px-3 py-2 text-sm">
+              <span class="text-gray-500">No aplica</span>
+            </div>
+          </div>
+          } @else {
+          <!-- Modalidad - Internal Clinic (Enabled) -->
           <app-form-input controlName="mode" label="Modalidad" type="select" [options]="modeOptions" [required]="true">
           </app-form-input>
 
+          <!-- Método de pago - Internal Clinic (Enabled) -->
           <app-form-input controlName="payment_method" label="Método de pago" type="select"
             [options]="paymentMethodOptions" [required]="true">
           </app-form-input>
+          }
         </div>
       </div>
     </section>
@@ -217,8 +244,8 @@
   </form>
   }
 
-  <!-- Tab Content: Clinical Notes -->
-  @if (activeTab() === 'clinical-notes' && isEditMode) {
+  <!-- Tab Content: Clinical Notes (hidden for external clinics) -->
+  @if (activeTab() === 'clinical-notes' && isEditMode && !isExternalClinic()) {
   <div class="p-4 sm:p-6 h-full flex flex-col">
     <!-- Header with Search and New Note Button -->
     <div class="flex items-center justify-between gap-4 mb-4 sm:mb-6">
