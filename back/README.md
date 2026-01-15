@@ -89,7 +89,7 @@ El sistema utiliza Google Calendar API para crear sesiones de Google Meet autom�
 El sistema detecta automáticamente el entorno basándose en el hostname de la petición (similar al patrón usado en `config/db.js`):
 
 - **localhost** → Usa credenciales de **TEST**
-- **Hostname contiene "test."** (ej: `test.millopsicologia.com`) → Usa credenciales de **TEST**
+- **Hostname contiene "test."** (ej: `test.psicoandante.com`) → Usa credenciales de **TEST**
 - **Cualquier otro hostname** → Usa credenciales de **PRODUCCIÓN**
 
 **Archivos de credenciales esperados:**
@@ -136,7 +136,7 @@ Para evitar afectar el calendario de producción durante el desarrollo, necesita
 4. Name: "Psychology ERP Backend Test"
 5. **Authorized redirect URIs**:
    - `http://localhost:3000/oauth/callback`
-   - `http://test.millopsicologia.com:3000/oauth/callback` (si aplica)
+   - `http://test.psicoandante.com:3000/oauth/callback` (si aplica)
 6. Click "Create"
 7. **Descarga el JSON** (botón de descarga)
 

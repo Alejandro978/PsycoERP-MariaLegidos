@@ -32,11 +32,14 @@ const getPendingReminders = async (db) => {
       IF(r.id IS NOT NULL, true, false) as reminder_sent
     FROM sessions s
     INNER JOIN patients p ON s.patient_id = p.id
+    INNER JOIN clinics c ON p.clinic_id = c.id
     LEFT JOIN reminders r ON s.id = r.session_id
     WHERE s.session_date = ?
       AND s.status != 'cancelada'
       AND s.is_active = true
       AND p.is_active = true
+      AND c.is_active = true
+      AND c.is_external = 0
     ORDER BY s.start_time ASC
   `;
 
@@ -61,14 +64,18 @@ const createReminder = async (db, sessionId) => {
       s.status,
       p.first_name as patient_name,
       p.phone as patient_phone,
-      c.name as clinic_name,
-      c.address as clinic_address,
+      cli.name as clinic_name,
+      cli.address as clinic_address,
       r.id as reminder_id
     FROM sessions s
     INNER JOIN patients p ON s.patient_id = p.id
-    LEFT JOIN clinics c ON s.clinic_id = c.id
+    INNER JOIN clinics cli ON p.clinic_id = cli.id
     LEFT JOIN reminders r ON s.id = r.session_id
-    WHERE s.id = ? AND s.is_active = true AND p.is_active = true
+    WHERE s.id = ? 
+      AND s.is_active = true 
+      AND p.is_active = true
+      AND cli.is_active = true
+      AND cli.is_external = 0
   `;
 
   const [sessionResult] = await db.execute(checkSessionQuery, [sessionId]);

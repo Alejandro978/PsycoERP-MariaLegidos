@@ -9,6 +9,7 @@ Se ha creado un sistema centralizado de logging que añade **automáticamente** 
 ## 🔧 Archivos Actualizados
 
 ### ✅ **Archivos Core (100% completado)**:
+
 - ✅ `utils/logger.js` - **Módulo centralizado** de logging
 - ✅ `config/googleMeet.js` - Logs de OAuth y renovación tokens
 - ✅ `utils/googleMeetUtils.js` - Logs de creación Google Meet
@@ -17,6 +18,7 @@ Se ha creado un sistema centralizado de logging que añade **automáticamente** 
 - ✅ **Todos los controllers** - `console.*` reemplazado por `logger.*`
 
 ### ⚠️ **Pendiente de verificar imports**:
+
 Los `console.log/error/warn` ya están reemplazados por `logger.*` en todos los controllers, pero algunos imports de logger pueden estar mal posicionados.
 
 ---
@@ -24,39 +26,42 @@ Los `console.log/error/warn` ya están reemplazados por `logger.*` en todos los 
 ## 📚 Uso del Logger
 
 ### **Antes** (sin timestamps):
+
 ```javascript
-console.log("Usuario creado");                    // Usuario creado
-console.error("Error al crear:", err.message);   // Error al crear: Database error
-console.warn("Token expirado");                   // Token expirado
+console.log("Usuario creado"); // Usuario creado
+console.error("Error al crear:", err.message); // Error al crear: Database error
+console.warn("Token expirado"); // Token expirado
 ```
 
 ### **Después** (con timestamps automáticos):
+
 ```javascript
 const logger = require("../../utils/logger");
 
-logger.log("Usuario creado");                     // [22/10/2025 20:15:30] Usuario creado
-logger.error("Error al crear:", err.message);    // [22/10/2025 20:15:30] ❌ Error al crear: Database error
-logger.warn("Token expirado");                    // [22/10/2025 20:15:30] ⚠️  Token expirado
+logger.log("Usuario creado"); // [22/10/2025 20:15:30] Usuario creado
+logger.error("Error al crear:", err.message); // [22/10/2025 20:15:30] ❌ Error al crear: Database error
+logger.warn("Token expirado"); // [22/10/2025 20:15:30] ⚠️  Token expirado
 ```
 
 ---
 
 ## 🎯 Métodos Disponibles
 
-| Método | Uso | Emoji |
-|--------|-----|-------|
-| `logger.log()` | Logs normales/info | - |
-| `logger.error()` | Errores | ❌ |
-| `logger.warn()` | Advertencias | ⚠️ |
-| `logger.info()` | Información | ℹ️ |
-| `logger.success()` | Operaciones exitosas | ✅ |
-| `logger.debug()` | Debug (solo desarrollo) | 🐛 |
+| Método             | Uso                     | Emoji |
+| ------------------ | ----------------------- | ----- |
+| `logger.log()`     | Logs normales/info      | -     |
+| `logger.error()`   | Errores                 | ❌    |
+| `logger.warn()`    | Advertencias            | ⚠️    |
+| `logger.info()`    | Información             | ℹ️    |
+| `logger.success()` | Operaciones exitosas    | ✅    |
+| `logger.debug()`   | Debug (solo desarrollo) | 🐛    |
 
 ---
 
 ## 📋 Ejemplos Prácticos
 
 ### **Logs de Google OAuth** (ya actualizado):
+
 ```javascript
 // config/googleMeet.js
 logger.log(`🔐 Google OAuth - Environment: ${paths.environment}`);
@@ -65,12 +70,14 @@ logger.error("Error initializing Google Auth:", error.message);
 ```
 
 **Output**:
+
 ```
 [22/10/2025 20:14:15] 🔐 Google OAuth - Environment: PRODUCTION
 [22/10/2025 20:15:00] ✅ Token refreshed automatically for PRODUCTION
 ```
 
 ### **Logs de Recordatorios**:
+
 ```javascript
 // controllers/reminders/reminders_controller.js
 logger.log("Google Meet creado exitosamente");
@@ -79,6 +86,7 @@ logger.warn("Fallback a enlace falso:", error.message);
 ```
 
 **Output**:
+
 ```
 [22/10/2025 20:16:30] Google Meet creado exitosamente
 [22/10/2025 20:17:45] ❌ Error al crear recordatorio: invalid_grant
@@ -89,14 +97,16 @@ logger.warn("Fallback a enlace falso:", error.message);
 ## 🚀 Beneficios
 
 ### **Para Debugging**:
+
 ✅ Puedes filtrar logs por fecha/hora exacta
 ✅ Sabes cuándo ocurrió cada error
 ✅ Puedes correlacionar eventos temporalmente
 
 ### **Para PM2 Logs**:
+
 ```bash
 # Ahora verás timestamps en los logs de PM2
-pm2 logs millopsicologia-api
+pm2 logs psicoandante-api
 
 # Output:
 [22/10/2025 20:14:15] 🔐 Google OAuth - Environment: PRODUCTION
@@ -105,15 +115,16 @@ pm2 logs millopsicologia-api
 ```
 
 ### **Para Análisis**:
+
 ```bash
 # Filtrar logs de una hora específica
-grep "22/10/2025 20:" ~/.pm2/logs/millopsicologia-api-out.log
+grep "22/10/2025 20:" ~/.pm2/logs/psicoandante-api-out.log
 
 # Filtrar errores de hoy
-grep "22/10/2025" ~/.pm2/logs/millopsicologia-api-error.log | grep "❌"
+grep "22/10/2025" ~/.pm2/logs/psicoandante-api-error.log | grep "❌"
 
 # Buscar renovaciones de token
-grep "Token refreshed automatically" ~/.pm2/logs/millopsicologia-api-out.log
+grep "Token refreshed automatically" ~/.pm2/logs/psicoandante-api-out.log
 ```
 
 ---
@@ -128,6 +139,7 @@ const logger = require("../../utils/logger");
 ```
 
 ### **Script de verificación**:
+
 ```bash
 # Verificar qué archivos usan logger pero no lo importan
 cd /Users/dguerrero/Desktop/Everything/Projects/Psyco/PsychologyERP-demo/back
@@ -145,6 +157,7 @@ done
 Si algún controller tiene el import mal puesto:
 
 ### **Antes** (mal):
+
 ```javascript
 const {
 const logger = require("../../utils/logger");  // ← Dentro de destructuring ❌
@@ -154,6 +167,7 @@ const logger = require("../../utils/logger");  // ← Dentro de destructuring �
 ```
 
 ### **Después** (correcto):
+
 ```javascript
 const {
   getSessions,
