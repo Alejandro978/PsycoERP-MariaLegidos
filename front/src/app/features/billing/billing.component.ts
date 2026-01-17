@@ -1013,7 +1013,7 @@ export class BillingComponent implements OnInit {
       total_net_with_irpf: totalNetWithIrpf,
       invoice_number: invoiceNumber,
       invoice_date: invoiceDate,
-      concept: `Servicios de Psicología`,
+      concept: `Derivación sesión psicología`,
       total: selectedClinic.total_net_clinic,
     };
   }
@@ -1085,7 +1085,7 @@ export class BillingComponent implements OnInit {
 
     this.isGeneratingBulkInvoices.set(true);
 
-    const concept = 'Servicios de Psicología';
+    const concept = `Derivación sesión psicología`;
 
     this.billingService
       .emitClinicInvoice(
@@ -1227,7 +1227,8 @@ export class BillingComponent implements OnInit {
         <!-- Header -->
         <div style="margin-bottom: 32px;">
           <div style="display: flex; justify-content: space-between; align-items: start;">
-            <div>
+            <div style="display: flex; align-items: center; gap: 16px;">
+              <img src="assets/logo/logo.png" alt="Logo" style="height: 64px; width: auto;">
               <h1 style="font-size: 36px; font-weight: 900; color: #6aa591; margin: 0;">FACTURA</h1>
             </div>
             <div style="text-align: right;">

@@ -110,9 +110,17 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
       // Aplicar la lógica de validación después de poblar el formulario
       this.updateAddressValidation(isOnline, isExternal);
-      this.updateCifValidation(this.clinica.is_billable || false);
-      this.updateFiscalNameValidation(this.clinica.is_billable || false);
-      this.updateInvoiceAddressValidation(this.clinica.is_billable || false);
+
+      // Si es externa, forzar is_billable a true y deshabilitar el checkbox
+      if (isExternal) {
+        this.clinicaForm.get('is_billable')?.setValue(true);
+        this.clinicaForm.get('is_billable')?.disable();
+      }
+
+      const isBillable = isExternal ? true : (this.clinica.is_billable || false);
+      this.updateCifValidation(isBillable);
+      this.updateFiscalNameValidation(isBillable);
+      this.updateInvoiceAddressValidation(isBillable);
     } else {
       this.resetForm();
     }
@@ -139,6 +147,9 @@ export class ClinicFormComponent implements OnInit, OnChanges {
     this.updateCifValidation(false);
     this.updateFiscalNameValidation(false);
     this.updateInvoiceAddressValidation(false);
+
+    // Habilitar el checkbox de facturable al resetear
+    this.clinicaForm.get('is_billable')?.enable();
   }
 
   private handleOnlineChange(isOnline: boolean): void {
@@ -147,6 +158,8 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       this.clinicaForm.get('is_external')?.setValue(false, { emitEvent: false });
       // Deshabilitar y limpiar address
       this.disableAndClearAddress();
+      // Habilitar el checkbox de facturable (ya que no es externa)
+      this.clinicaForm.get('is_billable')?.enable();
     } else {
       // Si se desmarca online, habilitar address solo si is_external tampoco está marcado
       const isExternal = this.clinicaForm.get('is_external')?.value;
@@ -162,12 +175,17 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       this.clinicaForm.get('is_online')?.setValue(false, { emitEvent: false });
       // Deshabilitar y limpiar address
       this.disableAndClearAddress();
+      // Marcar automáticamente como facturable y deshabilitar el checkbox
+      this.clinicaForm.get('is_billable')?.setValue(true);
+      this.clinicaForm.get('is_billable')?.disable();
     } else {
       // Si se desmarca externa, habilitar address solo si is_online tampoco está marcado
       const isOnline = this.clinicaForm.get('is_online')?.value;
       if (!isOnline) {
         this.enableAddress();
       }
+      // Habilitar el checkbox de facturable
+      this.clinicaForm.get('is_billable')?.enable();
     }
   }
 

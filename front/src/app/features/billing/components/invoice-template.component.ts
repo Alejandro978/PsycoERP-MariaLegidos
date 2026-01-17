@@ -18,7 +18,8 @@ import { ProgenitorInfo } from '../models/billing.models';
         <!-- Invoice Header -->
         <div class="mb-8">
           <div class="flex justify-between items-start">
-            <div>
+            <div class="flex items-center gap-4">
+              <img src="assets/logo/logo.png" alt="Logo" class="h-16 w-auto">
               <h1 class="text-4xl font-black text-primary">FACTURA</h1>
             </div>
             <div class="text-right">
@@ -85,7 +86,7 @@ import { ProgenitorInfo } from '../models/billing.models';
               <tbody class="divide-y divide-gray-200">
                 @for (session of invoiceData.sessions || []; track session.session_id; let isOdd = $odd) {
                   <tr [class.bg-gray-50]="isOdd" [class.bg-white]="!isOdd">
-                    <td class="px-4 py-3 font-medium text-gray-900">Sesión @if (userData) {{{ userData.name }}}</td>
+                    <td class="px-4 py-3 font-medium text-gray-900">Sesión psicología</td>
                     <td class="px-4 py-3 text-gray-700">{{ session.session_date }}</td>
                     <td class="px-4 py-3 text-right text-gray-700">{{ formatCurrency(session.price) }}</td>
                     <td class="px-4 py-3 text-center text-gray-700">1</td>
