@@ -1,0 +1,207 @@
+<div class="min-h-screen p-6" style="background-color: rgb(248, 250, 252);">
+
+  <!-- HEADER -->
+  <div class="mb-6">
+    <h1 class="text-3xl font-black font-montserrat" style="color: rgb(15, 23, 41);">
+      Invitaciones de Pacientes
+    </h1>
+    <p class="text-base mt-2" style="color: rgb(101, 117, 139);">
+      {{ totalInvitations() }} invitaciones totales
+    </p>
+  </div>
+
+  <!-- FILTROS Y BOTON GENERAR -->
+  <div class="card-elevated p-4 mb-6">
+    <div class="flex flex-col md:flex-row gap-4">
+
+      <!-- Filtro por Estado -->
+      <select
+        [(ngModel)]="filters.estado"
+        (change)="applyFilters()"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[200px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+        <option value="">Todos los estados</option>
+        <option value="pending">Pendiente</option>
+        <option value="used">Usado</option>
+        <option value="expired">Expirado</option>
+      </select>
+
+      <!-- Filtro Fecha Desde -->
+      <input
+        type="date"
+        [(ngModel)]="filters.fecha_desde"
+        (change)="applyFilters()"
+        placeholder="Desde"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[180px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+
+      <!-- Filtro Fecha Hasta -->
+      <input
+        type="date"
+        [(ngModel)]="filters.fecha_hasta"
+        (change)="applyFilters()"
+        placeholder="Hasta"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[180px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+
+      <!-- Spacer -->
+      <div class="flex-1"></div>
+
+      <!-- Boton Generar -->
+      <button
+        (click)="generateInvitation()"
+        [disabled]="loading()"
+        class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap gap-2 disabled:opacity-50"
+        style="background-color: rgb(60, 131, 246); color: rgb(255, 255, 255); border-radius: 0.5rem; font-weight: 500; box-shadow: rgba(15, 23, 41, 0.1) 0px 4px 6px -1px;">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+          <path d="M5 12h14"></path>
+          <path d="M12 5v14"></path>
+        </svg>
+        {{ loading() ? 'Generando...' : 'Generar Invitacion' }}
+      </button>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card-elevated overflow-hidden">
+    <div class="overflow-x-auto">
+      <table class="w-full">
+        <thead style="background-color: rgba(225, 231, 239, 0.5);">
+          <tr>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Estado</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Creado</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Expira</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Usado</th>
+            <th class="text-center p-4 w-[100px] text-sm font-medium" style="color: rgb(101, 117, 139);">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @for (invitation of invitations(); track invitation.id; let i = $index) {
+            <tr
+              class="animate-fade-in cursor-pointer transition-colors hover:bg-slate-50"
+              [style.animation-delay.ms]="i * 30"
+              style="border-bottom: 1px solid rgb(225, 231, 239);">
+
+              <td class="p-4">
+                @if (invitation.status === 'pending') {
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-amber-50 text-amber-600">
+                    {{ getStatusLabel(invitation.status) }}
+                  </span>
+                }
+                @if (invitation.status === 'used') {
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
+                    {{ getStatusLabel(invitation.status) }}
+                  </span>
+                }
+                @if (invitation.status === 'expired') {
+                  <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-red-50 text-red-600">
+                    {{ getStatusLabel(invitation.status) }}
+                  </span>
+                }
+              </td>
+
+              <td class="p-4">
+                <span class="text-sm" style="color: rgb(101, 117, 139);">
+                  {{ invitation.created_at | date:'dd MMM yyyy' }}
+                </span>
+              </td>
+
+              <td class="p-4">
+                <span class="text-sm" style="color: rgb(101, 117, 139);">
+                  {{ invitation.expires_at | date:'dd MMM yyyy' }}
+                </span>
+              </td>
+
+              <td class="p-4">
+                <span class="text-sm" style="color: rgb(101, 117, 139);">
+                  {{ invitation.used_at ? (invitation.used_at | date:'dd MMM yyyy') : '-' }}
+                </span>
+              </td>
+
+              <td class="p-4 text-center">
+                <div class="flex justify-center gap-2">
+                  <!-- Boton Copiar -->
+                  <button
+                    (click)="copyInvitationLink(invitation.token); $event.stopPropagation()"
+                    [disabled]="invitation.status === 'used' || invitation.status === 'expired'"
+                    class="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-slate-100 transition-colors disabled:opacity-40 disabled:cursor-not-allowed disabled:hover:bg-transparent"
+                    title="Copiar enlace">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4" style="color: rgb(101, 117, 139);">
+                      <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+                      <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+                    </svg>
+                  </button>
+
+                  <!-- Boton Eliminar -->
+                  <button
+                    (click)="openDeleteModal(invitation); $event.stopPropagation()"
+                    class="inline-flex items-center justify-center h-8 w-8 rounded-md hover:bg-red-50 transition-colors"
+                    title="Eliminar">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="w-4 h-4 text-red-500">
+                      <path d="M3 6h18"></path>
+                      <path d="M19 6v14c0 1-1 2-2 2H7c-1 0-2-1-2-2V6"></path>
+                    </svg>
+                  </button>
+                </div>
+              </td>
+            </tr>
+          }
+
+          @if (invitations().length === 0 && !loading()) {
+            <tr>
+              <td colspan="5" class="p-8 text-center">
+                <p class="text-base" style="color: rgb(101, 117, 139);">
+                  No hay invitaciones que mostrar
+                </p>
+              </td>
+            </tr>
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACION -->
+    <div class="p-4 border-t flex items-center justify-between" style="border-color: rgb(225, 231, 239);">
+      <div class="text-sm" style="color: rgb(101, 117, 139);">
+        Mostrando {{ (pagination().page - 1) * pagination().limit + 1 }} -
+        {{ Math.min(pagination().page * pagination().limit, pagination().total) }}
+        de {{ pagination().total }} invitaciones
+      </div>
+
+      <div class="flex gap-2">
+        <button
+          (click)="previousPage()"
+          [disabled]="pagination().page === 1"
+          class="px-3 py-1 rounded-md border text-sm transition-opacity"
+          [class.opacity-50]="pagination().page === 1"
+          [class.cursor-not-allowed]="pagination().page === 1"
+          style="border-color: rgb(225, 231, 239);">
+          Anterior
+        </button>
+
+        <button
+          (click)="nextPage()"
+          [disabled]="pagination().page >= pagination().totalPages"
+          class="px-3 py-1 rounded-md border text-sm transition-opacity"
+          [class.opacity-50]="pagination().page >= pagination().totalPages"
+          [class.cursor-not-allowed]="pagination().page >= pagination().totalPages"
+          style="border-color: rgb(225, 231, 239);">
+          Siguiente
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<app-confirmation-modal
+  [isOpen]="deletingInvitation() !== null"
+  title="Confirmar Eliminacion"
+  message="Esta segura de que deseas eliminar la invitacion "
+  [itemName]="'#' + (deletingInvitation()?.id || '')"
+  confirmText="Eliminar"
+  cancelText="Cancelar"
+  confirmButtonType="destructive"
+  (onConfirm)="handleDeleteInvitation()"
+  (onCancel)="closeDeleteModal()">
+</app-confirmation-modal>

@@ -1278,6 +1278,123 @@ const definitions = {
     },
   },
 
+  Invitation: {
+    type: "object",
+    properties: {
+      id: {
+        type: "integer",
+        format: "int64",
+        description: "ID único de la invitación",
+        example: 1,
+      },
+      token: {
+        type: "string",
+        description: "Token único de invitación",
+        example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3d4e5f6",
+      },
+      status: {
+        type: "string",
+        enum: ["pending", "used", "expired"],
+        description: "Estado de la invitación",
+        example: "pending",
+      },
+      expires_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de expiración",
+        example: "2024-01-15 10:30:00",
+      },
+      used_at: {
+        type: "string",
+        format: "date-time",
+        nullable: true,
+        description: "Fecha y hora en que se usó la invitación",
+        example: null,
+      },
+      created_at: {
+        type: "string",
+        format: "date-time",
+        description: "Fecha y hora de creación",
+        example: "2024-01-08 10:30:00",
+      },
+    },
+  },
+
+  InvitationGenerateResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Invitación generada exitosamente",
+      },
+      data: {
+        type: "object",
+        properties: {
+          id: {
+            type: "integer",
+            example: 1,
+          },
+          token: {
+            type: "string",
+            example: "a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3d4e5f6",
+          },
+          link: {
+            type: "string",
+            description: "Enlace completo para compartir con el paciente",
+            example: "https://psicoandante.com/register/a1b2c3d4e5f6g7h8i9j0k1l2m3n4o5p6q7r8s9t0u1v2w3x4y5z6a1b2c3d4e5f6",
+          },
+          expires_at: {
+            type: "string",
+            format: "date-time",
+            example: "2024-01-15 10:30:00",
+          },
+        },
+      },
+    },
+  },
+
+  InvitationsListResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      data: {
+        type: "array",
+        items: {
+          $ref: "#/components/schemas/Invitation",
+        },
+      },
+      pagination: {
+        $ref: "#/components/schemas/PaginationInfo",
+      },
+    },
+  },
+
+  InvitationValidateResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      valid: {
+        type: "boolean",
+        example: true,
+      },
+      expires_at: {
+        type: "string",
+        format: "date-time",
+        example: "2024-01-15 10:30:00",
+      },
+    },
+  },
+
   Invoice: {
     type: "object",
     properties: {
@@ -3343,6 +3460,158 @@ const definitions = {
       },
       PatientResumeInvoice: {
         $ref: "#/components/schemas/PatientResumeInvoice",
+      },
+    },
+  },
+
+  PatientRegisterRequest: {
+    type: "object",
+    required: ["first_name", "last_name"],
+    properties: {
+      first_name: {
+        type: "string",
+        description: "Nombre del paciente",
+        example: "Juan",
+      },
+      last_name: {
+        type: "string",
+        description: "Apellidos del paciente",
+        example: "Pérez García",
+      },
+      email: {
+        type: "string",
+        format: "email",
+        description: "Email del paciente",
+        example: "juan.perez@email.com",
+      },
+      phone: {
+        type: "string",
+        description: "Teléfono del paciente",
+        example: "+34 666 123 456",
+      },
+      dni: {
+        type: "string",
+        description: "DNI del paciente",
+        example: "12345678A",
+      },
+      gender: {
+        type: "string",
+        description: "Género del paciente",
+        example: "M",
+      },
+      birth_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de nacimiento (YYYY-MM-DD)",
+        example: "1985-03-15",
+      },
+      street: {
+        type: "string",
+        description: "Calle",
+        example: "Calle Mayor",
+      },
+      street_number: {
+        type: "string",
+        description: "Número",
+        example: "123",
+      },
+      door: {
+        type: "string",
+        description: "Puerta/Piso",
+        example: "2A",
+      },
+      postal_code: {
+        type: "string",
+        description: "Código postal",
+        example: "28001",
+      },
+      city: {
+        type: "string",
+        description: "Ciudad",
+        example: "Madrid",
+      },
+      province: {
+        type: "string",
+        description: "Provincia",
+        example: "Madrid",
+      },
+      occupation: {
+        type: "string",
+        description: "Ocupación/Profesión",
+        example: "Estudiante de Psicología",
+      },
+      treatment_start_date: {
+        type: "string",
+        format: "date",
+        description: "Fecha de inicio del tratamiento (YYYY-MM-DD)",
+        example: "2024-01-15",
+      },
+      status: {
+        type: "string",
+        description: "Estado del paciente",
+        example: "en curso",
+      },
+      is_minor: {
+        type: "boolean",
+        description: "Indica si el paciente es menor de edad",
+        example: false,
+      },
+      progenitor1_full_name: {
+        type: "string",
+        description: "Nombre completo del progenitor 1 (si es menor)",
+        example: "María García Martínez",
+      },
+      progenitor1_dni: {
+        type: "string",
+        description: "DNI del progenitor 1",
+        example: "87654321B",
+      },
+      progenitor1_phone: {
+        type: "string",
+        description: "Teléfono del progenitor 1",
+        example: "+34655987654",
+      },
+      progenitor2_full_name: {
+        type: "string",
+        description: "Nombre completo del progenitor 2 (si es menor)",
+        example: "Pedro López González",
+      },
+      progenitor2_dni: {
+        type: "string",
+        description: "DNI del progenitor 2",
+        example: "11223344C",
+      },
+      progenitor2_phone: {
+        type: "string",
+        description: "Teléfono del progenitor 2",
+        example: "+34666111222",
+      },
+      special_price: {
+        type: "number",
+        description: "Precio especial por sesión (si aplica)",
+        example: 50,
+      },
+    },
+  },
+
+  PatientRegisterResponse: {
+    type: "object",
+    properties: {
+      success: {
+        type: "boolean",
+        example: true,
+      },
+      message: {
+        type: "string",
+        example: "Paciente registrado exitosamente",
+      },
+      data: {
+        type: "object",
+        properties: {
+          patient: {
+            $ref: "#/components/schemas/PatientData",
+          },
+        },
       },
     },
   },

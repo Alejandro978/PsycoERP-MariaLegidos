@@ -9,6 +9,7 @@ const clinicsPaths = require("./paths/clinics");
 const dashboardPaths = require("./paths/dashboard");
 const documentsPaths = require("./paths/documents");
 const googlePaths = require("./paths/google");
+const invitationsPaths = require("./paths/invitations");
 const invoicesPaths = require("./paths/invoices");
 const notesPaths = require("./paths/notes");
 const patientsPaths = require("./paths/patients");
@@ -69,6 +70,7 @@ const swaggerDefinition = {
     ...dashboardPaths,
     ...documentsPaths,
     ...googlePaths,
+    ...invitationsPaths,
     ...invoicesPaths,
     ...notesPaths,
     ...patientsPaths,
@@ -104,6 +106,10 @@ const swaggerDefinition = {
     {
       name: "Google OAuth",
       description: "Autorización y gestión de tokens de Google Calendar",
+    },
+    {
+      name: "Invitations",
+      description: "Gestión de invitaciones para auto-registro de pacientes",
     },
     {
       name: "Invoices",

@@ -30,6 +30,8 @@ const remindersRoutes = require("./routes/reminders/reminders_routes");
 const usersRoutes = require("./routes/users/users_routes");
 const invoicesRoutes = require("./routes/invoices/invoices_routes");
 const notesRoutes = require("./routes/notes/notes_routes");
+const invitationsRoutes = require("./routes/invitations/invitations_routes");
+const invitationsPublicRoutes = require("./routes/invitations/invitations_public_routes");
 
 // Middlewares globales
 app.use(cors());
@@ -116,12 +118,15 @@ app.get("/", (req, res) => {
       reminders: "/api/reminders",
       users: "/api/users",
       invoices: "/api/invoices",
+      invitations: "/api/invitations",
     },
   });
 });
 
 // Rutas públicas (sin autenticación)
 app.use("/api/auth", authRoutes);
+app.use("/api/invitations", invitationsPublicRoutes);
+app.use("/api/patients", invitationsPublicRoutes);
 
 // Ruta pública para OAuth callback de Google (usado por get_gcal_token.js)
 app.get("/oauth/callback", (req, res) => {
@@ -216,6 +221,7 @@ app.use("/api/reminders", remindersRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/invoices", invoicesRoutes);
 app.use("/api/notes", notesRoutes);
+app.use("/api/invitations", invitationsRoutes);
 
 // Iniciar servidor
 app.listen(PORT, async () => {
