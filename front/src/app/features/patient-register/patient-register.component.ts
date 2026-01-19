@@ -3,6 +3,8 @@ import {
   OnInit,
   inject,
   signal,
+  computed,
+  effect,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
@@ -13,6 +15,7 @@ import {
   ReactiveFormsModule,
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
+import { toSignal } from '@angular/core/rxjs-interop';
 import { PatientRegisterService } from './services/patient-register.service';
 import { PatientRegistration } from './models/patient-register.model';
 import {
@@ -35,7 +38,7 @@ export class PatientRegisterComponent implements OnInit {
   private registerService = inject(PatientRegisterService);
   private fb = inject(FormBuilder);
 
-  // State
+  // State signals
   token = '';
   isValidToken = signal(false);
   isLoading = signal(true);
@@ -45,7 +48,54 @@ export class PatientRegisterComponent implements OnInit {
   expiresAt = signal('');
 
   // Form
-  registerForm!: FormGroup;
+  registerForm = this.createForm();
+
+  // Signal derivado del valor de birth_date del formulario
+  private birthDateValue = toSignal(
+    this.registerForm.get('birth_date')!.valueChanges,
+    { initialValue: '' }
+  );
+
+  // Signal derivado de los valores de progenitor 2
+  private progenitor2Values = toSignal(
+    this.registerForm.valueChanges,
+    { initialValue: this.registerForm.value }
+  );
+
+  /**
+   * Computed: calcula la edad basándose en la fecha de nacimiento
+   */
+  calculatedAge = computed(() => {
+    const birthDate = this.birthDateValue();
+    if (!birthDate) return 0;
+
+    const today = new Date();
+    const birth = new Date(birthDate);
+    const age = today.getFullYear() - birth.getFullYear();
+    const monthDiff = today.getMonth() - birth.getMonth();
+    const dayDiff = today.getDate() - birth.getDate();
+
+    return age - (monthDiff < 0 || (monthDiff === 0 && dayDiff < 0) ? 1 : 0);
+  });
+
+  /**
+   * Computed: determina si el paciente es menor de edad
+   */
+  isMinor = computed(() => {
+    const age = this.calculatedAge();
+    return age > 0 && age < 18;
+  });
+
+  /**
+   * Computed: verifica si algún campo de progenitor 2 tiene valor
+   */
+  private hasProgenitor2Data = computed(() => {
+    const values = this.progenitor2Values();
+    const fullName = values?.progenitor2_full_name?.trim() || '';
+    const dni = values?.progenitor2_dni?.trim() || '';
+    const phone = values?.progenitor2_phone?.trim() || '';
+    return !!(fullName || dni || phone);
+  });
 
   // Gender options
   genderOptions = [
@@ -54,8 +104,24 @@ export class PatientRegisterComponent implements OnInit {
     { value: 'O', label: 'Otro' },
   ];
 
+  constructor() {
+    // Effect: actualiza validadores cuando cambia isMinor
+    effect(() => {
+      const isMinorValue = this.isMinor();
+      this.updateProgenitorValidators(isMinorValue);
+    });
+
+    // Effect: actualiza validadores de progenitor 2 cuando cambian sus valores
+    effect(() => {
+      const hasData = this.hasProgenitor2Data();
+      const isMinorValue = this.isMinor();
+      if (isMinorValue) {
+        this.updateProgenitor2Validators(hasData);
+      }
+    });
+  }
+
   ngOnInit(): void {
-    this.initializeForm();
     this.token = this.route.snapshot.paramMap.get('token') || '';
 
     if (!this.token) {
@@ -67,8 +133,11 @@ export class PatientRegisterComponent implements OnInit {
     this.validateToken();
   }
 
-  private initializeForm(): void {
-    this.registerForm = this.fb.group({
+  /**
+   * Crea el formulario reactivo con todos los campos
+   */
+  private createForm(): FormGroup {
+    return this.fb.group({
       first_name: ['', [Validators.required, Validators.minLength(2)]],
       last_name: ['', [Validators.required, Validators.minLength(2)]],
       email: ['', [Validators.required, Validators.email]],
@@ -86,6 +155,13 @@ export class PatientRegisterComponent implements OnInit {
       ],
       city: ['', [Validators.required]],
       province: ['', [Validators.required]],
+      // Campos de progenitores (validación condicional si es menor)
+      progenitor1_full_name: [''],
+      progenitor1_dni: [''],
+      progenitor1_phone: [''],
+      progenitor2_full_name: [''],
+      progenitor2_dni: [''],
+      progenitor2_phone: [''],
     });
   }
 
@@ -110,6 +186,85 @@ export class PatientRegisterComponent implements OnInit {
     });
   }
 
+  /**
+   * Actualiza validadores de progenitor 1 según si es menor de edad
+   */
+  private updateProgenitorValidators(isMinorValue: boolean): void {
+    const progenitor1FullName = this.registerForm.get('progenitor1_full_name');
+    const progenitor1Dni = this.registerForm.get('progenitor1_dni');
+    const progenitor1Phone = this.registerForm.get('progenitor1_phone');
+
+    if (isMinorValue) {
+      // Progenitor 1 es obligatorio para menores
+      progenitor1FullName?.setValidators([Validators.required, Validators.minLength(2)]);
+      progenitor1Dni?.setValidators([Validators.required, dniValidator()]);
+      progenitor1Phone?.setValidators([Validators.required, phoneValidator()]);
+    } else {
+      // Limpiar validadores y valores si no es menor
+      progenitor1FullName?.clearValidators();
+      progenitor1Dni?.clearValidators();
+      progenitor1Phone?.clearValidators();
+
+      progenitor1FullName?.setValue('', { emitEvent: false });
+      progenitor1Dni?.setValue('', { emitEvent: false });
+      progenitor1Phone?.setValue('', { emitEvent: false });
+
+      // Limpiar también progenitor 2
+      this.clearProgenitor2Fields();
+    }
+
+    progenitor1FullName?.updateValueAndValidity({ emitEvent: false });
+    progenitor1Dni?.updateValueAndValidity({ emitEvent: false });
+    progenitor1Phone?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /**
+   * Actualiza validadores de progenitor 2 condicionalmente
+   * Si algún campo tiene valor, todos se vuelven obligatorios
+   */
+  private updateProgenitor2Validators(hasAnyValue: boolean): void {
+    const progenitor2FullName = this.registerForm.get('progenitor2_full_name');
+    const progenitor2Dni = this.registerForm.get('progenitor2_dni');
+    const progenitor2Phone = this.registerForm.get('progenitor2_phone');
+
+    if (hasAnyValue) {
+      // Si algún campo tiene valor, todos son obligatorios
+      progenitor2FullName?.setValidators([Validators.required, Validators.minLength(2)]);
+      progenitor2Dni?.setValidators([Validators.required, dniValidator()]);
+      progenitor2Phone?.setValidators([Validators.required, phoneValidator()]);
+    } else {
+      // Si todos están vacíos, quitar validadores
+      progenitor2FullName?.clearValidators();
+      progenitor2Dni?.clearValidators();
+      progenitor2Phone?.clearValidators();
+    }
+
+    progenitor2FullName?.updateValueAndValidity({ emitEvent: false });
+    progenitor2Dni?.updateValueAndValidity({ emitEvent: false });
+    progenitor2Phone?.updateValueAndValidity({ emitEvent: false });
+  }
+
+  /**
+   * Limpia los campos de progenitor 2
+   */
+  private clearProgenitor2Fields(): void {
+    const progenitor2FullName = this.registerForm.get('progenitor2_full_name');
+    const progenitor2Dni = this.registerForm.get('progenitor2_dni');
+    const progenitor2Phone = this.registerForm.get('progenitor2_phone');
+
+    progenitor2FullName?.clearValidators();
+    progenitor2Dni?.clearValidators();
+    progenitor2Phone?.clearValidators();
+
+    progenitor2FullName?.setValue('', { emitEvent: false });
+    progenitor2Dni?.setValue('', { emitEvent: false });
+    progenitor2Phone?.setValue('', { emitEvent: false });
+
+    progenitor2FullName?.updateValueAndValidity({ emitEvent: false });
+    progenitor2Dni?.updateValueAndValidity({ emitEvent: false });
+    progenitor2Phone?.updateValueAndValidity({ emitEvent: false });
+  }
+
   onSubmit(): void {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
@@ -132,6 +287,30 @@ export class PatientRegisterComponent implements OnInit {
         .trim()
         .toUpperCase(),
     };
+
+    // Clean progenitor data if minor
+    if (this.isMinor()) {
+      if (formData.progenitor1_phone) {
+        formData.progenitor1_phone = formData.progenitor1_phone.toString().replace(/\s+/g, '').trim();
+      }
+      if (formData.progenitor1_dni) {
+        formData.progenitor1_dni = formData.progenitor1_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
+      }
+      if (formData.progenitor2_phone) {
+        formData.progenitor2_phone = formData.progenitor2_phone.toString().replace(/\s+/g, '').trim();
+      }
+      if (formData.progenitor2_dni) {
+        formData.progenitor2_dni = formData.progenitor2_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
+      }
+    } else {
+      // Remove progenitor fields if not minor
+      delete formData.progenitor1_full_name;
+      delete formData.progenitor1_dni;
+      delete formData.progenitor1_phone;
+      delete formData.progenitor2_full_name;
+      delete formData.progenitor2_dni;
+      delete formData.progenitor2_phone;
+    }
 
     this.registerService.registerPatient(this.token, formData).subscribe({
       next: (response) => {
@@ -210,6 +389,12 @@ export class PatientRegisterComponent implements OnInit {
       postal_code: 'Codigo postal',
       city: 'Ciudad',
       province: 'Provincia',
+      progenitor1_full_name: 'Nombre completo (Progenitor 1)',
+      progenitor1_dni: 'DNI (Progenitor 1)',
+      progenitor1_phone: 'Telefono (Progenitor 1)',
+      progenitor2_full_name: 'Nombre completo (Progenitor 2)',
+      progenitor2_dni: 'DNI (Progenitor 2)',
+      progenitor2_phone: 'Telefono (Progenitor 2)',
     };
     return labels[fieldName] || fieldName;
   }

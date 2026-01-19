@@ -18,6 +18,13 @@ export interface PatientRegistration {
   postal_code: string;
   city: string;
   province: string;
+  // Campos de progenitores (solo para menores)
+  progenitor1_full_name?: string;
+  progenitor1_dni?: string;
+  progenitor1_phone?: string;
+  progenitor2_full_name?: string;
+  progenitor2_dni?: string;
+  progenitor2_phone?: string;
 }
 
 export interface RegistrationResponse {
