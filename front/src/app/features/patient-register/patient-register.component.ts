@@ -6,8 +6,10 @@ import {
   computed,
   effect,
   ChangeDetectionStrategy,
+  ViewChild,
+  ElementRef,
 } from '@angular/core';
-import { CommonModule } from '@angular/common';
+import { CommonModule, DatePipe } from '@angular/common';
 import {
   FormBuilder,
   FormGroup,
@@ -27,7 +29,7 @@ import {
 @Component({
   selector: 'app-patient-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule],
+  imports: [CommonModule, ReactiveFormsModule, DatePipe],
   templateUrl: './patient-register.component.html',
   styleUrls: ['./patient-register.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -104,11 +106,26 @@ export class PatientRegisterComponent implements OnInit {
     { value: 'O', label: 'Otro' },
   ];
 
+  // Signature canvas references
+  @ViewChild('patientSignature') patientSignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('guardian1Signature') guardian1SignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('guardian2Signature') guardian2SignatureCanvas!: ElementRef<HTMLCanvasElement>;
+
+  // Signature state
+  private signatureContexts = new Map<string, CanvasRenderingContext2D>();
+  private isDrawing = new Map<string, boolean>();
+  signatures = new Map<string, string>();
+  signatureError = signal('');
+
+  // Current date for signature
+  currentDate = new Date();
+
   constructor() {
     // Effect: actualiza validadores cuando cambia isMinor
     effect(() => {
       const isMinorValue = this.isMinor();
       this.updateProgenitorValidators(isMinorValue);
+      this.updateConsentValidators(isMinorValue);
     });
 
     // Effect: actualiza validadores de progenitor 2 cuando cambian sus valores
@@ -117,6 +134,23 @@ export class PatientRegisterComponent implements OnInit {
       const isMinorValue = this.isMinor();
       if (isMinorValue) {
         this.updateProgenitor2Validators(hasData);
+      }
+    });
+
+    // Effect: inicializa canvas de tutores cuando cambia a menor
+    effect(() => {
+      const isMinorValue = this.isMinor();
+      if (isMinorValue) {
+        setTimeout(() => this.initGuardianCanvases(), 100);
+      }
+    });
+
+    // Effect: inicializa canvas del paciente cuando el formulario se vuelve visible
+    effect(() => {
+      const isValid = this.isValidToken();
+      const isLoading = this.isLoading();
+      if (isValid && !isLoading) {
+        setTimeout(() => this.initPatientCanvas(), 100);
       }
     });
   }
@@ -162,7 +196,80 @@ export class PatientRegisterComponent implements OnInit {
       progenitor2_full_name: [''],
       progenitor2_dni: [''],
       progenitor2_phone: [''],
+      // Campos de consentimiento (NO se guardan en BD, solo para PDF)
+      consent_legal_representative: [false],
+      consent_data_protection: [false, [Validators.requiredTrue]],
+      consent_service_conditions: [false, [Validators.requiredTrue]],
     });
+  }
+
+
+  /**
+   * Inicializa el canvas de firma del paciente
+   */
+  private initPatientCanvas(): void {
+    if (!this.patientSignatureCanvas) return;
+
+    const canvas = this.patientSignatureCanvas.nativeElement;
+    const ctx = canvas.getContext('2d');
+    if (ctx) {
+      canvas.width = canvas.offsetWidth;
+      canvas.height = 150;
+      ctx.strokeStyle = '#000';
+      ctx.lineWidth = 2;
+      ctx.lineCap = 'round';
+      ctx.lineJoin = 'round';
+      this.signatureContexts.set('patient', ctx);
+    }
+  }
+
+  /**
+   * Inicializa los canvas de firmas de tutores
+   */
+  private initGuardianCanvases(): void {
+    if (this.guardian1SignatureCanvas) {
+      const canvas1 = this.guardian1SignatureCanvas.nativeElement;
+      const ctx1 = canvas1.getContext('2d');
+      if (ctx1) {
+        canvas1.width = canvas1.offsetWidth;
+        canvas1.height = 150;
+        ctx1.strokeStyle = '#000';
+        ctx1.lineWidth = 2;
+        ctx1.lineCap = 'round';
+        ctx1.lineJoin = 'round';
+        this.signatureContexts.set('guardian1', ctx1);
+      }
+    }
+
+    if (this.guardian2SignatureCanvas) {
+      const canvas2 = this.guardian2SignatureCanvas.nativeElement;
+      const ctx2 = canvas2.getContext('2d');
+      if (ctx2) {
+        canvas2.width = canvas2.offsetWidth;
+        canvas2.height = 150;
+        ctx2.strokeStyle = '#000';
+        ctx2.lineWidth = 2;
+        ctx2.lineCap = 'round';
+        ctx2.lineJoin = 'round';
+        this.signatureContexts.set('guardian2', ctx2);
+      }
+    }
+  }
+
+  /**
+   * Actualiza validadores del checkbox de tutor legal
+   */
+  private updateConsentValidators(isMinorValue: boolean): void {
+    const consentLegalRep = this.registerForm.get('consent_legal_representative');
+
+    if (isMinorValue) {
+      consentLegalRep?.setValidators([Validators.requiredTrue]);
+    } else {
+      consentLegalRep?.clearValidators();
+      consentLegalRep?.setValue(false, { emitEvent: false });
+    }
+
+    consentLegalRep?.updateValueAndValidity({ emitEvent: false });
   }
 
   private validateToken(): void {
@@ -265,14 +372,149 @@ export class PatientRegisterComponent implements OnInit {
     progenitor2Phone?.updateValueAndValidity({ emitEvent: false });
   }
 
+  // ═══════════════════════════════════════════════════════════════
+  // MÉTODOS PARA FIRMAS
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * Inicia el dibujo en el canvas
+   */
+  startDrawing(event: MouseEvent | TouchEvent, type: string): void {
+    this.isDrawing.set(type, true);
+    const ctx = this.signatureContexts.get(type);
+    if (!ctx) return;
+
+    const pos = this.getMousePos(event, type);
+    ctx.beginPath();
+    ctx.moveTo(pos.x, pos.y);
+  }
+
+  /**
+   * Dibuja en el canvas mientras se mueve el cursor/dedo
+   */
+  draw(event: MouseEvent | TouchEvent, type: string): void {
+    if (!this.isDrawing.get(type)) return;
+
+    event.preventDefault();
+    const ctx = this.signatureContexts.get(type);
+    if (!ctx) return;
+
+    const pos = this.getMousePos(event, type);
+    ctx.lineTo(pos.x, pos.y);
+    ctx.stroke();
+  }
+
+  /**
+   * Detiene el dibujo y guarda la firma como base64
+   */
+  stopDrawing(type: string): void {
+    this.isDrawing.set(type, false);
+
+    const canvas = this.getCanvasElement(type);
+    if (canvas) {
+      this.signatures.set(type, canvas.toDataURL('image/png'));
+    }
+  }
+
+  /**
+   * Limpia una firma específica
+   */
+  clearSignature(type: string): void {
+    const ctx = this.signatureContexts.get(type);
+    const canvas = this.getCanvasElement(type);
+
+    if (ctx && canvas) {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      this.signatures.delete(type);
+    }
+  }
+
+  /**
+   * Obtiene la posición del mouse/touch relativa al canvas
+   */
+  private getMousePos(event: MouseEvent | TouchEvent, type: string): { x: number; y: number } {
+    const canvas = this.getCanvasElement(type);
+    if (!canvas) return { x: 0, y: 0 };
+
+    const rect = canvas.getBoundingClientRect();
+
+    if (event instanceof MouseEvent) {
+      return {
+        x: event.clientX - rect.left,
+        y: event.clientY - rect.top
+      };
+    } else {
+      const touch = event.touches[0];
+      return {
+        x: touch.clientX - rect.left,
+        y: touch.clientY - rect.top
+      };
+    }
+  }
+
+  /**
+   * Obtiene el elemento canvas según el tipo
+   */
+  private getCanvasElement(type: string): HTMLCanvasElement | null {
+    switch (type) {
+      case 'patient':
+        return this.patientSignatureCanvas?.nativeElement || null;
+      case 'guardian1':
+        return this.guardian1SignatureCanvas?.nativeElement || null;
+      case 'guardian2':
+        return this.guardian2SignatureCanvas?.nativeElement || null;
+      default:
+        return null;
+    }
+  }
+
+  /**
+   * Verifica si hay firma del paciente
+   */
+  hasPatientSignature(): boolean {
+    return this.signatures.has('patient');
+  }
+
+  /**
+   * Verifica si hay firma del tutor 1
+   */
+  hasGuardian1Signature(): boolean {
+    return this.signatures.has('guardian1');
+  }
+
+  /**
+   * Valida las firmas requeridas
+   */
+  private validateSignatures(): boolean {
+    this.signatureError.set('');
+
+    if (!this.signatures.has('patient')) {
+      this.signatureError.set('Por favor, firme el documento antes de continuar');
+      return false;
+    }
+
+    if (this.isMinor() && !this.signatures.has('guardian1')) {
+      this.signatureError.set('El tutor/progenitor 1 debe firmar el documento');
+      return false;
+    }
+
+    return true;
+  }
+
   onSubmit(): void {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
     }
 
+    // Validar firmas
+    if (!this.validateSignatures()) {
+      return;
+    }
+
     this.isSubmitting.set(true);
     this.errorMessage.set('');
+    this.signatureError.set('');
 
     const formData: PatientRegistration = {
       ...this.registerForm.value,
@@ -395,6 +637,9 @@ export class PatientRegisterComponent implements OnInit {
       progenitor2_full_name: 'Nombre completo (Progenitor 2)',
       progenitor2_dni: 'DNI (Progenitor 2)',
       progenitor2_phone: 'Telefono (Progenitor 2)',
+      consent_legal_representative: 'Declaracion de tutor legal',
+      consent_data_protection: 'Proteccion de datos',
+      consent_service_conditions: 'Condiciones del servicio',
     };
     return labels[fieldName] || fieldName;
   }
