@@ -4522,12 +4522,6 @@ const definitions = {
         description: "Código postal",
         example: "28001",
       },
-      iban: {
-        type: "string",
-        nullable: true,
-        description: "IBAN de la cuenta bancaria",
-        example: "ES9121000418450200051332",
-      },
     },
   },
 
@@ -4692,12 +4686,6 @@ const definitions = {
         nullable: true,
         description: "Código postal",
         example: "28001",
-      },
-      iban: {
-        type: "string",
-        nullable: true,
-        description: "IBAN de la cuenta bancaria",
-        example: "ES9121000418450200051332",
       },
     },
   },
