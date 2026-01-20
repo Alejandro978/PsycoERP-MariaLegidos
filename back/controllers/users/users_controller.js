@@ -44,7 +44,7 @@ const obtenerUsuarioPorId = async (req, res) => {
 const actualizarUsuario = async (req, res) => {
   try {
     const { id } = req.params;
-    const { name, license_number, irpf, dni, street, street_number, door, city, province, postal_code, iban } = req.body;
+    const { name, license_number, irpf, dni, street, street_number, door, city, province, postal_code } = req.body;
 
     // Validar que se proporcione el ID y sea un número válido
     if (!id || isNaN(id)) {
@@ -67,7 +67,6 @@ const actualizarUsuario = async (req, res) => {
     if (city !== undefined) userData.city = city;
     if (province !== undefined) userData.province = province;
     if (postal_code !== undefined) userData.postal_code = postal_code;
-    if (iban !== undefined) userData.iban = iban;
 
     // Validar que se envíe al menos un campo
     if (Object.keys(userData).length === 0) {

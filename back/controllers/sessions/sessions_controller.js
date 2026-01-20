@@ -200,7 +200,7 @@ const crearSesion = async (req, res) => {
     }
 
     // Verificar si hay solapamiento de horarios
-    const overlappingSession = await checkTimeOverlap(req.db, session_date, start_time, end_time);
+    const overlappingSession = await checkTimeOverlap(req.db, session_date, start_time, end_time, clinic_id);
 
     if (overlappingSession) {
       return res.status(409).json({
@@ -297,7 +297,7 @@ const actualizarSesion = async (req, res) => {
     if (session_date || start_time || end_time) {
       // Obtener sesión actual para tener todos los datos
       const [currentSession] = await req.db.execute(
-        "SELECT session_date, start_time, end_time FROM sessions WHERE id = ? AND is_active = true",
+        "SELECT session_date, start_time, end_time, clinic_id FROM sessions WHERE id = ? AND is_active = true",
         [parseInt(id)]
       );
 
@@ -312,6 +312,7 @@ const actualizarSesion = async (req, res) => {
       const finalSessionDate = session_date || currentSession[0].session_date;
       const finalStartTime = start_time || currentSession[0].start_time;
       const finalEndTime = end_time || currentSession[0].end_time;
+      const finalClinicId = clinic_id || currentSession[0].clinic_id;
 
       // Validar horario laboral (7:00 - 22:00) si se modifican las horas
       if (start_time || end_time) {
@@ -363,6 +364,7 @@ const actualizarSesion = async (req, res) => {
         finalSessionDate,
         finalStartTime,
         finalEndTime,
+        finalClinicId,
         parseInt(id)
       );
 
