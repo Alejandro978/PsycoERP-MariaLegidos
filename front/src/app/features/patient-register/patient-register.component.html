@@ -41,7 +41,7 @@
 
   <!-- REGISTRATION FORM + PREVIEW (2 COLUMNS) -->
   @if (!isLoading() && isValidToken() && !successMessage()) {
-    <div class="grid grid-cols-1 lg:grid-cols-2 gap-6 max-w-7xl mx-auto">
+    <div class="grid grid-cols-1 xl:grid-cols-[500px_1fr] gap-6 mx-auto" style="max-width: 1400px;">
 
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <!-- COLUMNA IZQUIERDA: FORMULARIO -->
@@ -571,26 +571,6 @@
                 </button>
               </div>
 
-              <div class="mb-6">
-                <label class="block text-sm font-medium mb-2" style="color: rgb(15, 23, 41);">
-                  Firma del tutor/progenitor 2 <span class="text-gray-400">(opcional)</span>
-                </label>
-                <canvas
-                  #guardian2Signature
-                  (mousedown)="startDrawing($event, 'guardian2')"
-                  (mousemove)="draw($event, 'guardian2')"
-                  (mouseup)="stopDrawing('guardian2')"
-                  (mouseleave)="stopDrawing('guardian2')"
-                  (touchstart)="startDrawing($event, 'guardian2')"
-                  (touchmove)="draw($event, 'guardian2')"
-                  (touchend)="stopDrawing('guardian2')"
-                  class="border-2 rounded-lg w-full cursor-crosshair bg-white"
-                  style="border-color: rgb(225, 231, 239); height: 120px; touch-action: none;">
-                </canvas>
-                <button type="button" (click)="clearSignature('guardian2')" class="mt-2 text-sm text-red-600 hover:text-red-800">
-                  Borrar firma
-                </button>
-              </div>
             }
           </div>
 
@@ -610,169 +590,13 @@
       <!-- ═══════════════════════════════════════════════════════════════ -->
       <!-- COLUMNA DERECHA: PREVIEW DEL DOCUMENTO -->
       <!-- ═══════════════════════════════════════════════════════════════ -->
-      <div class="hidden lg:block">
-        <div class="sticky top-6">
-          <div class="card-elevated p-4 mb-4">
-            <div class="flex items-center justify-between">
-              <h2 class="text-lg font-semibold" style="color: rgb(15, 23, 41);">
-                Vista previa del documento
-              </h2>
-              <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
-                Tiempo real
-              </span>
-            </div>
-            <p class="text-xs mt-1" style="color: rgb(101, 117, 139);">
-              Este documento se generara como PDF al completar el registro
-            </p>
-          </div>
-
-          <!-- Document Preview -->
-          <div class="card-elevated overflow-hidden" style="max-height: calc(100vh - 180px);">
-            <div class="overflow-y-auto p-6" style="max-height: calc(100vh - 180px);">
-              <div class="bg-white border rounded-lg p-6 shadow-inner" style="font-family: 'Times New Roman', serif; font-size: 11px; line-height: 1.4;">
-
-                <!-- Header -->
-                <div class="flex justify-between items-start mb-6 pb-4 border-b">
-                  <div>
-                    <p class="text-base font-bold m-0" style="color: rgb(15, 23, 41);">CONSENTIMIENTO INFORMADO</p>
-                    <p class="text-xs m-0 mt-1" style="color: rgb(101, 117, 139);">Servicios de Psicologia</p>
-                  </div>
-                  <div class="text-right">
-                    <p class="text-xs font-semibold m-0">Maria Legidos Huertas</p>
-                    <p class="text-xs m-0" style="color: rgb(101, 117, 139);">Psicologa</p>
-                  </div>
-                </div>
-
-                <!-- Patient Data -->
-                <div class="mb-4">
-                  <p class="font-bold text-xs mb-2" style="color: rgb(15, 23, 41);">DATOS DEL PACIENTE</p>
-                  <p class="text-xs mb-1">
-                    {{ isMinor() ? 'El/La menor' : 'D./Da.' }}
-                    <strong>{{ registerForm.get('first_name')?.value || '________________' }} {{ registerForm.get('last_name')?.value || '________________' }}</strong>
-                  </p>
-                  <p class="text-xs mb-1">
-                    Con DNI: <strong>{{ registerForm.get('dni')?.value || '________________' }}</strong>,
-                    fecha de nacimiento: <strong>{{ registerForm.get('birth_date')?.value | date:'dd/MM/yyyy' }}</strong>
-                  </p>
-                  <p class="text-xs mb-1">
-                    Domicilio: <strong>{{ registerForm.get('street')?.value || '________________' }} {{ registerForm.get('street_number')?.value }}{{ registerForm.get('door')?.value ? ', ' + registerForm.get('door')?.value : '' }}</strong>
-                  </p>
-                  <p class="text-xs mb-1">
-                    CP: <strong>{{ registerForm.get('postal_code')?.value || '________' }}</strong>,
-                    {{ registerForm.get('city')?.value || '________________' }} ({{ registerForm.get('province')?.value || '________________' }})
-                  </p>
-                  <p class="text-xs mb-1">
-                    Telefono: <strong>{{ registerForm.get('phone')?.value || '________________' }}</strong>,
-                    Email: <strong>{{ registerForm.get('email')?.value || '________________' }}</strong>
-                  </p>
-                </div>
-
-                <!-- Guardian Data (only for minors) -->
-                @if (isMinor()) {
-                  <div class="mb-4 p-3 bg-amber-50 rounded border border-amber-200">
-                    <p class="font-bold text-xs mb-2" style="color: rgb(15, 23, 41);">DATOS DE TUTORES/PROGENITORES</p>
-
-                    <p class="text-xs mb-1">
-                      <strong>Tutor 1:</strong> {{ registerForm.get('progenitor1_full_name')?.value || '________________________________' }}
-                    </p>
-                    <p class="text-xs mb-2">
-                      DNI: {{ registerForm.get('progenitor1_dni')?.value || '________________' }},
-                      Telf: {{ registerForm.get('progenitor1_phone')?.value || '________________' }}
-                    </p>
-
-                    @if (registerForm.get('progenitor2_full_name')?.value) {
-                      <p class="text-xs mb-1">
-                        <strong>Tutor 2:</strong> {{ registerForm.get('progenitor2_full_name')?.value }}
-                      </p>
-                      <p class="text-xs">
-                        DNI: {{ registerForm.get('progenitor2_dni')?.value || '________________' }},
-                        Telf: {{ registerForm.get('progenitor2_phone')?.value || '________________' }}
-                      </p>
-                    }
-                  </div>
-                }
-
-                <!-- Checkboxes Preview -->
-                <div class="mb-4">
-                  <p class="font-bold text-xs mb-2" style="color: rgb(15, 23, 41);">CONSENTIMIENTOS</p>
-
-                  @if (isMinor()) {
-                    <div class="flex gap-2 mb-2">
-                      <div class="flex-shrink-0 w-3 h-3 border border-gray-400 rounded-sm flex items-center justify-center" style="margin-top: 2px;">
-                        @if (registerForm.get('consent_legal_representative')?.value) {
-                          <span class="text-green-600 text-xs font-bold">&#10003;</span>
-                        }
-                      </div>
-                      <p class="text-xs flex-1">Declaracion de tutor legal</p>
-                    </div>
-                  }
-
-                  <div class="flex gap-2 mb-2">
-                    <div class="flex-shrink-0 w-3 h-3 border border-gray-400 rounded-sm flex items-center justify-center" style="margin-top: 2px;">
-                      @if (registerForm.get('consent_data_protection')?.value) {
-                        <span class="text-green-600 text-xs font-bold">&#10003;</span>
-                      }
-                    </div>
-                    <p class="text-xs flex-1">Proteccion de datos (RGPD)</p>
-                  </div>
-
-                  <div class="flex gap-2">
-                    <div class="flex-shrink-0 w-3 h-3 border border-gray-400 rounded-sm flex items-center justify-center" style="margin-top: 2px;">
-                      @if (registerForm.get('consent_service_conditions')?.value) {
-                        <span class="text-green-600 text-xs font-bold">&#10003;</span>
-                      }
-                    </div>
-                    <p class="text-xs flex-1">Condiciones del servicio</p>
-                  </div>
-                </div>
-
-                <!-- Signatures Preview -->
-                <div class="mt-6 pt-4 border-t">
-                  <p class="font-bold text-xs mb-3" style="color: rgb(15, 23, 41);">FIRMAS</p>
-                  <p class="text-xs mb-4" style="color: rgb(101, 117, 139);">
-                    Fecha de firma: {{ currentDate | date:'dd/MM/yyyy' }}
-                  </p>
-
-                  <div class="grid grid-cols-2 gap-4">
-                    <!-- Patient Signature -->
-                    <div>
-                      <p class="text-xs font-semibold mb-1">Firma del paciente:</p>
-                      <div class="h-12 border-b border-gray-300 flex items-end justify-center">
-                        @if (signatures.has('patient')) {
-                          <img [src]="signatures.get('patient')" class="h-10 object-contain" alt="Firma paciente">
-                        }
-                      </div>
-                    </div>
-
-                    <!-- Guardian 1 Signature -->
-                    @if (isMinor()) {
-                      <div>
-                        <p class="text-xs font-semibold mb-1">Firma tutor 1:</p>
-                        <div class="h-12 border-b border-gray-300 flex items-end justify-center">
-                          @if (signatures.has('guardian1')) {
-                            <img [src]="signatures.get('guardian1')" class="h-10 object-contain" alt="Firma tutor 1">
-                          }
-                        </div>
-                      </div>
-                    }
-                  </div>
-
-                  @if (isMinor() && registerForm.get('progenitor2_full_name')?.value) {
-                    <div class="mt-4">
-                      <p class="text-xs font-semibold mb-1">Firma tutor 2:</p>
-                      <div class="h-12 border-b border-gray-300 flex items-end justify-center w-1/2">
-                        @if (signatures.has('guardian2')) {
-                          <img [src]="signatures.get('guardian2')" class="h-10 object-contain" alt="Firma tutor 2">
-                        }
-                      </div>
-                    </div>
-                  }
-                </div>
-
-              </div>
-            </div>
-          </div>
-        </div>
+      <div class="hidden xl:block">
+        <app-patient-document-preview
+          [registerForm]="registerForm"
+          [isMinor]="isMinor()"
+          [signatures]="signatures"
+          [currentDate]="currentDate">
+        </app-patient-document-preview>
       </div>
 
     </div>

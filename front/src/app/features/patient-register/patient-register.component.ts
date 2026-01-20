@@ -25,11 +25,12 @@ import {
   phoneValidator,
   birthDateValidator,
 } from '../../shared/validators/custom-validators';
+import { PatientDocumentPreviewComponent } from './components/patient-document-preview.component';
 
 @Component({
   selector: 'app-patient-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DatePipe],
+  imports: [CommonModule, ReactiveFormsModule, DatePipe, PatientDocumentPreviewComponent],
   templateUrl: './patient-register.component.html',
   styleUrls: ['./patient-register.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -109,7 +110,9 @@ export class PatientRegisterComponent implements OnInit {
   // Signature canvas references
   @ViewChild('patientSignature') patientSignatureCanvas!: ElementRef<HTMLCanvasElement>;
   @ViewChild('guardian1Signature') guardian1SignatureCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('guardian2Signature') guardian2SignatureCanvas!: ElementRef<HTMLCanvasElement>;
+
+  // Preview component reference for PDF generation
+  @ViewChild(PatientDocumentPreviewComponent) documentPreview!: PatientDocumentPreviewComponent;
 
   // Signature state
   private signatureContexts = new Map<string, CanvasRenderingContext2D>();
@@ -241,19 +244,6 @@ export class PatientRegisterComponent implements OnInit {
       }
     }
 
-    if (this.guardian2SignatureCanvas) {
-      const canvas2 = this.guardian2SignatureCanvas.nativeElement;
-      const ctx2 = canvas2.getContext('2d');
-      if (ctx2) {
-        canvas2.width = canvas2.offsetWidth;
-        canvas2.height = 150;
-        ctx2.strokeStyle = '#000';
-        ctx2.lineWidth = 2;
-        ctx2.lineCap = 'round';
-        ctx2.lineJoin = 'round';
-        this.signatureContexts.set('guardian2', ctx2);
-      }
-    }
   }
 
   /**
@@ -461,8 +451,6 @@ export class PatientRegisterComponent implements OnInit {
         return this.patientSignatureCanvas?.nativeElement || null;
       case 'guardian1':
         return this.guardian1SignatureCanvas?.nativeElement || null;
-      case 'guardian2':
-        return this.guardian2SignatureCanvas?.nativeElement || null;
       default:
         return null;
     }
@@ -501,7 +489,7 @@ export class PatientRegisterComponent implements OnInit {
     return true;
   }
 
-  onSubmit(): void {
+  async onSubmit(): Promise<void> {
     if (this.registerForm.invalid) {
       this.registerForm.markAllAsTouched();
       return;
@@ -515,6 +503,16 @@ export class PatientRegisterComponent implements OnInit {
     this.isSubmitting.set(true);
     this.errorMessage.set('');
     this.signatureError.set('');
+
+    // Generar y descargar PDF antes de enviar
+    try {
+      if (this.documentPreview) {
+        await this.documentPreview.generatePDF();
+      }
+    } catch (error) {
+      console.error('Error generando PDF:', error);
+      // Continuar con el registro aunque falle la generación del PDF
+    }
 
     const formData: PatientRegistration = {
       ...this.registerForm.value,

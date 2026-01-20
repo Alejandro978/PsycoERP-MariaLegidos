@@ -1,0 +1,177 @@
+<div>
+  <div class="sticky top-6">
+    <div class="card-elevated p-4 mb-4">
+      <div class="flex items-center justify-between">
+        <h2 class="text-lg font-semibold" style="color: rgb(15, 23, 41);">
+          Vista previa del documento
+        </h2>
+        <span class="text-xs px-2 py-1 bg-blue-100 text-blue-700 rounded-full">
+          Tiempo real
+        </span>
+      </div>
+      <p class="text-xs mt-1" style="color: rgb(101, 117, 139);">
+        Este documento se generara como PDF al completar el registro
+      </p>
+    </div>
+
+    <!-- Document Preview -->
+    <div class="card-elevated overflow-hidden" style="max-height: calc(100vh - 180px);">
+      <div class="overflow-y-auto" style="max-height: calc(100vh - 180px);">
+        <!-- Documento con estilos originales -->
+        <div #documentContent class="bg-white px-5 pt-4 pb-5" style="min-height: calc(-100px + 100vh);">
+
+          <!-- Header -->
+          <div class="flex mb-4 mt-3 items-start justify-between">
+            <p class="text-xl font-semibold m-0">Firmado profesional</p>
+            <img src="assets/logo/logo.png"
+              style="height: 60px;" alt="Logo Psicoandante" class="ml-auto">
+          </div>
+
+          <!-- Datos del paciente -->
+          <p class="mb-2 font-semibold">Datos del paciente</p>
+          <p class="mb-6">
+            Sr./Sra.{{ isMinor ? '/Menor' : '' }}
+            {{ registerForm.get('first_name')?.value || '____________________' }}
+            {{ registerForm.get('last_name')?.value || '____________________' }}, con fecha de nacimiento
+            {{ registerForm.get('birth_date')?.value ? (registerForm.get('birth_date')?.value | date:'dd/MM/yyyy') :
+            '__/__/____' }}, con domicilio en
+            {{ registerForm.get('street')?.value || '______________________________' }},
+            {{ registerForm.get('street_number')?.value || '______________' }}
+            {{ registerForm.get('door')?.value ? registerForm.get('door')?.value : '' }}
+            CP {{ registerForm.get('postal_code')?.value || '________' }}, con Documento de identidad
+            {{ registerForm.get('dni')?.value || '______________' }},
+            Telf.: {{ registerForm.get('phone')?.value || '________________' }},
+            E-mail: {{ registerForm.get('email')?.value || '________________________' }}
+          </p>
+
+          <!-- Datos tutores (SOLO SI ES MENOR) -->
+          @if (isMinor) {
+          <div class="mb-6">
+            <p class="mb-2 font-semibold">Datos personales de los padres y/o tutores legales del menor</p>
+            <p class="mb-4">
+              Sr./Sra. {{ registerForm.get('progenitor1_full_name')?.value || '________________________________' }},
+              con Documento de identidad {{ registerForm.get('progenitor1_dni')?.value || '______________' }},
+              Telf.: {{ registerForm.get('progenitor1_phone')?.value || '________________' }}
+            </p>
+
+            @if (registerForm.get('progenitor2_full_name')?.value) {
+            <p class="mb-2 font-semibold">Segundo tutor/a</p>
+            <p>
+              Sr./Sra. {{ registerForm.get('progenitor2_full_name')?.value || '________________________________' }},
+              con Documento de identidad {{ registerForm.get('progenitor2_dni')?.value || '______________' }},
+              Telf.: {{ registerForm.get('progenitor2_phone')?.value || '________________' }}
+            </p>
+            }
+          </div>
+          }
+
+          <!-- Checkboxes -->
+          <div class="space-y-4 mb-8">
+            @if (isMinor) {
+            <div class="flex">
+              <div class="mr-2 flex-shrink-0 flex justify-center items-center"
+                style="width: 14px; height: 14px; border: 1.5px solid rgb(108, 117, 125); border-radius: 2px; margin-top: 3px;">
+                @if (registerForm.get('consent_legal_representative')?.value) {
+                <span class="text-green-600 font-bold" style="font-size: 10px; line-height: 1;">✓</span>
+                }
+              </div>
+              <div class="w-full">
+                <pre class="whitespace-pre-wrap font-sans text-sm">En caso de no estar presente ambos progenitores/tutores legales, la persona solicitante declara ser la persona responsable legal del menor participante y manifiesta que el resto de representantes legales, si los hay, están conformes con el tratamiento</pre>
+              </div>
+            </div>
+            }
+
+            <div class="flex">
+              <div class="mr-2 flex-shrink-0 flex justify-center items-center"
+                style="width: 14px; height: 14px; border: 1.5px solid rgb(108, 117, 125); border-radius: 2px; margin-top: 3px;">
+                @if (registerForm.get('consent_data_protection')?.value) {
+                <span class="text-green-600 font-bold" style="font-size: 10px; line-height: 1;">✓</span>
+                }
+              </div>
+              <div class="w-full">
+                <pre class="whitespace-pre-wrap font-sans text-sm">En cumplimiento de la Ley Orgánica 3/2018 de protección de datos de carácter personal y garantía de los derechos digitales y del Reglamento Europeo RGPD 679/2016 le informamos que sus datos están siendo objeto de tratamiento por parte de María Legidos Huertas con la finalidad de gestionar el historial clínico {{ isMinor ? 'del menor' : 'del paciente' }} y un seguimiento posterior, prestarle nuestros servicios sanitarios, enviarles información, responder a sus consultas y peticiones mientras dure nuestra relación y/o tengamos su consentimiento. Las bases jurídicas de legitimación son la relación contractual, interés legítimo y en su caso, consentimiento del interesado. No se cederán datos a terceros salvo obligación legal o autorización previa. Pueden ejercer sus derechos de acceso, rectificación, supresión, así como otros derechos como indica la información adicional: https://www.adelopd.com/privacidad/psicoandante
+
+{{ isMinor ? 'Los progenitores' : 'El paciente' }} mediante el envío de este formulario manifiestan que han sido informados sobre el tratamiento de datos por parte de la empresa.</pre>
+              </div>
+            </div>
+
+            <div class="flex">
+              <div class="mr-2 flex-shrink-0 flex justify-center items-center"
+                style="width: 14px; height: 14px; border: 1.5px solid rgb(108, 117, 125); border-radius: 2px; margin-top: 3px;">
+                @if (registerForm.get('consent_service_conditions')?.value) {
+                <span class="text-green-600 font-bold" style="font-size: 10px; line-height: 1;">✓</span>
+                }
+              </div>
+              <div class="w-full">
+                <pre class="whitespace-pre-wrap font-sans text-sm">CONDICIONES DEL SERVICIO
+
+La finalidad del presente contenido es especificar las condiciones generales del funcionamiento del programa terapéutico que usted va a comenzar.
+
+COSTE DE LOS SERVICIOS: Las sesiones tendrán una duración aproximada de 1 hora (entre 50-60 minutos). Se realizarán siempre bajo cita previa.
+Sesión individual presencial/online:
+Las sesiones se realizarán online, a través de google meet. Se le enviará un link para su sesión o en caso de problemas de conectividad se hará por videollamada de WhatsApp. Las sesiones se abonarán por adelantado (48-24h antes).
+
+MÉTODO DE PAGO: El pago se realizará 48-24 horas ANTES de la SESIÓN, a través de transferencia bancaria o bizum:
+
+Transferencia bancaria: ES65 2100 7572 7802 0012 1902
+Bizum: 600402111
+
+Se requerirá envío al e-mail (andantepsicologia&#64;gmail.com)/ WhatsApp (+34 600402111) del recibo de transferencia bancaria.
+
+Para que se haga efectiva la reserva de su cita ONLINE será NECESARIO el pago 48-24 horas ANTES de las sesiones, enviando vía e-mail/WhatsApp el recibo de la transferencia.
+
+SI LA SESIÓN NO SE ABONA entre 48-24 horas ANTES de la sesión o, tras un recordatorio de la profesional a su WhatsApp/email que le requiere el envío del justificante de pago en un tiempo determinado, se le comunicará la ANULACIÓN de la cita, ya que no se habrá completado el proceso de reserva de sus sesiones.
+
+CANCELACIÓN DE LAS SESIONES Y REAJENDAR:
+CANCELAR CITAS. Cada sesión de 1 hora de duración ha sido reservada exclusivamente para usted, por lo que deberá indicarnos, con una antelación de 24 horas, su imposibilidad de acudir a ella y así poder utilizar este tiempo con otra persona que esté a la espera.
+Para avisar de cualquier imprevisto puede comunicarlo a través de WHATSAPP: +34 619 85 54 86
+BONOS. Si no puede acudir a la sesión y no avisa en el plazo establecido, la sesión se descontará de su bono. Si avisa dentro del margen especificado, se reagendará su cita y no se descontará.
+REAGENDAR. Si no puede acudir a la sesión y avisa de ello en el plazo establecido se le dará otra sesión sin necesidad de que abone por adelantado esa sesión. En ninguna circunstancia se hará reembolso del abono de las sesiones.
+LLEGAR CON RETRASO A LA SESIONES. El tiempo de espera máximo para conectarse a la sesión es de 15 minutos. De llegar con retraso, la hora finalización de la consulta seguirá siendo la establecida al momento de reservar.
+OTRAS CONSIDERACIONES:
+Las citas le serán recordadas en los días anteriores, contactando con usted en el teléfono que nos facilite o a través de mensaje de WhatsApp.
+Se le enviarán recursos digitales útiles para su trabajo personal entre sesiones de los servicios requeridos a través de su e-mail o mensaje de WhatsApp.
+Autoriza a realizar grabaciones de alguna de las prácticas hechas en sesión para poder replicar la práctica entre sesiones. A esas grabaciones únicamente podrá tener acceso la profesional y el/la cliente/a.
+Las notas que se tomen durante o tras la sesión del servicio requerido únicamente tendrá acceso a ellas la profesional que le atienda.
+No se realizan informes de evaluación con validez pericial ni forense.</pre>
+              </div>
+            </div>
+          </div>
+
+          <!-- Fecha de firma -->
+          <p class="mb-4 font-semibold">Firmado {{ currentDate | date:'dd, MMMM, yyyy' }}</p>
+
+          <!-- Firmas -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <div class="flex">
+                <p class="m-0 self-end">Firmado paciente</p>
+                <div>
+                  <div style="height: 40px; background-size: contain; background-repeat: no-repeat;"
+                    [style.background-image]="signatures.has('patient') ? 'url(' + signatures.get('patient') + ')' : ''">
+                  </div>
+                  <p class="m-0" style="line-height: 1px;"> ____________________________ </p>
+                </div>
+              </div>
+            </div>
+
+            @if (isMinor) {
+            <div>
+              <div class="flex">
+                <p class="m-0 self-end">Firmado tutor/progenitor</p>
+                <div>
+                  <div style="height: 40px; background-size: contain; background-repeat: no-repeat;"
+                    [style.background-image]="signatures.has('guardian1') ? 'url(' + signatures.get('guardian1') + ')' : ''">
+                  </div>
+                  <p class="m-0" style="line-height: 1px;"> ____________________________ </p>
+                </div>
+              </div>
+            </div>
+            }
+          </div>
+
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

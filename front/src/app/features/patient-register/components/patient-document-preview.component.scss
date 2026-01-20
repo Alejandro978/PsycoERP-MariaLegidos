@@ -4,11 +4,15 @@
   box-shadow: 0 1px 3px 0 rgba(0, 0, 0, 0.1), 0 1px 2px -1px rgba(0, 0, 0, 0.1);
 }
 
-.font-montserrat {
-  font-family: 'Montserrat', sans-serif;
+// Hacer que la columna derecha sea sticky en desktop
+@media (min-width: 1024px) {
+  .lg\:sticky {
+    position: sticky;
+    top: 1.5rem;
+  }
 }
 
-// Scroll suave para el formulario
+// Scroll suave para el preview
 .overflow-y-auto {
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
