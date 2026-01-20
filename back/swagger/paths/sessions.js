@@ -139,7 +139,7 @@ const sessionsPaths = {
     post: {
       tags: ["Sessions"],
       summary: "Crear nueva sesión",
-      description: "Crea una nueva sesión en el sistema. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones. **IMPORTANTE**: Para pacientes externos (is_external=1), los campos 'mode', 'payment_method' y 'notes' son opcionales y no se trackearán.",
+      description: "Crea una nueva sesión en el sistema. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones (excepto si al menos una de las clínicas involucradas es externa). **IMPORTANTE**: Para pacientes externos (is_external=1), los campos 'mode', 'payment_method' y 'notes' son opcionales y no se trackearán. **Validación de solapamiento**: No se valida solapamiento si la clínica de la nueva sesión es externa, o si la clínica de la sesión existente es externa.",
       requestBody: {
         required: true,
         content: {
@@ -329,7 +329,7 @@ const sessionsPaths = {
       tags: ["Sessions"],
       summary: "Actualizar sesión existente",
       description:
-        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones.",
+        "Actualiza una sesión existente con los datos proporcionados. Solo se actualizan los campos enviados. Validaciones: horario entre 08:00-21:00, duración máxima 1 hora, start_time < end_time, sin solapamiento con otras sesiones (excepto si al menos una de las clínicas involucradas es externa). **Validación de solapamiento**: No se valida solapamiento si la clínica de la sesión es externa, o si la clínica de la sesión existente con la que se solapa es externa.",
       parameters: [
         {
           name: "id",

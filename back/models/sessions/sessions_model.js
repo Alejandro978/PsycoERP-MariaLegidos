@@ -291,15 +291,29 @@ const getSessionForWhatsApp = async (db, sessionId) => {
 // Una sesión se solapa si:
 // - La nueva sesión empieza antes de que termine una existente Y
 // - La nueva sesión termina después de que empiece una existente
-const checkTimeOverlap = async (db, session_date, start_time, end_time, excludeSessionId = null) => {
+const checkTimeOverlap = async (db, session_date, start_time, end_time, clinic_id, excludeSessionId = null) => {
+  // Primero, verificar si la clínica de la nueva sesión es externa
+  const [newClinicRows] = await db.execute(
+    'SELECT is_external FROM clinics WHERE id = ? AND is_active = true',
+    [clinic_id]
+  );
+
+  // Si la clínica de la nueva sesión es externa, no validar solapamiento
+  if (newClinicRows.length > 0 && newClinicRows[0].is_external === 1) {
+    return null;
+  }
+
   let query = `
-    SELECT s.id, s.start_time, s.end_time, s.status, s.patient_id,
-           CONCAT(p.first_name, ' ', p.last_name) as patient_name
+    SELECT s.id, s.start_time, s.end_time, s.status, s.patient_id, s.clinic_id,
+           CONCAT(p.first_name, ' ', p.last_name) as patient_name,
+           c.is_external
     FROM sessions s
     LEFT JOIN patients p ON s.patient_id = p.id
+    LEFT JOIN clinics c ON s.clinic_id = c.id
     WHERE s.session_date = ?
       AND s.is_active = true
       AND s.status != 'cancelada'
+      AND c.is_external = 0
       AND (
         -- La nueva sesión empieza antes de que termine una existente
         (? < s.end_time AND ? > s.start_time)
