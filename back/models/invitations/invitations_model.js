@@ -1,16 +1,16 @@
 /**
  * Crear una nueva invitación
  * @param {Object} db - Pool de conexión a BD
- * @param {Object} data - Datos de la invitación
+ * @param {Object} data - Datos de la invitación (token, expires_at, clinic_id)
  * @returns {Object} - Invitación creada
  */
 const createInvitation = async (db, data) => {
-  const { token, expires_at } = data;
+  const { token, expires_at, clinic_id } = data;
 
   const [result] = await db.execute(
-    `INSERT INTO patient_invitations (token, status, expires_at, created_at)
-     VALUES (?, 'pending', ?, NOW())`,
-    [token, expires_at]
+    `INSERT INTO patient_invitations (token, status, expires_at, clinic_id, created_at)
+     VALUES (?, 'pending', ?, ?, NOW())`,
+    [token, expires_at, clinic_id]
   );
 
   return {
@@ -18,6 +18,7 @@ const createInvitation = async (db, data) => {
     token,
     status: "pending",
     expires_at,
+    clinic_id,
   };
 };
 
@@ -29,7 +30,7 @@ const createInvitation = async (db, data) => {
  */
 const getInvitationByToken = async (db, token) => {
   const [rows] = await db.execute(
-    `SELECT id, token, status, expires_at, used_at, created_at
+    `SELECT id, token, status, expires_at, used_at, clinic_id, created_at
      FROM patient_invitations
      WHERE token = ?`,
     [token]
@@ -46,7 +47,7 @@ const getInvitationByToken = async (db, token) => {
  */
 const getInvitationById = async (db, id) => {
   const [rows] = await db.execute(
-    `SELECT id, token, status, expires_at, used_at, created_at
+    `SELECT id, token, status, expires_at, used_at, clinic_id, created_at
      FROM patient_invitations
      WHERE id = ?`,
     [id]
@@ -68,7 +69,7 @@ const getInvitations = async (db, filters = {}) => {
 
   let countQuery = `SELECT COUNT(*) as total FROM patient_invitations WHERE 1=1`;
   let dataQuery = `
-    SELECT id, token, status, expires_at, used_at, created_at
+    SELECT id, token, status, expires_at, used_at, clinic_id, created_at
     FROM patient_invitations
     WHERE 1=1
   `;

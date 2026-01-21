@@ -76,6 +76,13 @@ export interface PatientData {
   menor_edad: number; // 0 or 1
   nombre_clinica: string;
   tipo_clinica: string;
+  // Progenitor fields (for minors)
+  progenitor1_full_name?: string | null;
+  progenitor1_dni?: string | null;
+  progenitor1_phone?: string | null;
+  progenitor2_full_name?: string | null;
+  progenitor2_dni?: string | null;
+  progenitor2_phone?: string | null;
 }
 
 // Helper functions for data transformation
@@ -102,7 +109,14 @@ export class PatientDetailUtils {
       status: apiData.estado as 'en curso' | 'fin del tratamiento' | 'en pausa' | 'abandono' | 'derivación',
       nombre_clinica: apiData.nombre_clinica,
       tipo_clinica: apiData.tipo_clinica,
-      is_minor: apiData.menor_edad === 1
+      is_minor: apiData.menor_edad === 1,
+      // Progenitor fields
+      progenitor1_full_name: apiData.progenitor1_full_name || '',
+      progenitor1_dni: apiData.progenitor1_dni || '',
+      progenitor1_phone: apiData.progenitor1_phone || '',
+      progenitor2_full_name: apiData.progenitor2_full_name || '',
+      progenitor2_dni: apiData.progenitor2_dni || '',
+      progenitor2_phone: apiData.progenitor2_phone || '',
     };
   }
 

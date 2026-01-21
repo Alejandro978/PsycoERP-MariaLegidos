@@ -16,10 +16,21 @@ const FRONTEND_URL = process.env.FRONTEND_URL || "https://psicoandante.com";
 /**
  * Genera una nueva invitación
  * POST /api/invitations/generate
+ * Body: { clinic_id: number } - Clínica asociada a la invitación
  * Protegido - requiere autenticación
  */
 const generarInvitacion = async (req, res) => {
   try {
+    const { clinic_id } = req.body;
+
+    // Validar que se proporcione clinic_id
+    if (!clinic_id) {
+      return res.status(400).json({
+        success: false,
+        message: "El campo clinic_id es obligatorio",
+      });
+    }
+
     // Generar token único
     const token = crypto.randomBytes(32).toString("hex");
 
@@ -30,6 +41,7 @@ const generarInvitacion = async (req, res) => {
     const invitation = await createInvitation(req.db, {
       token,
       expires_at: expiresAt.toISOString().slice(0, 19).replace("T", " "),
+      clinic_id,
     });
 
     // Construir enlace completo
@@ -43,6 +55,7 @@ const generarInvitacion = async (req, res) => {
         token: invitation.token,
         link: invitationLink,
         expires_at: invitation.expires_at,
+        clinic_id: invitation.clinic_id,
       },
     });
   } catch (error) {
@@ -190,9 +203,11 @@ const registrarPaciente = async (req, res) => {
       });
     }
 
-    // Crear paciente con status por defecto "en curso"
+    // Crear paciente con datos automáticos desde la invitación
     const newPatientData = {
       ...patientData,
+      clinic_id: invitation.clinic_id, // Automático desde la invitación
+      treatment_start_date: new Date().toISOString().slice(0, 10), // Fecha actual
       status: patientData.status || "en curso",
     };
 

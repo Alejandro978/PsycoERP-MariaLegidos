@@ -52,7 +52,7 @@
           <div>
             @if (isEditing()) {
               <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="first_name">
-                Nombre
+                Nombre *
               </label>
             } @else {
               <div class="text-sm font-medium leading-none mb-2">
@@ -63,15 +63,18 @@
               id="first_name"
               formControlName="first_name"
               [class]="isEditing()
-                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('first_name') ? 'border-red-500' : 'border-blue-200')
                 : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="text" />
+            @if (getFieldError('first_name')) {
+              <p class="text-sm text-red-500 mt-1">{{ getFieldError('first_name') }}</p>
+            }
           </div>
 
           <div>
             @if (isEditing()) {
               <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="last_name">
-                Apellidos
+                Apellidos *
               </label>
             } @else {
               <div class="text-sm font-medium leading-none mb-2">
@@ -82,15 +85,18 @@
               id="last_name"
               formControlName="last_name"
               [class]="isEditing()
-                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('last_name') ? 'border-red-500' : 'border-blue-200')
                 : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="text" />
+            @if (getFieldError('last_name')) {
+              <p class="text-sm text-red-500 mt-1">{{ getFieldError('last_name') }}</p>
+            }
           </div>
 
           <div>
             @if (isEditing()) {
               <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="dni">
-                DNI
+                DNI *
               </label>
             } @else {
               <div class="text-sm font-medium leading-none mb-2">
@@ -101,15 +107,18 @@
               id="dni"
               formControlName="dni"
               [class]="isEditing()
-                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('dni') ? 'border-red-500' : 'border-blue-200')
                 : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="text" />
+            @if (getFieldError('dni')) {
+              <p class="text-sm text-red-500 mt-1">{{ getFieldError('dni') }}</p>
+            }
           </div>
 
           <div>
             @if (isEditing()) {
               <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="birth_date">
-                Fecha de Nacimiento
+                Fecha de Nacimiento *
               </label>
             } @else {
               <div class="text-sm font-medium leading-none mb-2">
@@ -119,11 +128,22 @@
             <input
               id="birth_date"
               formControlName="birth_date"
+              (change)="onBirthDateChange($event)"
               [class]="isEditing()
-                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('birth_date') ? 'border-red-500' : 'border-blue-200')
                 : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="date" />
-            <p class="text-sm text-muted-foreground mt-1 italic">Edad: {{ age() }} años</p>
+            <div class="flex items-center gap-2 mt-1">
+              <p class="text-sm text-muted-foreground italic">Edad: {{ age() }} años</p>
+              @if (isMinor()) {
+                <span class="inline-flex items-center rounded-md bg-amber-50 px-2 py-0.5 text-xs font-medium text-amber-700 ring-1 ring-inset ring-amber-600/20">
+                  Menor de edad
+                </span>
+              }
+            </div>
+            @if (getFieldError('birth_date')) {
+              <p class="text-sm text-red-500 mt-1">{{ getFieldError('birth_date') }}</p>
+            }
           </div>
 
           <div>
@@ -148,6 +168,186 @@
       </div>
     </div>
 
+    <!-- Progenitor Information Card (only for minors) -->
+    @if (isMinor()) {
+    <div class="bg-card text-card-foreground flex flex-col rounded-xl border py-6 shadow-sm border-amber-200 bg-amber-50/30">
+      <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
+        <div class="flex items-center gap-2">
+          <svg class="h-5 w-5 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+          </svg>
+          <h3 class="text-lg font-semibold text-amber-800">Información de Progenitores</h3>
+          @if (isEditing()) {
+            <span class="inline-flex items-center rounded-md bg-blue-50 px-2 py-1 text-xs font-medium text-blue-700 ring-1 ring-inset ring-blue-700/10">
+              Editando
+            </span>
+          }
+        </div>
+      </div>
+
+      <div class="px-6 space-y-6">
+        <!-- Progenitor 1 (Required) -->
+        <div>
+          <h4 class="text-sm font-semibold text-amber-700 mb-3 flex items-center gap-2">
+            Progenitor 1
+            <span class="text-red-500 text-xs">(Obligatorio)</span>
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              @if (isEditing()) {
+                <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="progenitor1_full_name">
+                  Nombre completo *
+                </label>
+              } @else {
+                <div class="text-sm font-medium leading-none mb-2">
+                  Nombre completo
+                </div>
+              }
+              <input
+                id="progenitor1_full_name"
+                formControlName="progenitor1_full_name"
+                [class]="isEditing()
+                  ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('progenitor1_full_name') ? 'border-red-500' : 'border-blue-200')
+                  : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
+                type="text"
+                placeholder="Ej: María González López" />
+              @if (getFieldError('progenitor1_full_name')) {
+                <p class="text-sm text-red-500 mt-1">{{ getFieldError('progenitor1_full_name') }}</p>
+              }
+            </div>
+
+            <div>
+              @if (isEditing()) {
+                <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="progenitor1_dni">
+                  DNI / NIE *
+                </label>
+              } @else {
+                <div class="text-sm font-medium leading-none mb-2">
+                  DNI / NIE
+                </div>
+              }
+              <input
+                id="progenitor1_dni"
+                formControlName="progenitor1_dni"
+                [class]="isEditing()
+                  ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('progenitor1_dni') ? 'border-red-500' : 'border-blue-200')
+                  : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
+                type="text"
+                placeholder="Ej: 98765432B" />
+              @if (getFieldError('progenitor1_dni')) {
+                <p class="text-sm text-red-500 mt-1">{{ getFieldError('progenitor1_dni') }}</p>
+              }
+            </div>
+
+            <div>
+              @if (isEditing()) {
+                <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="progenitor1_phone">
+                  Teléfono *
+                </label>
+              } @else {
+                <div class="text-sm font-medium leading-none mb-2">
+                  Teléfono
+                </div>
+              }
+              <input
+                id="progenitor1_phone"
+                formControlName="progenitor1_phone"
+                [class]="isEditing()
+                  ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('progenitor1_phone') ? 'border-red-500' : 'border-blue-200')
+                  : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
+                type="tel"
+                placeholder="Ej: 677888999" />
+              @if (getFieldError('progenitor1_phone')) {
+                <p class="text-sm text-red-500 mt-1">{{ getFieldError('progenitor1_phone') }}</p>
+              }
+            </div>
+          </div>
+        </div>
+
+        <!-- Progenitor 2 (Optional) -->
+        <div>
+          <h4 class="text-sm font-semibold text-amber-700 mb-3 flex items-center gap-2">
+            Progenitor 2
+            <span class="text-gray-500 text-xs">(Opcional - Si añades algo, todos los campos son obligatorios)</span>
+          </h4>
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div>
+              @if (isEditing()) {
+                <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="progenitor2_full_name">
+                  Nombre completo
+                </label>
+              } @else {
+                <div class="text-sm font-medium leading-none mb-2">
+                  Nombre completo
+                </div>
+              }
+              <input
+                id="progenitor2_full_name"
+                formControlName="progenitor2_full_name"
+                (input)="onProgenitor2Change()"
+                [class]="isEditing()
+                  ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('progenitor2_full_name') ? 'border-red-500' : 'border-blue-200')
+                  : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
+                type="text"
+                placeholder="Ej: Carlos Martínez Ruiz" />
+              @if (getFieldError('progenitor2_full_name')) {
+                <p class="text-sm text-red-500 mt-1">{{ getFieldError('progenitor2_full_name') }}</p>
+              }
+            </div>
+
+            <div>
+              @if (isEditing()) {
+                <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="progenitor2_dni">
+                  DNI / NIE
+                </label>
+              } @else {
+                <div class="text-sm font-medium leading-none mb-2">
+                  DNI / NIE
+                </div>
+              }
+              <input
+                id="progenitor2_dni"
+                formControlName="progenitor2_dni"
+                (input)="onProgenitor2Change()"
+                [class]="isEditing()
+                  ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('progenitor2_dni') ? 'border-red-500' : 'border-blue-200')
+                  : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
+                type="text"
+                placeholder="Ej: 87654321C" />
+              @if (getFieldError('progenitor2_dni')) {
+                <p class="text-sm text-red-500 mt-1">{{ getFieldError('progenitor2_dni') }}</p>
+              }
+            </div>
+
+            <div>
+              @if (isEditing()) {
+                <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="progenitor2_phone">
+                  Teléfono
+                </label>
+              } @else {
+                <div class="text-sm font-medium leading-none mb-2">
+                  Teléfono
+                </div>
+              }
+              <input
+                id="progenitor2_phone"
+                formControlName="progenitor2_phone"
+                (input)="onProgenitor2Change()"
+                [class]="isEditing()
+                  ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('progenitor2_phone') ? 'border-red-500' : 'border-blue-200')
+                  : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
+                type="tel"
+                placeholder="Ej: 688777666" />
+              @if (getFieldError('progenitor2_phone')) {
+                <p class="text-sm text-red-500 mt-1">{{ getFieldError('progenitor2_phone') }}</p>
+              }
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+    }
+
     <!-- Contact Information Card -->
     <div class="bg-card text-card-foreground flex flex-col rounded-xl border py-6 shadow-sm">
       <div class="@container/card-header grid auto-rows-min grid-rows-[auto_auto] items-start gap-1.5 px-6 has-data-[slot=card-action]:grid-cols-[1fr_auto] [.border-b]:pb-6 pb-3">
@@ -169,7 +369,7 @@
           <div>
             @if (isEditing()) {
               <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="email">
-                Email
+                Email *
               </label>
             } @else {
               <div class="text-sm font-medium leading-none mb-2">
@@ -180,15 +380,18 @@
               id="email"
               formControlName="email"
               [class]="isEditing()
-                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('email') ? 'border-red-500' : 'border-blue-200')
                 : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="email" />
+            @if (getFieldError('email')) {
+              <p class="text-sm text-red-500 mt-1">{{ getFieldError('email') }}</p>
+            }
           </div>
 
           <div>
             @if (isEditing()) {
               <label class="text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="phone">
-                Teléfono
+                Teléfono *
               </label>
             } @else {
               <div class="text-sm font-medium leading-none mb-2">
@@ -199,9 +402,12 @@
               id="phone"
               formControlName="phone"
               [class]="isEditing()
-                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('phone') ? 'border-red-500' : 'border-blue-200')
                 : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="tel" />
+            @if (getFieldError('phone')) {
+              <p class="text-sm text-red-500 mt-1">{{ getFieldError('phone') }}</p>
+            }
           </div>
 
           <div class="md:col-span-2">
@@ -283,10 +489,13 @@
                   id="postal_code"
                   formControlName="postal_code"
                   [class]="isEditing()
-                    ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                    ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('postal_code') ? 'border-red-500' : 'border-blue-200')
                     : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
                   type="text"
                   placeholder="Ej: 46002" />
+                @if (getFieldError('postal_code')) {
+                  <p class="text-sm text-red-500 mt-1">{{ getFieldError('postal_code') }}</p>
+                }
               </div>
 
               <div class="md:col-span-2">
@@ -384,9 +593,12 @@
               id="treatment_start_date"
               formControlName="treatment_start_date"
               [class]="isEditing()
-                ? 'flex h-10 w-full rounded-md border-2 border-blue-200 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors'
+                ? 'flex h-10 w-full rounded-md border-2 bg-white px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:border-blue-500 transition-colors ' + (getFieldError('treatment_start_date') ? 'border-red-500' : 'border-blue-200')
                 : 'flex h-10 w-full rounded-md border border-gray-200 bg-gray-50 px-3 py-2 text-sm text-gray-700 disabled:cursor-not-allowed'"
               type="date" />
+            @if (getFieldError('treatment_start_date')) {
+              <p class="text-sm text-red-500 mt-1">{{ getFieldError('treatment_start_date') }}</p>
+            }
           </div>
 
           <div>
