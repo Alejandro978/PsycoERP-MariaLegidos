@@ -117,29 +117,22 @@ export class FormInputComponent {
     }
 
     // Validaciones personalizadas de fecha de nacimiento
-    if (errors['futureDate']) {
+    if (errors['futureBirthDate']) {
       return 'La fecha de nacimiento no puede ser futura';
     }
-    if (errors['ageTooOld']) {
-      const maxAge = errors['ageTooOld'].maxAge;
-      return `La edad no puede superar los ${maxAge} años`;
-    }
-    if (errors['ageTooYoung']) {
-      const minAge = errors['ageTooYoung'].minAge;
-      return `La edad debe ser al menos ${minAge} años`;
+    if (errors['tooOld']) {
+      const age = errors['tooOld'].age;
+      return `La edad no puede superar los 100 años (edad calculada: ${age} años)`;
     }
 
     // Validaciones personalizadas de fecha de tratamiento
-    if (errors['dateTooOld']) {
-      const maxYears = errors['dateTooOld'].maxYears;
-      return `La fecha no puede ser más de ${maxYears} años en el pasado`;
+    if (errors['treatmentDateTooFarPast']) {
+      const years = errors['treatmentDateTooFarPast'].years;
+      return `La fecha no puede ser más de 100 años en el pasado (${years} años)`;
     }
-    if (errors['dateTooFuture']) {
-      const maxYears = errors['dateTooFuture'].maxYears;
-      return `La fecha no puede ser más de ${maxYears} años en el futuro`;
-    }
-    if (errors['invalidDate']) {
-      return 'La fecha ingresada no es válida';
+    if (errors['treatmentDateTooFarFuture']) {
+      const years = errors['treatmentDateTooFarFuture'].years;
+      return `La fecha no puede ser más de 100 años en el futuro (${years} años)`;
     }
 
     // Return first error key as fallback

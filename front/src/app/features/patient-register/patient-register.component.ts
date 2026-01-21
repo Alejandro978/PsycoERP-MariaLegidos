@@ -592,6 +592,9 @@ export class PatientRegisterComponent implements OnInit {
         const error = field.errors['invalidDniLetter'];
         return `La letra del DNI no es valida. Deberia ser ${error.expected} en lugar de ${error.actual}`;
       }
+      if (field.errors?.['phoneContainsSpaces']) {
+        return 'El telefono no puede contener espacios';
+      }
       if (field.errors?.['invalidPhone']) {
         return 'El telefono debe tener exactamente 9 digitos sin espacios (ej: 666123456)';
       }

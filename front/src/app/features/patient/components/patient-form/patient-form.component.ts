@@ -175,7 +175,6 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
         treatment_start_date: this.patient.treatment_start_date || '',
         status: this.patient.status || 'en curso',
         special_price: this.patient.special_price ?? 0,
-        is_minor: this.patient.is_minor || false,
         progenitor1_full_name: this.patient.progenitor1_full_name || '',
         progenitor1_dni: this.patient.progenitor1_dni || '',
         progenitor1_phone: this.patient.progenitor1_phone || '',
@@ -183,8 +182,12 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
         progenitor2_dni: this.patient.progenitor2_dni || '',
         progenitor2_phone: this.patient.progenitor2_phone || '',
       });
-      // Update validators after populating
-      this.updateProgenitorValidators();
+
+      // Calculate is_minor based on current birth_date
+      this.calculateIsMinor();
+
+      // Update progenitor fields state based on minor status
+      this.updateProgenitorFieldsState();
 
       // Apply field restrictions for external clinics in edit mode
       this.applyFieldRestrictionsForEditMode();
@@ -433,11 +436,8 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
         formData.progenitor2_dni = formData.progenitor2_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
       }
 
-      // Get is_minor value before deleting it
+      // Get is_minor value (will be sent to backend)
       const isMinor = Boolean(formData.is_minor);
-
-      // Remove is_minor from payload (backend calculates this from birth_date)
-      delete formData.is_minor;
 
       // If not minor, remove progenitor fields from payload
       if (!isMinor) {
@@ -450,10 +450,9 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
       }
 
       if (this.isEditing && this.patient) {
-        // Merge patient data with form data, excluding is_minor
-        const { is_minor: _, ...patientWithoutIsMinor } = this.patient;
+        // Merge patient data with form data (is_minor from formData will override)
         const updatedPatient: Patient = {
-          ...patientWithoutIsMinor,
+          ...this.patient,
           ...formData,
         };
         this.onSave.emit(updatedPatient);
@@ -490,6 +489,9 @@ export class PatientFormComponent implements OnInit, OnChanges, OnDestroy {
       if (field.errors?.['invalidDniLetter']) {
         const error = field.errors['invalidDniLetter'];
         return `La letra del DNI no es válida. Debería ser ${error.expected} en lugar de ${error.actual}`;
+      }
+      if (field.errors?.['phoneContainsSpaces']) {
+        return 'El teléfono no puede contener espacios';
       }
       if (field.errors?.['invalidPhone']) {
         return 'El teléfono debe tener exactamente 9 dígitos sin espacios (ej: 666123456)';

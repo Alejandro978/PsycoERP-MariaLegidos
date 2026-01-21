@@ -1161,19 +1161,25 @@ export class BillingComponent implements OnInit {
         invoiceWrapper.innerHTML = this.generateInvoiceHTML(invoice);
         tempContainer.appendChild(invoiceWrapper);
 
-        // Sanitizar el nombre del paciente para el nombre del archivo
-        const patientNameSanitized = invoice.patient_full_name
-          .replace(/[^a-zA-Z0-9\sáéíóúñÁÉÍÓÚÑüÜ]/g, '') // Eliminar caracteres especiales pero mantener acentos y ñ
-          .replace(/\s+/g, '_') // Reemplazar espacios por guiones bajos
-          .toLowerCase();
+        // Si hay información del progenitor, usar su nombre; si no, usar el del paciente
+        const hasProgenitor = invoice.progenitors_data?.progenitor1?.full_name;
+        const nameToUse = hasProgenitor
+          ? invoice.progenitors_data!.progenitor1.full_name!
+          : invoice.patient_full_name;
 
-        // Agregar a la lista de elementos con formato: numero-factura_nombre-paciente
+        // Sanitizar el nombre para el archivo
+        const nameSanitized = nameToUse
+          .replace(/\s+/g, '_')  // Reemplazar espacios por guiones bajos
+          .normalize('NFD')       // Normalizar caracteres acentuados
+          .replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
+
+        // Agregar a la lista de elementos con formato: FACTURA-numero_nombre
         elementsToGenerate.push({
           element: invoiceWrapper,
-          fileName: `${invoice.invoice_number.replace(
+          fileName: `FACTURA-${invoice.invoice_number.replace(
             /\//g,
             '-'
-          )}_${patientNameSanitized}`,
+          )}-${nameSanitized}`,
         });
       }
 
@@ -1256,9 +1262,7 @@ export class BillingComponent implements OnInit {
           <div>
             <h3 style="font-size: 18px; font-weight: 600; color: #1f2937; margin-bottom: 12px; border-bottom: 1px solid #e5e7eb; padding-bottom: 8px;">DATOS DEL RECEPTOR</h3>
             <div style="color: #374151;">
-              <div style="font-weight: 600;">${invoice.patient_full_name}</div>
-              <div>DNI: ${invoice.dni}</div>
-              <div>Email: ${invoice.email}</div>
+              ${this.generateReceiverHTML(invoice)}
             </div>
           </div>
         </div>
@@ -1324,6 +1328,33 @@ export class BillingComponent implements OnInit {
           <p style="margin: 0;">Servicio exento de IVA según el artículo 20 3a de la ley 37/1992 del impuesto sobre el Valor Añadido.</p>
         </div>
       </div>
+    `;
+  }
+
+  /**
+   * Genera el HTML del receptor de la factura
+   * Si hay información del progenitor, muestra sus datos; si no, muestra los del paciente
+   */
+  private generateReceiverHTML(invoice: ExistingInvoice): string {
+    const hasProgenitor = invoice.progenitors_data?.progenitor1?.full_name &&
+                          invoice.progenitors_data?.progenitor1?.dni;
+
+    if (hasProgenitor) {
+      const progenitor = invoice.progenitors_data!.progenitor1;
+      return `
+        <div style="font-weight: 600;">${progenitor.full_name}</div>
+        <div>DNI: ${progenitor.dni}</div>
+        ${progenitor.phone ? `<div>Teléfono: ${progenitor.phone}</div>` : ''}
+        <div style="font-size: 14px; color: #6b7280; margin-top: 8px; padding-top: 8px; border-top: 1px solid #e5e7eb;">
+          <span style="font-style: italic;">Tutor de: ${invoice.patient_full_name}</span>
+        </div>
+      `;
+    }
+
+    return `
+      <div style="font-weight: 600;">${invoice.patient_full_name}</div>
+      <div>DNI: ${invoice.dni}</div>
+      <div>Email: ${invoice.email}</div>
     `;
   }
 }

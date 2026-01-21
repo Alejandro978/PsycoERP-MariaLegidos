@@ -4,7 +4,9 @@
       "Bash(mkdir:*)",
       "Bash(npm run build:*)",
       "Bash(npm install:*)",
-      "Bash(tree:*)"
+      "Bash(tree:*)",
+      "Bash(npx ng build:*)",
+      "mcp__ide__getDiagnostics"
     ],
     "deny": [],
     "ask": []
