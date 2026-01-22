@@ -1,6 +1,8 @@
 export interface TokenValidation {
   valid: boolean;
   expires_at: string;
+  clinic_id: number | null;
+  clinic_name: string | null;
 }
 
 export interface PatientRegistration {

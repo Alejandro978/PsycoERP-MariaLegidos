@@ -49,7 +49,7 @@
 
       <!-- Boton Generar -->
       <button
-        (click)="generateInvitation()"
+        (click)="openClinicSelector()"
         [disabled]="loading()"
         class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap gap-2 disabled:opacity-50"
         style="background-color: rgb(60, 131, 246); color: rgb(255, 255, 255); border-radius: 0.5rem; font-weight: 500; box-shadow: rgba(15, 23, 41, 0.1) 0px 4px 6px -1px;">
@@ -69,6 +69,7 @@
         <thead style="background-color: rgba(225, 231, 239, 0.5);">
           <tr>
             <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Estado</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Clinica</th>
             <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Creado</th>
             <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Expira</th>
             <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Usado</th>
@@ -98,6 +99,12 @@
                     {{ getStatusLabel(invitation.status) }}
                   </span>
                 }
+              </td>
+
+              <td class="p-4">
+                <span class="text-sm font-medium" style="color: rgb(15, 23, 41);">
+                  {{ invitation.clinic_name || '-' }}
+                </span>
               </td>
 
               <td class="p-4">
@@ -149,7 +156,7 @@
 
           @if (invitations().length === 0 && !loading()) {
             <tr>
-              <td colspan="5" class="p-8 text-center">
+              <td colspan="6" class="p-8 text-center">
                 <p class="text-base" style="color: rgb(101, 117, 139);">
                   No hay invitaciones que mostrar
                 </p>
@@ -205,3 +212,49 @@
   (onConfirm)="handleDeleteInvitation()"
   (onCancel)="closeDeleteModal()">
 </app-confirmation-modal>
+
+<!-- Clinic Selector Modal -->
+@if (showClinicSelector()) {
+  <div class="fixed inset-0 z-50 flex items-center justify-center">
+    <!-- Backdrop -->
+    <div
+      class="fixed inset-0 bg-black bg-opacity-50 transition-opacity"
+      (click)="closeClinicSelector()">
+    </div>
+
+    <!-- Modal Content -->
+    <div class="relative bg-white rounded-xl shadow-xl p-6 w-full max-w-md mx-4 z-10">
+      <h3 class="text-lg font-bold mb-2" style="color: rgb(15, 23, 41);">
+        Seleccionar Clinica
+      </h3>
+      <p class="text-sm mb-4" style="color: rgb(101, 117, 139);">
+        El paciente quedara asociado a esta clinica al registrarse
+      </p>
+
+      <!-- Clinic Selector Component -->
+      <app-clinic-selector
+        [control]="clinicControl"
+        [clinics]="filteredClinics()"
+        label="Clinica"
+        placeholder="Seleccionar clinica..."
+        [required]="true">
+      </app-clinic-selector>
+
+      <div class="flex gap-3 mt-6">
+        <button
+          (click)="closeClinicSelector()"
+          class="flex-1 py-2 border rounded-md text-sm font-medium transition-colors hover:bg-gray-50"
+          style="border-color: rgb(225, 231, 239); color: rgb(101, 117, 139);">
+          Cancelar
+        </button>
+        <button
+          (click)="onClinicSelected()"
+          [disabled]="!clinicControl.value || loading()"
+          class="flex-1 py-2 rounded-md text-sm font-medium transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background-color: rgb(60, 131, 246); color: rgb(255, 255, 255);">
+          {{ loading() ? 'Generando...' : 'Generar Enlace' }}
+        </button>
+      </div>
+    </div>
+  </div>
+}

@@ -66,13 +66,13 @@ export class InvitationService {
       );
   }
 
-  generateInvitation(): Observable<GenerateInvitationResponse> {
+  generateInvitation(clinicId: number): Observable<GenerateInvitationResponse> {
     this.loadingService.show();
 
     return this.http
       .post<GenerateInvitationResponse>(
         `${this.apiUrl}/generate`,
-        {},
+        { clinic_id: clinicId },
         this.httpOptions
       )
       .pipe(

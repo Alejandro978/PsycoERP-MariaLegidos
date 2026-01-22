@@ -69,10 +69,16 @@
           <div class="space-y-4 mb-8">
             @if (isMinor) {
             <div class="flex">
-              <div class="mr-2 flex-shrink-0 flex justify-center items-center"
-                style="width: 14px; height: 14px; border: 1.5px solid rgb(108, 117, 125); border-radius: 2px; margin-top: 3px;">
+              <div class="mr-2 flex-shrink-0" style="width: 14px; height: 14px; margin-top: 3px;">
                 @if (registerForm.get('consent_legal_representative')?.value) {
-                <span class="text-green-600 font-bold" style="font-size: 10px; line-height: 1;">✓</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
+                  <path d="M3 7L6 10L11 4" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                } @else {
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
+                </svg>
                 }
               </div>
               <div class="w-full">
@@ -82,10 +88,16 @@
             }
 
             <div class="flex">
-              <div class="mr-2 flex-shrink-0 flex justify-center items-center"
-                style="width: 14px; height: 14px; border: 1.5px solid rgb(108, 117, 125); border-radius: 2px; margin-top: 3px;">
+              <div class="mr-2 flex-shrink-0" style="width: 14px; height: 14px; margin-top: 3px;">
                 @if (registerForm.get('consent_data_protection')?.value) {
-                <span class="text-green-600 font-bold" style="font-size: 10px; line-height: 1;">✓</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
+                  <path d="M3 7L6 10L11 4" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                } @else {
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
+                </svg>
                 }
               </div>
               <div class="w-full">
@@ -96,10 +108,16 @@
             </div>
 
             <div class="flex">
-              <div class="mr-2 flex-shrink-0 flex justify-center items-center"
-                style="width: 14px; height: 14px; border: 1.5px solid rgb(108, 117, 125); border-radius: 2px; margin-top: 3px;">
+              <div class="mr-2 flex-shrink-0" style="width: 14px; height: 14px; margin-top: 3px;">
                 @if (registerForm.get('consent_service_conditions')?.value) {
-                <span class="text-green-600 font-bold" style="font-size: 10px; line-height: 1;">✓</span>
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
+                  <path d="M3 7L6 10L11 4" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
+                </svg>
+                } @else {
+                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
+                </svg>
                 }
               </div>
               <div class="w-full">
@@ -142,30 +160,22 @@ No se realizan informes de evaluación con validez pericial ni forense.</pre>
           <p class="mb-4 font-semibold">Firmado {{ currentDate | date:'dd, MMMM, yyyy' }}</p>
 
           <!-- Firmas -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div>
-              <div class="flex">
-                <p class="m-0 self-end">Firmado paciente</p>
-                <div>
-                  <div style="height: 40px; background-size: contain; background-repeat: no-repeat;"
-                    [style.background-image]="signatures.has('patient') ? 'url(' + signatures.get('patient') + ')' : ''">
-                  </div>
-                  <p class="m-0" style="line-height: 1px;"> ____________________________ </p>
-                </div>
+              <p class="m-0 mb-1 text-sm">Firmado paciente</p>
+              <div style="height: 80px; width: 200px; background-size: contain; background-repeat: no-repeat; background-position: left bottom;"
+                [style.background-image]="signatures.has('patient') ? 'url(' + signatures.get('patient') + ')' : ''">
               </div>
+              <p class="m-0" style="width: 200px; border-top: 1px solid #333;"></p>
             </div>
 
             @if (isMinor) {
             <div>
-              <div class="flex">
-                <p class="m-0 self-end">Firmado tutor/progenitor</p>
-                <div>
-                  <div style="height: 40px; background-size: contain; background-repeat: no-repeat;"
-                    [style.background-image]="signatures.has('guardian1') ? 'url(' + signatures.get('guardian1') + ')' : ''">
-                  </div>
-                  <p class="m-0" style="line-height: 1px;"> ____________________________ </p>
-                </div>
+              <p class="m-0 mb-1 text-sm">Firmado tutor/progenitor</p>
+              <div style="height: 80px; width: 200px; background-size: contain; background-repeat: no-repeat; background-position: left bottom;"
+                [style.background-image]="signatures.has('guardian1') ? 'url(' + signatures.get('guardian1') + ')' : ''">
               </div>
+              <p class="m-0" style="width: 200px; border-top: 1px solid #333;"></p>
             </div>
             }
           </div>

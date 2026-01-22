@@ -50,6 +50,10 @@ export class PatientRegisterComponent implements OnInit {
   successMessage = signal('');
   expiresAt = signal('');
 
+  // Clinic info from invitation
+  clinicId = signal<number | null>(null);
+  clinicName = signal<string | null>(null);
+
   // Form
   registerForm = this.createForm();
 
@@ -268,6 +272,8 @@ export class PatientRegisterComponent implements OnInit {
         if (response.valid) {
           this.isValidToken.set(true);
           this.expiresAt.set(response.expires_at);
+          this.clinicId.set(response.clinic_id);
+          this.clinicName.set(response.clinic_name);
         } else {
           this.errorMessage.set(
             'El enlace de invitacion ha expirado o no es valido'
@@ -605,7 +611,7 @@ export class PatientRegisterComponent implements OnInit {
         return 'La fecha de nacimiento no puede ser futura';
       }
       if (field.errors?.['tooOld']) {
-        return 'La edad no puede superar los 100 anos';
+        return 'La edad no puede superar los 100 años';
       }
       if (field.errors?.['pattern']) {
         if (fieldName === 'postal_code') {

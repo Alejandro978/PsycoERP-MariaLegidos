@@ -56,6 +56,26 @@
           </p>
         </div>
 
+        <!-- Clinic Info Banner -->
+        @if (clinicName()) {
+          <div class="mb-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-center gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-blue-600 flex-shrink-0">
+                <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                <polyline points="9 22 9 12 15 12 15 22"></polyline>
+              </svg>
+              <div>
+                <p class="text-sm font-medium" style="color: rgb(15, 23, 41);">
+                  Clinica asignada
+                </p>
+                <p class="text-base font-bold" style="color: rgb(60, 131, 246);">
+                  {{ clinicName() }}
+                </p>
+              </div>
+            </div>
+          </div>
+        }
+
         @if (errorMessage()) {
           <div class="mb-4 p-3 rounded-md bg-red-50 text-red-600 text-sm">
             {{ errorMessage() }}
@@ -181,7 +201,7 @@
                         <div class="w-2 h-2 bg-green-500 rounded-full"></div>
                         <span class="text-green-700 font-medium">Mayor de edad</span>
                       }
-                      <span class="text-gray-500">({{ calculatedAge() }} anos)</span>
+                      <span class="text-gray-500">({{ calculatedAge() }} años)</span>
                     </div>
                   </div>
                 </div>

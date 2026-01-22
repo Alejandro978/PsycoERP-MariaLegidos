@@ -5,6 +5,8 @@ export interface Invitation {
   expires_at: string;
   used_at: string | null;
   created_at: string;
+  clinic_id: number | null;
+  clinic_name: string | null;
 }
 
 export interface InvitationFilters {
@@ -29,4 +31,6 @@ export interface GenerateInvitationResponse {
   invitationLink: string;
   token: string;
   expires_at: string;
+  clinic_id: number;
+  clinic_name: string;
 }

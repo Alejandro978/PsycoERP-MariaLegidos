@@ -3,25 +3,30 @@ import {
   OnInit,
   inject,
   signal,
+  computed,
   ChangeDetectionStrategy,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormsModule, ReactiveFormsModule, FormControl } from '@angular/forms';
 import { InvitationService } from './services/invitation.service';
 import { Invitation, InvitationFilters } from './models/invitation.model';
 import { ToastService } from '../../core/services/toast.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
+import { ClinicsService } from '../clinics/services/clinics.service';
+import { Clinic } from '../clinics/models/clinic.model';
+import { ClinicSelectorComponent } from '../../shared/components/clinic-selector/clinic-selector.component';
 
 @Component({
   selector: 'app-invitations',
   standalone: true,
-  imports: [CommonModule, FormsModule, ConfirmationModalComponent],
+  imports: [CommonModule, FormsModule, ReactiveFormsModule, ConfirmationModalComponent, ClinicSelectorComponent],
   templateUrl: './invitations.component.html',
   styleUrls: ['./invitations.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class InvitationsComponent implements OnInit {
   private invitationService = inject(InvitationService);
+  private clinicsService = inject(ClinicsService);
   private toast = inject(ToastService);
 
   // State signals
@@ -31,6 +36,16 @@ export class InvitationsComponent implements OnInit {
 
   // Delete modal state
   deletingInvitation = signal<Invitation | null>(null);
+
+  // Clinic selector state
+  showClinicSelector = signal(false);
+  clinics = signal<Clinic[]>([]);
+  clinicControl = new FormControl<string | number | null>(null);
+
+  // Computed: clínicas filtradas (solo is_external = false)
+  filteredClinics = computed(() => {
+    return this.clinics().filter(clinic => !clinic.is_external);
+  });
 
   // Expose Math for template
   Math = Math;
@@ -54,6 +69,18 @@ export class InvitationsComponent implements OnInit {
 
   ngOnInit(): void {
     this.loadInvitations();
+    this.loadClinics();
+  }
+
+  loadClinics(): void {
+    this.clinicsService.getAll().subscribe({
+      next: (clinics) => {
+        this.clinics.set(clinics);
+      },
+      error: (error) => {
+        console.error('Error loading clinics:', error);
+      },
+    });
   }
 
   loadInvitations(): void {
@@ -106,14 +133,35 @@ export class InvitationsComponent implements OnInit {
     return invitation?.id || index;
   }
 
-  // Generate new invitation
-  generateInvitation(): void {
+  // Open clinic selector modal
+  openClinicSelector(): void {
+    this.clinicControl.setValue(null);
+    this.showClinicSelector.set(true);
+  }
+
+  // Close clinic selector modal
+  closeClinicSelector(): void {
+    this.showClinicSelector.set(false);
+    this.clinicControl.setValue(null);
+  }
+
+  // Handle clinic selection from the selector
+  onClinicSelected(): void {
+    const clinicId = this.clinicControl.value;
+    if (clinicId) {
+      this.showClinicSelector.set(false);
+      this.generateInvitation(Number(clinicId));
+    }
+  }
+
+  // Generate new invitation with clinic_id
+  generateInvitation(clinicId: number): void {
     this.loading.set(true);
-    this.invitationService.generateInvitation().subscribe({
+    this.invitationService.generateInvitation(clinicId).subscribe({
       next: (response) => {
         // Copy link to clipboard
         navigator.clipboard.writeText(response.invitationLink).then(() => {
-          this.toast.showSuccess('Enlace copiado al portapapeles');
+          this.toast.showSuccess(`Enlace copiado al portapapeles (${response.clinic_name})`);
         }).catch(() => {
           this.toast.showError('Error al copiar el enlace');
         });
