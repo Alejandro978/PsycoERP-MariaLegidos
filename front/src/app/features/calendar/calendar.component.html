@@ -368,6 +368,19 @@
 <!-- New Session Dialog -->
 @if (showNewSessionDialog()) {
 <app-new-session-dialog [prefilledData]="prefilledSessionData" (close)="onCloseNewSessionDialog()"
-  (sessionDataCreated)="onSessionDataCreated($event)">
+  (sessionDataCreated)="onSessionDataCreated($event)"
+  (whatsAppRequest)="onWhatsAppRequest($event)">
 </app-new-session-dialog>
 }
+
+<!-- WhatsApp Confirmation Modal -->
+<app-confirmation-modal
+  [isOpen]="showWhatsAppConfirmation()"
+  [title]="whatsAppData()?.isEdit ? '¿Notificar cambio al paciente?' : '¿Confirmar cita al paciente?'"
+  [message]="getWhatsAppConfirmationMessage()"
+  confirmText="Sí, enviar WhatsApp"
+  cancelText="No, gracias"
+  confirmButtonType="primary"
+  (onConfirm)="onConfirmWhatsApp()"
+  (onCancel)="onCancelWhatsApp()">
+</app-confirmation-modal>

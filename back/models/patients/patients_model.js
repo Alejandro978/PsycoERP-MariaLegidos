@@ -684,6 +684,7 @@ const getActivePatientsWithClinicInfo = async (db) => {
     SELECT
       p.id as idPaciente,
       CONCAT(p.first_name, ' ', p.last_name) as nombreCompleto,
+      p.phone as telefono,
       p.clinic_id as idClinica,
       c.name as nombreClinica,
       c.price as precioSesion,

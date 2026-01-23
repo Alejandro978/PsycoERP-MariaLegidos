@@ -18,6 +18,8 @@ import {
 } from '../../shared/models/clinic-config.model';
 import { CalendarService } from './services/calendar.service';
 import { NewSessionFormComponent } from './components/new-sesion-dialog/new-session-form.component';
+import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
+import { WhatsAppService } from '../../core/services/whatsapp.service';
 
 /**
  * Representa un fragmento de sesión dentro de un slot horario específico
@@ -42,13 +44,14 @@ interface SessionLayout extends SessionFragment {
 @Component({
   selector: 'app-calendar',
   standalone: true,
-  imports: [CommonModule, NewSessionFormComponent],
+  imports: [CommonModule, NewSessionFormComponent, ConfirmationModalComponent],
   templateUrl: './calendar.component.html',
   styleUrl: './calendar.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class CalendarComponent implements OnInit {
   private calendarService = inject(CalendarService);
+  private whatsAppService = inject(WhatsAppService);
 
   ngOnInit(): void {
     this.calendarService.reloadSessions();
@@ -71,6 +74,17 @@ export class CalendarComponent implements OnInit {
   readonly showReminderConfirmModal = signal(false);
   readonly pendingReminderSession = signal<SessionData | null>(null);
   readonly clinicConfigs = CLINIC_CONFIGS;
+
+  // WhatsApp confirmation modal state
+  readonly showWhatsAppConfirmation = signal(false);
+  readonly whatsAppData = signal<{
+    patientName: string;
+    patientPhone: string;
+    sessionDate: string;
+    sessionTime: string;
+    clinicName: string;
+    isEdit: boolean;
+  } | null>(null);
 
   // Tooltip state
   readonly hoveredSession = signal<SessionData | null>(null);
@@ -722,5 +736,88 @@ export class CalendarComponent implements OnInit {
       paymentMethod: this.formatPaymentMethod(session.payment_method),
       notes: session.notes || 'Sin notas'
     };
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // WhatsApp Confirmation Methods
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * Handles WhatsApp request from session form
+   */
+  onWhatsAppRequest(data: {
+    patientName: string;
+    patientPhone: string;
+    sessionDate: string;
+    sessionTime: string;
+    clinicName: string;
+    isEdit: boolean;
+  }): void {
+    this.whatsAppData.set(data);
+    this.showWhatsAppConfirmation.set(true);
+  }
+
+  /**
+   * Gets the WhatsApp confirmation message
+   */
+  getWhatsAppConfirmationMessage(): string {
+    const data = this.whatsAppData();
+    if (!data) return '';
+
+    if (data.isEdit) {
+      return `Se ha modificado la sesión de ${data.patientName} para el ${data.sessionDate} a las ${data.sessionTime} en ${data.clinicName}. ¿Quieres enviarle un WhatsApp para notificarle?`;
+    } else {
+      return `Se ha creado una sesión para ${data.patientName} el ${data.sessionDate} a las ${data.sessionTime} en ${data.clinicName}. ¿Quieres enviarle un WhatsApp para confirmarle la cita?`;
+    }
+  }
+
+  /**
+   * Confirms sending WhatsApp message
+   */
+  onConfirmWhatsApp(): void {
+    const data = this.whatsAppData();
+    if (data) {
+      this.sendSessionWhatsApp(data);
+    }
+    this.showWhatsAppConfirmation.set(false);
+    this.whatsAppData.set(null);
+  }
+
+  /**
+   * Cancels WhatsApp message
+   */
+  onCancelWhatsApp(): void {
+    this.showWhatsAppConfirmation.set(false);
+    this.whatsAppData.set(null);
+  }
+
+  /**
+   * Sends WhatsApp message with session details
+   */
+  private sendSessionWhatsApp(data: {
+    patientName: string;
+    patientPhone: string;
+    sessionDate: string;
+    sessionTime: string;
+    clinicName: string;
+    isEdit: boolean;
+  }): void {
+    // Generate message based on action type
+    const message = data.isEdit
+      ? `Hola ${data.patientName}, se ha modificado tu sesión. Nueva fecha: ${data.sessionDate} a las ${data.sessionTime} en ${data.clinicName}.`
+      : `Hola ${data.patientName}, se ha creado tu sesión para el ${data.sessionDate} a las ${data.sessionTime} en ${data.clinicName}. ¡Te esperamos!`;
+
+    // Generate WhatsApp deeplink
+    const encodedMessage = encodeURIComponent(message);
+    const whatsappDeeplink = `https://wa.me/${data.patientPhone}?text=${encodedMessage}`;
+
+    // Open WhatsApp using existing service
+    this.whatsAppService
+      .openWhatsAppDesktopOnly(whatsappDeeplink)
+      .then((success) => {
+        if (!success) {
+          this.whatsAppService.openWhatsApp(whatsappDeeplink);
+        }
+      });
   }
 }

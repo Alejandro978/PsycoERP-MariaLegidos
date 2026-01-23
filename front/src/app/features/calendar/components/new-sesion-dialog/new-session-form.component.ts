@@ -74,6 +74,14 @@ export class NewSessionFormComponent implements OnInit {
   } | null = null;
   @Output() close = new EventEmitter<void>();
   @Output() sessionDataCreated = new EventEmitter<SessionData>();
+  @Output() whatsAppRequest = new EventEmitter<{
+    patientName: string;
+    patientPhone: string;
+    sessionDate: string;
+    sessionTime: string;
+    clinicName: string;
+    isEdit: boolean;
+  }>();
 
   private fb = inject(FormBuilder);
   private http = inject(HttpClient);
@@ -103,6 +111,10 @@ export class NewSessionFormComponent implements OnInit {
     content: string;
     date: Date;
   } | null = null;
+
+  /** Original values for edit mode comparison */
+  private originalSessionDate: string | null = null;
+  private originalStartTime: string | null = null;
 
   /** Patients data from API */
   patients = signal<PatientSelector[]>([]);
@@ -365,6 +377,12 @@ export class NewSessionFormComponent implements OnInit {
     const defaultDate =
       this.prefilledData?.date || new Date().toISOString().split('T')[0];
     const defaultStartTime = this.prefilledData?.startTime || '';
+
+    // Store original values for edit mode comparison
+    if (isEditMode) {
+      this.originalSessionDate = sessionData!.SessionDetailData.session_date;
+      this.originalStartTime = sessionData!.SessionDetailData.start_time.substring(0, 5);
+    }
 
     const formValues = isEditMode
       ? {
@@ -762,8 +780,14 @@ export class NewSessionFormComponent implements OnInit {
         .updateSession(this.sessionId, sessionData)
         .subscribe({
           next: (updatedSession) => {
-            this.sessionDataCreated.emit(updatedSession);
             this.isLoading.set(false);
+            this.sessionDataCreated.emit(updatedSession);
+
+            // Emit WhatsApp request only for internal clinics AND if date/time changed
+            if (!this.isExternalClinic() && patient.telefono && this.hasDateOrTimeChanged()) {
+              this.emitWhatsAppRequest(true);
+            }
+
             this.onClose();
           },
           error: (error) => {
@@ -778,8 +802,14 @@ export class NewSessionFormComponent implements OnInit {
       // Create new session
       this.sessionsService.createSession(sessionData).subscribe({
         next: (createdSession) => {
-          this.sessionDataCreated.emit(createdSession);
           this.isLoading.set(false);
+          this.sessionDataCreated.emit(createdSession);
+
+          // Emit WhatsApp request only for internal clinics
+          if (!this.isExternalClinic() && patient.telefono) {
+            this.emitWhatsAppRequest(false);
+          }
+
           this.onClose();
         },
         error: (error) => {
@@ -1087,5 +1117,59 @@ export class NewSessionFormComponent implements OnInit {
     if (!patientId) return;
 
     this.router.navigate(['/patient', patientId]);
+  }
+
+  // ═══════════════════════════════════════════════════════════════
+  // WhatsApp Session Confirmation Methods
+  // ═══════════════════════════════════════════════════════════════
+
+  /**
+   * Checks if session date or start time has changed (for edit mode)
+   */
+  private hasDateOrTimeChanged(): boolean {
+    const formValue = this.sessionForm.getRawValue();
+    return (
+      formValue.session_date !== this.originalSessionDate ||
+      formValue.start_time !== this.originalStartTime
+    );
+  }
+
+  /**
+   * Emits WhatsApp request event to parent component
+   */
+  private emitWhatsAppRequest(isEdit: boolean): void {
+    const patient = this.selectedPatient();
+    const formValue = this.sessionForm.getRawValue();
+
+    if (!patient) return;
+
+    // Format date for display (DD/MM/YYYY)
+    const sessionDate = new Date(formValue.session_date);
+    const formattedDate = sessionDate.toLocaleDateString('es-ES', {
+      day: '2-digit',
+      month: '2-digit',
+      year: 'numeric'
+    });
+
+    // Format time (remove seconds if present)
+    const formattedTime = formValue.start_time.substring(0, 5);
+
+    // Clean phone number - remove spaces and ensure international format
+    let phone = patient.telefono?.toString().replace(/\s+/g, '').trim() || '';
+    // Add Spain prefix if not present
+    if (phone && !phone.startsWith('34') && !phone.startsWith('+34')) {
+      phone = '34' + phone;
+    }
+    // Remove + if present
+    phone = phone.replace('+', '');
+
+    this.whatsAppRequest.emit({
+      patientName: patient.nombreCompleto,
+      patientPhone: phone,
+      sessionDate: formattedDate,
+      sessionTime: formattedTime,
+      clinicName: patient.nombreClinica,
+      isEdit: isEdit
+    });
   }
 }

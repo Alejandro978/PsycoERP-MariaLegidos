@@ -69,6 +69,12 @@ export class PatientRegisterComponent implements OnInit {
     { initialValue: this.registerForm.value }
   );
 
+  // Signal derivado del estado de validez del formulario
+  private formStatus = toSignal(
+    this.registerForm.statusChanges,
+    { initialValue: this.registerForm.status }
+  );
+
   /**
    * Computed: calcula la edad basándose en la fecha de nacimiento
    */
@@ -124,8 +130,35 @@ export class PatientRegisterComponent implements OnInit {
   signatures = new Map<string, string>();
   signatureError = signal('');
 
+  // Signals para reactividad de firmas
+  private patientSignatureExists = signal(false);
+  private guardian1SignatureExists = signal(false);
+
   // Current date for signature
   currentDate = new Date();
+
+  // Tab state for mobile responsive
+  activeTab: 'form' | 'preview' = 'form';
+
+  // PDF download state
+  pdfDownloaded = signal(false);
+
+  /**
+   * Computed: verifica si se puede descargar el PDF
+   * Requiere: formulario válido + firma del paciente + firma del tutor (si es menor)
+   */
+  canDownloadPdf = computed(() => {
+    const isFormValid = this.formStatus() === 'VALID';
+    const hasPatientSig = this.patientSignatureExists();
+    const isMinorValue = this.isMinor();
+
+    if (isMinorValue) {
+      const hasGuardianSig = this.guardian1SignatureExists();
+      return isFormValid && hasPatientSig && hasGuardianSig;
+    }
+
+    return isFormValid && hasPatientSig;
+  });
 
   constructor() {
     // Effect: actualiza validadores cuando cambia isMinor
@@ -160,6 +193,26 @@ export class PatientRegisterComponent implements OnInit {
         setTimeout(() => this.initPatientCanvas(), 100);
       }
     });
+
+    // Effect: resetea pdfDownloaded cuando cambian los datos del formulario o firmas
+    let isFirstRun = true;
+    effect(() => {
+      // Escuchar cambios en el formulario y firmas
+      this.progenitor2Values();
+      this.patientSignatureExists();
+      this.guardian1SignatureExists();
+
+      // Saltar la primera ejecución
+      if (isFirstRun) {
+        isFirstRun = false;
+        return;
+      }
+
+      // Si ya se había descargado, resetear
+      if (this.pdfDownloaded()) {
+        this.pdfDownloaded.set(false);
+      }
+    }, { allowSignalWrites: true });
   }
 
   ngOnInit(): void {
@@ -409,6 +462,12 @@ export class PatientRegisterComponent implements OnInit {
     const canvas = this.getCanvasElement(type);
     if (canvas) {
       this.signatures.set(type, canvas.toDataURL('image/png'));
+      // Actualizar signals de firma
+      if (type === 'patient') {
+        this.patientSignatureExists.set(true);
+      } else if (type === 'guardian1') {
+        this.guardian1SignatureExists.set(true);
+      }
     }
   }
 
@@ -422,6 +481,12 @@ export class PatientRegisterComponent implements OnInit {
     if (ctx && canvas) {
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       this.signatures.delete(type);
+      // Actualizar signals de firma
+      if (type === 'patient') {
+        this.patientSignatureExists.set(false);
+      } else if (type === 'guardian1') {
+        this.guardian1SignatureExists.set(false);
+      }
     }
   }
 
@@ -477,6 +542,25 @@ export class PatientRegisterComponent implements OnInit {
   }
 
   /**
+   * Cambia entre tabs en vista móvil
+   */
+  switchTab(tab: 'form' | 'preview'): void {
+    this.activeTab = tab;
+
+    // Scroll al inicio cuando cambiamos de tab en móvil
+    if (window.innerWidth < 1280) {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+  }
+
+  /**
+   * Maneja el evento de descarga exitosa del PDF
+   */
+  onPdfDownloaded(): void {
+    this.pdfDownloaded.set(true);
+  }
+
+  /**
    * Valida las firmas requeridas
    */
   private validateSignatures(): boolean {
@@ -506,19 +590,15 @@ export class PatientRegisterComponent implements OnInit {
       return;
     }
 
+    // Validar que se haya descargado el PDF
+    if (!this.pdfDownloaded()) {
+      this.errorMessage.set('Debes descargar el documento PDF antes de completar el registro');
+      return;
+    }
+
     this.isSubmitting.set(true);
     this.errorMessage.set('');
     this.signatureError.set('');
-
-    // Generar y descargar PDF antes de enviar
-    try {
-      if (this.documentPreview) {
-        await this.documentPreview.generatePDF();
-      }
-    } catch (error) {
-      console.error('Error generando PDF:', error);
-      // Continuar con el registro aunque falle la generación del PDF
-    }
 
     const formData: PatientRegistration = {
       ...this.registerForm.value,

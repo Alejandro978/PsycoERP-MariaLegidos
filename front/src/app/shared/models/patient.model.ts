@@ -55,6 +55,7 @@ export interface Patient {
 export interface PatientSelector {
   idPaciente: number;
   nombreCompleto: string;
+  telefono?: string; // Teléfono del paciente para enviar WhatsApp
   idClinica: number;
   nombreClinica: string;
   precioSesion: number;
