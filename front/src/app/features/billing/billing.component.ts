@@ -196,7 +196,7 @@ export class BillingComponent implements OnInit {
   allSelected = computed(
     () =>
       this.pendingInvoices().length > 0 &&
-      this.selectedPatients().length === this.pendingInvoices().length
+      this.selectedPatients().length === this.pendingInvoices().length,
   );
 
   selectedCount = computed(() => this.selectedPatients().length);
@@ -563,7 +563,7 @@ export class BillingComponent implements OnInit {
 
     // Obtener datos de las facturas seleccionadas
     const selectedInvoices = this.pendingInvoices().filter((inv) =>
-      selected.includes(inv.dni)
+      selected.includes(inv.dni),
     );
 
     // Preparar datos para el modal
@@ -575,12 +575,12 @@ export class BillingComponent implements OnInit {
         pending_sessions_count: inv.pending_sessions_count,
         total_gross: inv.total_gross,
         invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
-          this.invoiceNextNumber() + index
+          this.invoiceNextNumber() + index,
         )}`,
         invoice_date: new Date().toISOString().split('T')[0],
         sessions: inv.sessions,
         progenitors_data: inv.progenitors_data,
-      })
+      }),
     );
 
     this.invoicesToGenerate.set(invoices);
@@ -619,7 +619,7 @@ export class BillingComponent implements OnInit {
     // Obtener datos completos de las facturas seleccionadas
     const selected = this.selectedPatients();
     const selectedInvoicesData = this.pendingInvoices().filter((inv) =>
-      selected.includes(inv.dni)
+      selected.includes(inv.dni),
     );
 
     // Preparar el payload para el backend
@@ -654,16 +654,16 @@ export class BillingComponent implements OnInit {
           const duplicateError = data.failed.find(
             (f: any) =>
               f.error?.includes('número de factura ya existe') ||
-              f.error?.includes('already exists')
+              f.error?.includes('already exists'),
           );
 
           if (duplicateError) {
             this.errorMessage.set(
-              'No se pudieron generar las facturas. Uno o más números de factura ya existen en el sistema. Por favor, verifica la numeración e intenta nuevamente.'
+              'No se pudieron generar las facturas. Uno o más números de factura ya existen en el sistema. Por favor, verifica la numeración e intenta nuevamente.',
             );
           } else {
             this.errorMessage.set(
-              'Ocurrió un error al generar las facturas. Por favor, revisa los datos e intenta nuevamente.'
+              'Ocurrió un error al generar las facturas. Por favor, revisa los datos e intenta nuevamente.',
             );
           }
           this.isGeneratingBulkInvoices.set(false);
@@ -676,7 +676,7 @@ export class BillingComponent implements OnInit {
               successCount === 1 ? 'generó' : 'generaron'
             } ${successCount} ${
               successCount === 1 ? 'factura' : 'facturas'
-            } exitosamente`
+            } exitosamente`,
           );
           this.closeModal();
           this.errorMessage.set(null);
@@ -691,7 +691,7 @@ export class BillingComponent implements OnInit {
       error: () => {
         this.isGeneratingBulkInvoices.set(false);
         this.errorMessage.set(
-          'Ocurrió un error al generar las facturas. Por favor, intenta nuevamente.'
+          'Ocurrió un error al generar las facturas. Por favor, intenta nuevamente.',
         );
       },
     });
@@ -747,7 +747,7 @@ export class BillingComponent implements OnInit {
       pending_sessions_count: invoice.pending_sessions_count,
       total_gross: invoice.total_gross,
       invoice_number: `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
-        this.invoiceNextNumber()
+        this.invoiceNextNumber(),
       )}`,
       invoice_date: new Date().toISOString().split('T')[0],
       sessions: invoice.sessions,
@@ -789,7 +789,7 @@ export class BillingComponent implements OnInit {
     this.billingService
       .getExistingClinicInvoices(
         this.existingClinicMonth(),
-        this.existingClinicYear()
+        this.existingClinicYear(),
       )
       .subscribe({
         next: (invoices) => {
@@ -799,10 +799,10 @@ export class BillingComponent implements OnInit {
         error: (error) => {
           console.error(
             'Error al cargar facturas existentes de clínicas:',
-            error
+            error,
           );
           this.toastService.showError(
-            'Error al cargar las facturas existentes de clínicas'
+            'Error al cargar las facturas existentes de clínicas',
           );
           this.existingClinicInvoices.set([]);
           this.isLoadingExistingClinics.set(false);
@@ -905,13 +905,13 @@ export class BillingComponent implements OnInit {
 
         const invoiceNumberSanitized = invoice.invoice_number.replace(
           /\//g,
-          '-'
+          '-',
         );
         const fileName = `${invoiceNumberSanitized}_${clinicNameSanitized}`;
 
         await this.pdfGeneratorService.generatePdfById(
           'clinic-invoice-content',
-          fileName
+          fileName,
         );
         this.toastService.showSuccess('PDF descargado correctamente');
       } catch (error) {
@@ -972,11 +972,11 @@ export class BillingComponent implements OnInit {
    * @returns Datos de la factura o null si hay error
    */
   private prepareClinicInvoiceData(
-    clinicId: number
+    clinicId: number,
   ): ClinicInvoiceToGenerate | null {
     // Obtener los datos de la clínica seleccionada
     const selectedClinic = this.clinicInvoices().find(
-      (c) => c.clinic_id === clinicId
+      (c) => c.clinic_id === clinicId,
     );
     if (!selectedClinic) {
       return null;
@@ -985,13 +985,13 @@ export class BillingComponent implements OnInit {
     const user = this.userData();
     if (!user) {
       this.toastService.showError(
-        'No se pudo cargar la información del usuario'
+        'No se pudo cargar la información del usuario',
       );
       return null;
     }
 
     const invoiceNumber = `${this.invoicePrefix()}-${this.invoiceYear()}-${this.padNumber(
-      this.invoiceNextNumber()
+      this.invoiceNextNumber(),
     )}`;
     const invoiceDate = new Date().toISOString().split('T')[0];
 
@@ -1095,17 +1095,17 @@ export class BillingComponent implements OnInit {
         invoice.invoice_number,
         invoice.invoice_date,
         concept,
-        invoice.total_net
+        invoice.total_net,
       )
       .subscribe({
         next: (response: any) => {
           if (response?.success === false) {
             this.errorMessage.set(
-              response.error || 'Error al generar la factura de la clínica'
+              response.error || 'Error al generar la factura de la clínica',
             );
           } else {
             this.toastService.showSuccess(
-              'Factura de clínica generada exitosamente'
+              'Factura de clínica generada exitosamente',
             );
             this.closeClinicModal();
             // Recargar datos
@@ -1138,7 +1138,7 @@ export class BillingComponent implements OnInit {
       this.toastService.showInfo(
         `Generando ${invoices.length} ${
           invoices.length === 1 ? 'factura' : 'facturas'
-        }...`
+        }...`,
       );
 
       // Crear un contenedor temporal oculto para renderizar las facturas
@@ -1169,8 +1169,8 @@ export class BillingComponent implements OnInit {
 
         // Sanitizar el nombre para el archivo
         const nameSanitized = nameToUse
-          .replace(/\s+/g, '_')  // Reemplazar espacios por guiones bajos
-          .normalize('NFD')       // Normalizar caracteres acentuados
+          .replace(/\s+/g, '_') // Reemplazar espacios por guiones bajos
+          .normalize('NFD') // Normalizar caracteres acentuados
           .replace(/[\u0300-\u036f]/g, ''); // Eliminar acentos
 
         // Agregar a la lista de elementos con formato: FACTURA-numero_nombre
@@ -1178,7 +1178,7 @@ export class BillingComponent implements OnInit {
           element: invoiceWrapper,
           fileName: `FACTURA-${invoice.invoice_number.replace(
             /\//g,
-            '-'
+            '-',
           )}-${nameSanitized}`,
         });
       }
@@ -1191,9 +1191,6 @@ export class BillingComponent implements OnInit {
       await this.pdfGeneratorService.generateBulkPdfsAsZip(
         elementsToGenerate,
         `facturas_${today}`,
-        (current: number, total: number) => {
-          console.log(`Procesando factura ${current} de ${total}`);
-        }
       );
 
       // Limpiar el contenedor temporal
@@ -1203,7 +1200,7 @@ export class BillingComponent implements OnInit {
       this.toastService.showSuccess(
         `${invoices.length} ${
           invoices.length === 1 ? 'factura descargada' : 'facturas descargadas'
-        } exitosamente`
+        } exitosamente`,
       );
     } catch (error) {
       console.error('Error generando descarga masiva:', error);
@@ -1287,10 +1284,10 @@ export class BillingComponent implements OnInit {
                   invoice.concept
                 }</td>
                 <td style="padding: 12px 16px; text-align: right; color: #374151;">${this.formatCurrency(
-                  invoice.total / invoice.sessions_count
+                  invoice.total / invoice.sessions_count,
                 )}</td>
                 <td style="padding: 12px 16px; text-align: right; font-weight: 500; color: #111827;">${this.formatCurrency(
-                  invoice.total
+                  invoice.total,
                 )}</td>
               </tr>
             </tbody>
@@ -1304,7 +1301,7 @@ export class BillingComponent implements OnInit {
               <div style="margin-bottom: 12px; display: flex; justify-content: space-between; color: #374151;">
                 <span>SERV. DE ATENCIÓN PSICOLÓGICA:</span>
                 <span style="font-weight: 600;">${this.formatCurrency(
-                  invoice.total
+                  invoice.total,
                 )}</span>
               </div>
               <div style="margin-bottom: 12px; display: flex; justify-content: space-between; color: #374151;">
@@ -1315,7 +1312,7 @@ export class BillingComponent implements OnInit {
                 <div style="display: flex; justify-content: space-between; font-size: 20px; font-weight: bold; color: #111827;">
                   <span>TOTAL:</span>
                   <span style="color: #16a34a;">${this.formatCurrency(
-                    invoice.total
+                    invoice.total,
                   )}</span>
                 </div>
               </div>
@@ -1336,8 +1333,9 @@ export class BillingComponent implements OnInit {
    * Si hay información del progenitor, muestra sus datos; si no, muestra los del paciente
    */
   private generateReceiverHTML(invoice: ExistingInvoice): string {
-    const hasProgenitor = invoice.progenitors_data?.progenitor1?.full_name &&
-                          invoice.progenitors_data?.progenitor1?.dni;
+    const hasProgenitor =
+      invoice.progenitors_data?.progenitor1?.full_name &&
+      invoice.progenitors_data?.progenitor1?.dni;
 
     if (hasProgenitor) {
       const progenitor = invoice.progenitors_data!.progenitor1;

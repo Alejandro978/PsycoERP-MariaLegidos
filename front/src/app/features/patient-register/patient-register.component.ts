@@ -18,6 +18,8 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router } from '@angular/router';
 import { toSignal } from '@angular/core/rxjs-interop';
+import { switchMap, catchError } from 'rxjs/operators';
+import { from, of } from 'rxjs';
 import { PatientRegisterService } from './services/patient-register.service';
 import { PatientRegistration } from './models/patient-register.model';
 import {
@@ -140,26 +142,6 @@ export class PatientRegisterComponent implements OnInit {
   // Tab state for mobile responsive
   activeTab: 'form' | 'preview' = 'form';
 
-  // PDF download state
-  pdfDownloaded = signal(false);
-
-  /**
-   * Computed: verifica si se puede descargar el PDF
-   * Requiere: formulario válido + firma del paciente + firma del tutor (si es menor)
-   */
-  canDownloadPdf = computed(() => {
-    const isFormValid = this.formStatus() === 'VALID';
-    const hasPatientSig = this.patientSignatureExists();
-    const isMinorValue = this.isMinor();
-
-    if (isMinorValue) {
-      const hasGuardianSig = this.guardian1SignatureExists();
-      return isFormValid && hasPatientSig && hasGuardianSig;
-    }
-
-    return isFormValid && hasPatientSig;
-  });
-
   constructor() {
     // Effect: actualiza validadores cuando cambia isMinor
     effect(() => {
@@ -193,26 +175,6 @@ export class PatientRegisterComponent implements OnInit {
         setTimeout(() => this.initPatientCanvas(), 100);
       }
     });
-
-    // Effect: resetea pdfDownloaded cuando cambian los datos del formulario o firmas
-    let isFirstRun = true;
-    effect(() => {
-      // Escuchar cambios en el formulario y firmas
-      this.progenitor2Values();
-      this.patientSignatureExists();
-      this.guardian1SignatureExists();
-
-      // Saltar la primera ejecución
-      if (isFirstRun) {
-        isFirstRun = false;
-        return;
-      }
-
-      // Si ya se había descargado, resetear
-      if (this.pdfDownloaded()) {
-        this.pdfDownloaded.set(false);
-      }
-    }, { allowSignalWrites: true });
   }
 
   ngOnInit(): void {
@@ -554,13 +516,6 @@ export class PatientRegisterComponent implements OnInit {
   }
 
   /**
-   * Maneja el evento de descarga exitosa del PDF
-   */
-  onPdfDownloaded(): void {
-    this.pdfDownloaded.set(true);
-  }
-
-  /**
    * Valida las firmas requeridas
    */
   private validateSignatures(): boolean {
@@ -587,12 +542,6 @@ export class PatientRegisterComponent implements OnInit {
 
     // Validar firmas
     if (!this.validateSignatures()) {
-      return;
-    }
-
-    // Validar que se haya descargado el PDF
-    if (!this.pdfDownloaded()) {
-      this.errorMessage.set('Debes descargar el documento PDF antes de completar el registro');
       return;
     }
 
@@ -638,18 +587,78 @@ export class PatientRegisterComponent implements OnInit {
       delete formData.progenitor2_phone;
     }
 
-    this.registerService.registerPatient(this.token, formData).subscribe({
-      next: (response) => {
-        if (response.success) {
-          this.successMessage.set(
-            'Registro completado exitosamente. La psicologa se pondra en contacto contigo pronto.'
-          );
-          this.isValidToken.set(false);
+    // Paso 1: Registrar paciente
+    // Paso 2: Generar y subir PDF automáticamente
+    this.registerService.registerPatient(this.token, formData).pipe(
+      switchMap((response) => {
+        // El backend devuelve: { success, message, data: { patient: { id, ... } } }
+        const patientId = response.data?.patient?.id;
+
+        if (!response.success || !patientId) {
+          console.error('Error al crear paciente:', response);
+          throw new Error('Error al crear el paciente');
         }
+
+        // Generar PDF y subirlo
+        return from(this.documentPreview.getPdfBlob()).pipe(
+          catchError((pdfError) => {
+            console.error('Error generando PDF:', pdfError);
+            // Si falla la generación del PDF, continuar sin documento
+            return of({ blob: null, fileName: null });
+          }),
+          switchMap((pdfResult: any) => {
+            if (!pdfResult.blob) {
+              console.warn('No se pudo generar el PDF, continuando sin documento');
+              return of({ success: false, message: 'Error generando PDF' });
+            }
+            const { blob, fileName } = pdfResult;
+            return this.registerService.uploadDocument(
+              patientId,
+              blob,
+              fileName,
+              'Documento de consentimiento informado'
+            ).pipe(
+              // Si falla la subida del documento, no bloqueamos el registro
+              catchError((uploadError) => {
+                console.warn('Error subiendo documento (el paciente fue creado):', uploadError);
+                return of({ success: false, message: 'Error al subir documento', documentError: true });
+              })
+            );
+          }),
+          // Pasar información del paciente junto con resultado del upload
+          switchMap((uploadResult: any) => {
+            return of({ patientCreated: true, documentUploaded: uploadResult.success, uploadResult });
+          })
+        );
+      }),
+      catchError((error) => {
+        // Error al crear el paciente
+        return of({ patientCreated: false, error });
+      })
+    ).subscribe({
+      next: (result: any) => {
         this.isSubmitting.set(false);
+
+        if (result.patientCreated) {
+          if (result.documentUploaded) {
+            this.successMessage.set(
+              'Registro completado exitosamente. La psicóloga se pondrá en contacto contigo pronto.'
+            );
+          } else {
+            // Paciente creado pero documento no subido
+            this.successMessage.set(
+              'Registro completado exitosamente. Nota: El documento de consentimiento no pudo guardarse automáticamente, pero tu registro está completo. La psicóloga se pondrá en contacto contigo pronto.'
+            );
+          }
+          this.isValidToken.set(false);
+        } else {
+          this.errorMessage.set(
+            'Error al completar el registro. Por favor, intenta nuevamente.'
+          );
+        }
       },
       error: (error) => {
-        console.error('Error registering patient:', error);
+        console.error('Error en el proceso de registro:', error);
         this.errorMessage.set(
           'Error al completar el registro. Por favor, intenta nuevamente.'
         );

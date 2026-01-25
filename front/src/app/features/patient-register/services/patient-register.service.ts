@@ -5,6 +5,7 @@ import {
   TokenValidation,
   PatientRegistration,
   RegistrationResponse,
+  DocumentUploadResponse,
 } from '../models/patient-register.model';
 
 @Injectable({
@@ -15,6 +16,7 @@ export class PatientRegisterService {
 
   private readonly invitationsUrl = '/invitations';
   private readonly patientsUrl = '/patients';
+  private readonly documentsUrl = '/documents';
 
   private get httpOptions() {
     return {
@@ -41,6 +43,32 @@ export class PatientRegisterService {
       `${this.patientsUrl}/register/${token}`,
       data,
       this.httpOptions
+    );
+  }
+
+  /**
+   * Sube un documento PDF al servidor
+   * @param patientId ID del paciente
+   * @param pdfBlob Blob del PDF a subir
+   * @param fileName Nombre del archivo
+   * @param description Descripción del documento
+   */
+  uploadDocument(
+    patientId: number,
+    pdfBlob: Blob,
+    fileName: string,
+    description: string
+  ): Observable<DocumentUploadResponse> {
+    const formData = new FormData();
+    formData.append('patient_id', patientId.toString());
+    formData.append('description', description);
+    formData.append('file', pdfBlob, fileName);
+
+    // No establecer Content-Type, el navegador lo hace automáticamente con boundary
+    // POST /api/documents (sin /upload)
+    return this.http.post<DocumentUploadResponse>(
+      this.documentsUrl,
+      formData
     );
   }
 }

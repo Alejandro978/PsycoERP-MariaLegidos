@@ -97,7 +97,7 @@
           Registro de Paciente
         </h1>
         <p class="text-sm sm:text-base" style="color: rgb(101, 117, 139);">
-          Completa todos tus datos, descarga el documento PDF y dale a enviar para enviar.</p>
+          Completa todos tus datos, firma el documento y envía el formulario. El documento se guardará automáticamente.</p>
       </div>
 
       <!-- Clinic Info Banner -->
@@ -603,20 +603,15 @@
             <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
-          Descarga y vista previa del Documento
+          Ver vista previa del documento (descarga opcional)
         </button>
 
         <!-- Submit Button -->
         <div class="flex flex-col items-center sm:items-end gap-2">
-          @if (!pdfDownloaded()) {
-          <p class="text-xs sm:text-sm text-amber-600 text-center sm:text-right">
-            Debes descargar el documento PDF antes de completar el registro
-          </p>
-          }
-          <button type="submit" [disabled]="isSubmitting() || !pdfDownloaded()"
+          <button type="submit" [disabled]="isSubmitting()"
             class="w-full sm:w-auto inline-flex items-center justify-center rounded-md text-sm font-medium h-11 sm:h-10 px-6 py-2 whitespace-nowrap gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
             style="background-color: rgb(60, 131, 246); color: rgb(255, 255, 255); border-radius: 0.5rem; font-weight: 500;">
-            {{ isSubmitting() ? 'Enviando...' : 'Enviar' }}
+            {{ isSubmitting() ? 'Registrando y guardando documento...' : 'Completar registro' }}
           </button>
         </div>
       </form>
@@ -627,7 +622,7 @@
     <!-- ═══════════════════════════════════════════════════════════════ -->
     <div [class.hidden]="activeTab !== 'preview'" [class.xl:block]="true">
       <app-patient-document-preview [registerForm]="registerForm" [isMinor]="isMinor()" [signatures]="signatures"
-        [currentDate]="currentDate" [canDownload]="canDownloadPdf()" (pdfDownloaded)="onPdfDownloaded()">
+        [currentDate]="currentDate">
       </app-patient-document-preview>
     </div>
 

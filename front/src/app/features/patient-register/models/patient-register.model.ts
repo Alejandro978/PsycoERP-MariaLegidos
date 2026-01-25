@@ -31,5 +31,24 @@ export interface PatientRegistration {
 
 export interface RegistrationResponse {
   success: boolean;
-  patient: any;
+  message: string;
+  data: {
+    patient: {
+      id: number;
+      first_name: string;
+      last_name: string;
+      [key: string]: any;
+    };
+  };
+}
+
+export interface DocumentUploadResponse {
+  success: boolean;
+  message: string;
+  data?: {
+    id: number;
+    patient_id: number;
+    file_name: string;
+    [key: string]: any;
+  };
 }
