@@ -363,7 +363,10 @@ export class SessionComponent implements OnInit {
     );
   }
 
-  getPaymentMethodClass(method: string): string {
+  getPaymentMethodClass(method: string | null): string {
+    if (method === null) {
+      return 'bg-gray-100 text-gray-500 border-gray-200';
+    }
     const classes = {
       bizum: 'bg-emerald-100 text-emerald-800 border-emerald-200',
       transferencia: 'bg-blue-100 text-blue-800 border-blue-200',
@@ -377,7 +380,10 @@ export class SessionComponent implements OnInit {
     );
   }
 
-  formatPaymentMethod(method: string): string {
+  formatPaymentMethod(method: string | null): string {
+    if (method === null) {
+      return 'No aplica';
+    }
     return SessionUtils.formatPaymentMethod(method);
   }
 

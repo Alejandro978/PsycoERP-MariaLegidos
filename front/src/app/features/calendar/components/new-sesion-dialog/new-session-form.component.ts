@@ -390,7 +390,7 @@ export class NewSessionFormComponent implements OnInit {
           session_date: sessionData!.SessionDetailData.session_date,
           start_time: sessionData!.SessionDetailData.start_time.substring(0, 5),
           end_time: sessionData!.SessionDetailData.end_time.substring(0, 5),
-          mode: sessionData!.SessionDetailData.mode.toLowerCase(),
+          mode: sessionData!.SessionDetailData.mode?.toLowerCase() || 'presencial',
           base_price: 0,
           payment_method:
             sessionData!.SessionDetailData.payment_method || 'pendiente',
@@ -628,16 +628,19 @@ export class NewSessionFormComponent implements OnInit {
 
     this.isLoading.set(true);
 
+    // Para clínicas externas, enviar payment_method y mode como null
+    const isExternal = this.isExternalClinic();
+
     const sessionData: CreateSessionRequest = {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
       session_date: formValue.session_date,
       start_time: this.convertTimeToMySQL(formValue.start_time),
       end_time: this.convertTimeToMySQL(formValue.end_time),
-      mode: formValue.mode,
+      mode: isExternal ? null : formValue.mode,
       status: 'cancelada',
       price: parseFloat(formValue.base_price),
-      payment_method: formValue.payment_method,
+      payment_method: isExternal ? null : formValue.payment_method,
       notes: formValue.notes || null,
     };
 
@@ -761,16 +764,19 @@ export class NewSessionFormComponent implements OnInit {
         'completada'
       : 'completada';
 
+    // Para clínicas externas, enviar payment_method y mode como null
+    const isExternal = this.isExternalClinic();
+
     const sessionData: CreateSessionRequest = {
       patient_id: formValue.patient_id,
       clinic_id: patient.idClinica,
       session_date: formValue.session_date,
       start_time: this.convertTimeToMySQL(formValue.start_time),
       end_time: this.convertTimeToMySQL(formValue.end_time),
-      mode: formValue.mode,
+      mode: isExternal ? null : formValue.mode,
       status: currentStatus,
       price: parseFloat(formValue.base_price),
-      payment_method: formValue.payment_method,
+      payment_method: isExternal ? null : formValue.payment_method,
       notes: formValue.notes || null,
     };
 

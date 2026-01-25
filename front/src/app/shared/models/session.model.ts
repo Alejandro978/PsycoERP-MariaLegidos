@@ -9,7 +9,7 @@ export interface CreateSessionRequest {
   session_date: string; // "2025-09-22"
   start_time: string; // "19:12:21.989Z"
   end_time: string; // "19:12:21.989Z"
-  mode: 'presencial' | 'online';
+  mode: 'presencial' | 'online' | null; // null para clínicas externas
   status: 'completada' | 'cancelada';
   price: number;
   payment_method:
@@ -17,8 +17,9 @@ export interface CreateSessionRequest {
     | 'transferencia'
     | 'tarjeta'
     | 'efectivo'
-    | 'pendiente';
-  notes: string;
+    | 'pendiente'
+    | null; // null para clínicas externas
+  notes: string | null;
 }
 
 export interface SessionData {
