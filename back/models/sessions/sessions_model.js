@@ -397,6 +397,116 @@ const getSessionsKPIs = async (db, filters = {}) => {
   };
 };
 
+/**
+ * Obtener sesiones para exportación a Excel (sin paginación)
+ * @param {Object} db - Conexión a la base de datos
+ * @param {Object} filters - Filtros opcionales (clinic_ids, status, payment_method, fecha_desde, fecha_hasta)
+ * @returns {Promise<Array>} Array de sesiones con datos para Excel
+ */
+const getSessionsForExport = async (db, filters = {}) => {
+  // Query para obtener datos
+  let dataQuery = `
+    SELECT
+      s.id AS session_id,
+      s.session_date,
+      s.mode,
+      s.status,
+      s.price,
+      s.payment_method,
+      CONCAT(p.first_name, ' ', p.last_name) AS patient_name,
+      c.id AS clinic_id,
+      c.name AS clinic_name,
+      c.percentage AS clinic_percentage
+    FROM sessions s
+    LEFT JOIN patients p ON s.patient_id = p.id AND p.status = 'en curso'
+    LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
+    WHERE s.is_active = true
+  `;
+
+  const params = [];
+  const conditions = [];
+
+  // Filtro por estado
+  if (filters.status) {
+    conditions.push("s.status = ?");
+    params.push(filters.status);
+  }
+
+  // Filtro por múltiples clínicas
+  if (filters.clinic_ids && filters.clinic_ids.length > 0) {
+    const placeholders = filters.clinic_ids.map(() => '?').join(',');
+    conditions.push(`s.clinic_id IN (${placeholders})`);
+    params.push(...filters.clinic_ids);
+  }
+
+  // Filtro por método de pago
+  if (filters.payment_method) {
+    conditions.push("s.payment_method = ?");
+    params.push(filters.payment_method);
+  }
+
+  // Filtro por rango de fechas
+  if (filters.fecha_desde) {
+    conditions.push("s.session_date >= ?");
+    params.push(filters.fecha_desde);
+  }
+
+  if (filters.fecha_hasta) {
+    conditions.push("s.session_date <= ?");
+    params.push(filters.fecha_hasta);
+  }
+
+  // Aplicar condiciones
+  if (conditions.length > 0) {
+    dataQuery += " AND " + conditions.join(" AND ");
+  }
+
+  // Ordenar por fecha descendente
+  dataQuery += " ORDER BY s.session_date DESC, s.id DESC";
+
+  // Ejecutar query
+  const [rows] = await db.execute(dataQuery, params);
+
+  // Transformar datos para Excel
+  const transformedData = rows.map((row) => {
+    // Calcular comisión (lo que se queda la clínica)
+    let commission = null;
+    if (row.price && row.clinic_percentage) {
+      const brutePrice = parseFloat(row.price);
+      const percentage = parseFloat(row.clinic_percentage);
+      if (!isNaN(brutePrice) && !isNaN(percentage) && percentage > 0 && percentage <= 100) {
+        commission = brutePrice * ((100 - percentage) / 100);
+        commission = Math.round(commission * 100) / 100;
+      }
+    }
+
+    // Calcular precio neto (lo que recibe el psicólogo)
+    let netPrice = null;
+    if (row.price && row.clinic_percentage) {
+      const brutePrice = parseFloat(row.price);
+      const percentage = parseFloat(row.clinic_percentage);
+      if (!isNaN(brutePrice) && !isNaN(percentage) && percentage > 0 && percentage <= 100) {
+        netPrice = brutePrice * (percentage / 100);
+        netPrice = Math.round(netPrice * 100) / 100;
+      }
+    }
+
+    return {
+      patient_name: row.patient_name || 'Sin paciente',
+      mode: row.mode || '',
+      session_date: row.session_date,
+      clinic_name: row.clinic_name || 'Sin clínica',
+      status: row.status || '',
+      price: row.price || 0,
+      commission: commission || 0,
+      net_price: netPrice || 0,
+      payment_method: row.payment_method || 'pendiente',
+    };
+  });
+
+  return transformedData;
+};
+
 module.exports = {
   getSessions,
   createSession,
@@ -405,4 +515,5 @@ module.exports = {
   getSessionForWhatsApp,
   checkTimeOverlap,
   getSessionsKPIs,
+  getSessionsForExport,
 };

@@ -832,6 +832,107 @@ const sessionsPaths = {
       },
     },
   },
+  "/api/sessions/export": {
+    post: {
+      tags: ["Sessions"],
+      summary: "Exportar sesiones a Excel",
+      description: "Genera y descarga un archivo Excel con todas las sesiones que coincidan con los filtros especificados. No aplica paginación, devuelve todas las sesiones filtradas. El archivo incluye: Paciente, Tipo, Fecha, Clínica, Estado, Precio, Comisión, Neto y Forma de Pago.",
+      requestBody: {
+        required: false,
+        content: {
+          "application/json": {
+            schema: {
+              type: "object",
+              properties: {
+                clinic_id: {
+                  type: "array",
+                  items: {
+                    type: "integer",
+                  },
+                  description: "ID(s) de la(s) clínica(s) para filtrar. Puede ser uno o múltiples IDs",
+                  example: [1, 2, 3],
+                },
+                status: {
+                  type: "string",
+                  enum: ["completada", "cancelada"],
+                  description: "Estado de la sesión",
+                  example: "completada",
+                },
+                payment_method: {
+                  type: "string",
+                  enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+                  description: "Método de pago",
+                  example: "bizum",
+                },
+                fecha_desde: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de inicio del rango (YYYY-MM-DD)",
+                  example: "2026-01-01",
+                },
+                fecha_hasta: {
+                  type: "string",
+                  format: "date",
+                  description: "Fecha de fin del rango (YYYY-MM-DD)",
+                  example: "2026-01-31",
+                },
+              },
+            },
+          },
+        },
+      },
+      responses: {
+        200: {
+          description: "Archivo Excel generado exitosamente",
+          content: {
+            "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet": {
+              schema: {
+                type: "string",
+                format: "binary",
+              },
+            },
+          },
+          headers: {
+            "Content-Disposition": {
+              schema: {
+                type: "string",
+                example: "attachment; filename=\"sesiones_2026-01-25.xlsx\"",
+              },
+              description: "Nombre del archivo Excel a descargar",
+            },
+          },
+        },
+        404: {
+          description: "No se encontraron sesiones con los filtros especificados",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+              example: {
+                success: false,
+                error: "No se encontraron sesiones con los filtros especificados",
+              },
+            },
+          },
+        },
+        500: {
+          description: "Error interno del servidor al generar el Excel",
+          content: {
+            "application/json": {
+              schema: {
+                $ref: "#/components/schemas/ErrorResponse",
+              },
+              example: {
+                success: false,
+                error: "Error al generar el archivo Excel",
+              },
+            },
+          },
+        },
+      },
+    },
+  },
 };
 
 module.exports = sessionsPaths;

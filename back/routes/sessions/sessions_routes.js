@@ -10,9 +10,14 @@ const {
   obtenerKPIsSesiones,
 } = require("../../controllers/sessions/sessions_controller");
 
+const {
+  exportarSesionesExcel,
+} = require("../../controllers/sessions/sessions_export_controller");
+
 router.get("/", obtenerSesiones);
 router.get("/kpis", obtenerKPIsSesiones);
 router.post("/", crearSesion);
+router.post("/export", exportarSesionesExcel); // Nuevo endpoint de exportación
 router.put("/:id", actualizarSesion);
 router.delete("/:id", eliminarSesion);
 router.get("/:id/whatsapp-link", obtenerEnlaceWhatsApp);
