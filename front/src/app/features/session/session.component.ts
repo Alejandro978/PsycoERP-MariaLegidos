@@ -15,7 +15,7 @@ import { Clinic } from '../clinics/models/clinic.model';
 import { environment } from '../../../environments/environment';
 
 interface SessionFilters {
-  clinicId: number | null;
+  clinicIds: number[];
   sessionType: string | null;
   status: string | null;
   paymentMethod: string | null;
@@ -79,7 +79,7 @@ export class SessionComponent implements OnInit {
   });
 
   // Filter controls
-  clinicControl = new FormControl<number | null>(null);
+  clinicControl = new FormControl<number[]>([]);
 
   // Date validation signals
   dateFromError = signal<string | null>(null);
@@ -87,7 +87,7 @@ export class SessionComponent implements OnInit {
 
   // Filter signals with initial dates
   filters = signal<SessionFilters>({
-    clinicId: null,
+    clinicIds: [],
     sessionType: null,
     status: null,
     paymentMethod: null,
@@ -154,7 +154,7 @@ export class SessionComponent implements OnInit {
 
   private setupClinicControlSubscription(): void {
     this.clinicControl.valueChanges.subscribe((value) => {
-      this.onFilterChange('clinicId', value);
+      this.onFilterChange('clinicIds', value || []);
     });
   }
 
@@ -167,8 +167,8 @@ export class SessionComponent implements OnInit {
       limit: '7000',
     };
 
-    if (currentFilters.clinicId) {
-      params.clinic_id = currentFilters.clinicId.toString();
+    if (currentFilters.clinicIds && currentFilters.clinicIds.length > 0) {
+      params.clinic_ids = currentFilters.clinicIds.join(',');
     }
 
     if (currentFilters.status) {
@@ -215,8 +215,8 @@ export class SessionComponent implements OnInit {
     // Build query params with same filters as loadSessions
     const params: any = {};
 
-    if (currentFilters.clinicId) {
-      params.clinic_id = currentFilters.clinicId.toString();
+    if (currentFilters.clinicIds && currentFilters.clinicIds.length > 0) {
+      params.clinic_ids = currentFilters.clinicIds.join(',');
     }
 
     if (currentFilters.status) {
@@ -304,14 +304,14 @@ export class SessionComponent implements OnInit {
 
   clearFilters(): void {
     this.filters.set({
-      clinicId: null,
+      clinicIds: [],
       sessionType: null,
       status: null,
       paymentMethod: null,
       dateFrom: this.getCurrentMonth(),
       dateTo: this.getTodayDate(),
     });
-    this.clinicControl.setValue(null);
+    this.clinicControl.setValue([]);
     this.dateFromError.set(null);
     this.dateToError.set(null);
     this.applyFilters();

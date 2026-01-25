@@ -62,19 +62,22 @@
 
       <div class="px-4">
         <div class="space-y-3">
-          <!-- First row of filters -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
+          <!-- Clinic selector row (separate to handle chips properly) -->
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
-                placeholder="Todas las clínicas" size="sm">
+                placeholder="Todas las clínicas" size="sm" [multiple]="true">
               </app-clinic-selector>
             </div>
+          </div>
 
+          <!-- Other filters row -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
             <div>
               <label class="text-xs font-medium block mb-1">Estado</label>
               <select (change)="onFilterChange('status', $any($event.target).value || null)"
                 [value]="filters().status || ''"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
                 <option value="">Todos los estados</option>
                 <option value="completada">Completada</option>
                 <option value="cancelada">Cancelada</option>
@@ -85,7 +88,7 @@
               <label class="text-xs font-medium block mb-1">Método de Pago</label>
               <select (change)="onFilterChange('paymentMethod', $any($event.target).value || null)"
                 [value]="filters().paymentMethod || ''"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
                 <option value="">Todos los métodos</option>
                 <option value="bizum">Bizum</option>
                 <option value="transferencia">Transferencia</option>
@@ -94,16 +97,13 @@
                 <option value="pendiente">Pendiente</option>
               </select>
             </div>
-          </div>
 
-          <!-- Second row of filters -->
-          <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
             <div>
               <label class="text-xs font-medium block mb-1">Fecha Desde</label>
               <input type="date" [value]="filters().dateFrom"
                 (change)="onFilterChange('dateFrom', $any($event.target).value)"
                 [class.border-red-500]="dateFromError()"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
               @if (dateFromError()) {
               <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
               }
@@ -113,7 +113,7 @@
               <label class="text-xs font-medium block mb-1">Fecha Hasta</label>
               <input type="date" [value]="filters().dateTo"
                 (change)="onFilterChange('dateTo', $any($event.target).value)" [class.border-red-500]="dateToError()"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500">
+                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
               @if (dateToError()) {
               <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
               }

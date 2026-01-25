@@ -22,13 +22,14 @@ export class ClinicSelectorComponent {
   @ViewChild('modalSearchInput') modalSearchInput!: ElementRef<HTMLInputElement>;
 
   // Inputs
-  @Input() control!: FormControl<string | number | null>;
+  @Input() control!: FormControl<string | number | number[] | null>;
   @Input() clinics: Clinic[] = [];
   @Input() placeholder: string = 'Seleccionar clínica...';
   @Input() label: string = 'Clínica';
   @Input() required: boolean = false;
-  @Input() size: 'sm' | 'md' = 'md'; // 'sm' for smaller inputs (text-xs), 'md' for standard (text-sm)
+  @Input() size: 'sm' | 'md' = 'md';
   @Input() disabled: boolean = false;
+  @Input() multiple: boolean = false;
 
   // Internal signals
   private searchTerm = signal<string>('');
@@ -45,12 +46,28 @@ export class ClinicSelectorComponent {
     );
   });
 
+  // Get selected clinics for multiple mode
+  get selectedClinics(): Clinic[] {
+    if (!this.multiple) return [];
+    const ids = this.control?.value as number[] || [];
+    return this.clinics.filter(c => c.id && ids.includes(Number(c.id)));
+  }
+
+  // Check if all clinics are selected
+  get allSelected(): boolean {
+    if (!this.multiple) return false;
+    const selectedIds = this.control?.value as number[] || [];
+    return selectedIds.length === this.clinics.length && this.clinics.length > 0;
+  }
+
   // Use a getter instead of computed for better control value tracking
   get selectedClinic(): Clinic | null {
+    if (this.multiple) return null;
+
     const selectedId = this.control?.value;
 
-    // Handle empty string, null, undefined
-    if (!selectedId || selectedId === '') {
+    // Handle empty string, null, undefined, or array
+    if (!selectedId || selectedId === '' || Array.isArray(selectedId)) {
       return null;
     }
 
@@ -68,6 +85,17 @@ export class ClinicSelectorComponent {
     return foundClinic || null;
   }
 
+  // Get display text for the selector
+  get displayText(): string {
+    if (this.multiple) {
+      const selected = this.selectedClinics;
+      if (selected.length === 0) return this.placeholder;
+      if (selected.length === 1) return selected[0].name;
+      return `${selected.length} clínicas seleccionadas`;
+    }
+    return this.selectedClinic ? this.selectedClinic.name : this.placeholder;
+  }
+
   // Event handlers
   onSearchInput(event: Event): void {
     const target = event.target as HTMLInputElement;
@@ -76,11 +104,15 @@ export class ClinicSelectorComponent {
   }
 
   selectClinic(clinic: Clinic): void {
-    // Convert to number if the clinic ID is a string that represents a number
+    if (this.multiple) {
+      this.toggleClinic(Number(clinic.id));
+      return;
+    }
+
+    // Single selection mode (original behavior)
     let clinicId: string | number | null = clinic.id || null;
 
     if (clinicId !== null && typeof clinicId === 'string') {
-      // Try to convert to number if it's a numeric string
       const numericId = parseInt(clinicId, 10);
       if (!isNaN(numericId)) {
         clinicId = numericId;
@@ -95,10 +127,56 @@ export class ClinicSelectorComponent {
     this.focusedIndex.set(-1);
   }
 
-  clearSelection(): void {
-    if (this.disabled) return; // Don't clear if disabled
+  // Toggle clinic selection in multiple mode
+  toggleClinic(clinicId: number): void {
+    if (!this.multiple) return;
 
-    this.control.setValue(null);
+    const currentIds = (this.control?.value as number[]) || [];
+    const newIds = currentIds.includes(clinicId)
+      ? currentIds.filter(id => id !== clinicId)
+      : [...currentIds, clinicId];
+
+    this.control?.setValue(newIds);
+    this.control?.markAsTouched();
+  }
+
+  // Remove clinic from selection (for chips)
+  removeClinic(clinicId: number, event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (!this.multiple) return;
+
+    const currentIds = (this.control?.value as number[]) || [];
+    const newIds = currentIds.filter(id => id !== clinicId);
+    this.control?.setValue(newIds);
+    this.control?.markAsTouched();
+  }
+
+  // Toggle select all
+  toggleSelectAll(): void {
+    if (!this.multiple) return;
+
+    if (this.allSelected) {
+      this.control?.setValue([]);
+    } else {
+      const allIds = this.clinics.filter(c => c.id).map(c => Number(c.id));
+      this.control?.setValue(allIds);
+    }
+    this.control?.markAsTouched();
+  }
+
+  clearSelection(event?: Event): void {
+    if (event) {
+      event.stopPropagation();
+    }
+    if (this.disabled) return;
+
+    if (this.multiple) {
+      this.control.setValue([]);
+    } else {
+      this.control.setValue(null);
+    }
     this.control.markAsTouched();
     this.searchTerm.set('');
     this.focusedIndex.set(-1);
@@ -110,10 +188,14 @@ export class ClinicSelectorComponent {
   }
 
   isClinicSelected(clinic: Clinic): boolean {
+    if (this.multiple) {
+      const selectedIds = (this.control?.value as number[]) || [];
+      return clinic.id ? selectedIds.includes(Number(clinic.id)) : false;
+    }
+
     const selectedId = this.control?.value;
     if (!selectedId || selectedId === '' || !clinic.id) return false;
 
-    // Convert both to strings for comparison
     const clinicIdStr = clinic.id.toString();
     const selectedIdStr = selectedId.toString();
 
@@ -121,12 +203,11 @@ export class ClinicSelectorComponent {
   }
 
   openModal(): void {
-    if (this.disabled) return; // Don't open if disabled
+    if (this.disabled) return;
 
     this.isModalOpen.set(true);
     this.searchTerm.set('');
 
-    // Focus search input when modal opens
     setTimeout(() => {
       if (this.modalSearchInput) {
         this.modalSearchInput.nativeElement.focus();
@@ -143,14 +224,12 @@ export class ClinicSelectorComponent {
   // Keyboard navigation
   @HostListener('keydown', ['$event'])
   onKeyDown(event: KeyboardEvent): void {
-    // Handle opening modal with keyboard
     if (!this.isModalOpen() && event.key === 'Enter') {
       event.preventDefault();
       this.openModal();
       return;
     }
 
-    // Handle modal keyboard navigation
     if (!this.isModalOpen()) return;
 
     const filteredClinics = this.filteredClinics();
@@ -184,7 +263,6 @@ export class ClinicSelectorComponent {
         break;
 
       case 'Tab':
-        // Allow normal tab behavior within modal
         break;
     }
   }
@@ -219,5 +297,12 @@ export class ClinicSelectorComponent {
       return 'La clínica seleccionada no es válida';
 
     return 'Campo inválido';
+  }
+
+  get hasSelection(): boolean {
+    if (this.multiple) {
+      return this.selectedClinics.length > 0;
+    }
+    return this.selectedClinic !== null;
   }
 }

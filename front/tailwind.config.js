@@ -76,6 +76,32 @@ module.exports = {
         "3xl": "var(--radius-3xl)",
         full: "9999px",
       },
+      animation: {
+        // Modal/Popup animations
+        'modal-fade-in': 'modalFadeIn 150ms ease-out forwards',
+        'modal-scale-in': 'modalScaleIn 150ms ease-out forwards',
+        'modal-slide-up': 'modalSlideUp 200ms ease-out forwards',
+        // Overlay/Backdrop
+        'overlay-fade-in': 'overlayFadeIn 150ms ease-out forwards',
+      },
+      keyframes: {
+        modalFadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        modalScaleIn: {
+          '0%': { opacity: '0', transform: 'scale(0.95)' },
+          '100%': { opacity: '1', transform: 'scale(1)' },
+        },
+        modalSlideUp: {
+          '0%': { opacity: '0', transform: 'translateY(10px) scale(0.98)' },
+          '100%': { opacity: '1', transform: 'translateY(0) scale(1)' },
+        },
+        overlayFadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+      },
     },
   },
   plugins: [],

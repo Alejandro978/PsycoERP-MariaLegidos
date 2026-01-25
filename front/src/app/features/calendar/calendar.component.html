@@ -351,7 +351,7 @@
 <!-- Tooltip -->
 @if (hoveredSession(); as session) {
 <div
-  class="fixed z-50 bg-gray-900 text-white text-sm rounded-lg shadow-xl px-3 py-2 pointer-events-none"
+  class="fixed z-50 bg-gray-900 text-white text-sm rounded-lg shadow-xl px-3 py-2 pointer-events-none animate-modal-fade-in"
   [style.left.px]="tooltipPosition().x"
   [style.top.px]="tooltipPosition().y"
   title="{{ getTooltipContent(session).patientName }} - {{ getTooltipContent(session).time }}">
@@ -380,7 +380,7 @@
   [message]="getWhatsAppConfirmationMessage()"
   confirmText="Sí, enviar WhatsApp"
   cancelText="No, gracias"
-  confirmButtonType="primary"
+  modalType="whatsapp"
   (onConfirm)="onConfirmWhatsApp()"
   (onCancel)="onCancelWhatsApp()">
 </app-confirmation-modal>

@@ -744,6 +744,7 @@ export class CalendarComponent implements OnInit {
 
   /**
    * Handles WhatsApp request from session form
+   * Shows the confirmation modal after a small delay to allow smooth transition
    */
   onWhatsAppRequest(data: {
     patientName: string;
@@ -754,7 +755,10 @@ export class CalendarComponent implements OnInit {
     isEdit: boolean;
   }): void {
     this.whatsAppData.set(data);
-    this.showWhatsAppConfirmation.set(true);
+    // Small delay to allow the session dialog to close first and prevent backdrop flicker
+    setTimeout(() => {
+      this.showWhatsAppConfirmation.set(true);
+    }, 200);
   }
 
   /**
