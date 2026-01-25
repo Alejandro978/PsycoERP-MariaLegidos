@@ -70,6 +70,7 @@ export class SessionComponent implements OnInit {
   sessions = signal<SessionData[]>([]); // Current page sessions
   clinics = signal<Clinic[]>([]);
   isLoading = signal(false);
+  isDownloading = signal(false);
   totalSessions = signal(0);
   kpis = signal<SessionKPIs>({
     sesiones_completadas: 0,
@@ -517,5 +518,68 @@ export class SessionComponent implements OnInit {
       return 0;
     }
     return price - netPrice;
+  }
+
+  /**
+   * Downloads an Excel file with the filtered sessions.
+   */
+  downloadExcel(): void {
+    if (this.isDownloading()) return;
+
+    this.isDownloading.set(true);
+    const currentFilters = this.filters();
+
+    // Build request body with the same filters used for loading sessions
+    const body: any = {};
+
+    if (currentFilters.clinicIds && currentFilters.clinicIds.length > 0) {
+      body.clinic_ids = currentFilters.clinicIds;
+    }
+
+    if (currentFilters.status) {
+      body.status = currentFilters.status;
+    }
+
+    if (currentFilters.paymentMethod) {
+      body.payment_method = currentFilters.paymentMethod;
+    }
+
+    if (currentFilters.dateFrom) {
+      body.fecha_desde = currentFilters.dateFrom;
+    }
+
+    if (currentFilters.dateTo) {
+      body.fecha_hasta = currentFilters.dateTo;
+    }
+
+    this.http
+      .post(`${environment.api.baseUrl}/sessions/export`, body, {
+        responseType: 'blob',
+      })
+      .subscribe({
+        next: (blob: Blob) => {
+          // Create download link
+          const url = window.URL.createObjectURL(blob);
+          const link = document.createElement('a');
+          link.href = url;
+
+          // Generate filename with current date
+          const today = new Date();
+          const dateStr = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+          link.download = `sesiones_${dateStr}.xlsx`;
+
+          // Trigger download
+          document.body.appendChild(link);
+          link.click();
+          document.body.removeChild(link);
+          window.URL.revokeObjectURL(url);
+
+          this.isDownloading.set(false);
+        },
+        error: (error) => {
+          console.error('Error downloading Excel:', error);
+          this.isDownloading.set(false);
+        },
+      });
   }
 }
