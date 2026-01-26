@@ -323,7 +323,10 @@ export class CalendarComponent implements OnInit {
     return SessionUtils.formatPrice(price);
   }
 
-  formatPaymentMethod(method: string): string {
+  formatPaymentMethod(method: string | null): string {
+    if (method === null) {
+      return 'No aplica';
+    }
     return SessionUtils.formatPaymentMethod(method);
   }
 

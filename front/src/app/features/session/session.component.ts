@@ -162,36 +162,33 @@ export class SessionComponent implements OnInit {
   private loadSessions(): void {
     const currentFilters = this.filters();
 
-    // Build query params - always request 5000 sessions
-    const params: any = {
-      page: '1',
-      limit: '7000',
-    };
+    // Build query params - always request 7000 sessions
+    const queryParts: string[] = ['page=1', 'limit=7000'];
 
     if (currentFilters.clinicIds && currentFilters.clinicIds.length > 0) {
-      params.clinic_ids = currentFilters.clinicIds.join(',');
+      currentFilters.clinicIds.forEach((id) => {
+        queryParts.push(`clinic_id=${id}`);
+      });
     }
 
     if (currentFilters.status) {
-      params.status = currentFilters.status;
+      queryParts.push(`status=${currentFilters.status}`);
     }
 
     if (currentFilters.paymentMethod) {
-      params.payment_method = currentFilters.paymentMethod;
+      queryParts.push(`payment_method=${currentFilters.paymentMethod}`);
     }
 
     if (currentFilters.dateFrom) {
-      params.fecha_desde = currentFilters.dateFrom;
+      queryParts.push(`fecha_desde=${currentFilters.dateFrom}`);
     }
 
     if (currentFilters.dateTo) {
-      params.fecha_hasta = currentFilters.dateTo;
+      queryParts.push(`fecha_hasta=${currentFilters.dateTo}`);
     }
 
     // Build query string
-    const queryString = Object.keys(params)
-      .map((key) => `${key}=${params[key]}`)
-      .join('&');
+    const queryString = queryParts.join('&');
 
     this.http
       .get<any>(`${environment.api.baseUrl}/sessions?${queryString}`)
@@ -214,32 +211,32 @@ export class SessionComponent implements OnInit {
     const currentFilters = this.filters();
 
     // Build query params with same filters as loadSessions
-    const params: any = {};
+    const queryParts: string[] = [];
 
     if (currentFilters.clinicIds && currentFilters.clinicIds.length > 0) {
-      params.clinic_ids = currentFilters.clinicIds.join(',');
+      currentFilters.clinicIds.forEach((id) => {
+        queryParts.push(`clinic_id=${id}`);
+      });
     }
 
     if (currentFilters.status) {
-      params.status = currentFilters.status;
+      queryParts.push(`status=${currentFilters.status}`);
     }
 
     if (currentFilters.paymentMethod) {
-      params.payment_method = currentFilters.paymentMethod;
+      queryParts.push(`payment_method=${currentFilters.paymentMethod}`);
     }
 
     if (currentFilters.dateFrom) {
-      params.fecha_desde = currentFilters.dateFrom;
+      queryParts.push(`fecha_desde=${currentFilters.dateFrom}`);
     }
 
     if (currentFilters.dateTo) {
-      params.fecha_hasta = currentFilters.dateTo;
+      queryParts.push(`fecha_hasta=${currentFilters.dateTo}`);
     }
 
     // Build query string
-    const queryString = Object.keys(params)
-      .map((key) => `${key}=${params[key]}`)
-      .join('&');
+    const queryString = queryParts.join('&');
 
     this.http
       .get<{ data: SessionKPIs }>(
@@ -274,12 +271,14 @@ export class SessionComponent implements OnInit {
         dateFrom: this.getCurrentMonth(),
       }));
       this.dateFromError.set(null);
+      this.applyFilters();
       return;
     }
 
     if (filterName === 'dateTo' && (!value || value === '')) {
       this.filters.update((f) => ({ ...f, dateTo: this.getTodayDate() }));
       this.dateToError.set(null);
+      this.applyFilters();
       return;
     }
 
@@ -288,6 +287,11 @@ export class SessionComponent implements OnInit {
     // Validate dates when they change
     if (filterName === 'dateFrom' || filterName === 'dateTo') {
       this.validateDates();
+    }
+
+    // Auto-apply filters if validations pass
+    if (!this.dateFromError() && !this.dateToError()) {
+      this.applyFilters();
     }
   }
 
@@ -352,7 +356,10 @@ export class SessionComponent implements OnInit {
     return texts[status as keyof typeof texts] || status;
   }
 
-  getModeClass(mode: string): string {
+  getModeClass(mode: string | null): string {
+    if (mode === null) {
+      return 'bg-gray-100 text-gray-500 border-gray-200';
+    }
     const classes = {
       presencial: 'bg-blue-100 text-blue-800 border-blue-200',
       online: 'bg-purple-100 text-purple-800 border-purple-200',
@@ -362,6 +369,13 @@ export class SessionComponent implements OnInit {
       classes[mode as keyof typeof classes] ||
       'bg-gray-100 text-gray-800 border-gray-200'
     );
+  }
+
+  formatMode(mode: string | null): string {
+    if (mode === null) {
+      return 'No aplica';
+    }
+    return mode;
   }
 
   getPaymentMethodClass(method: string | null): string {
@@ -533,7 +547,7 @@ export class SessionComponent implements OnInit {
     const body: any = {};
 
     if (currentFilters.clinicIds && currentFilters.clinicIds.length > 0) {
-      body.clinic_ids = currentFilters.clinicIds;
+      body.clinic_id = currentFilters.clinicIds;
     }
 
     if (currentFilters.status) {

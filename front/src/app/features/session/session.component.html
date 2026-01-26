@@ -126,35 +126,15 @@
               class="px-4 py-1.5 text-xs bg-white border border-gray-300 rounded-md hover:bg-gray-50 transition-colors shadow-sm">
               Limpiar Filtros
             </button>
-            <button (click)="applyFilters()"
-              class="px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors shadow-sm font-medium">
-              Buscar
-            </button>
-            <button (click)="downloadExcel()" [disabled]="isDownloading() || totalSessions() === 0"
-              class="px-4 py-1.5 text-xs bg-emerald-600 text-white rounded-md hover:bg-emerald-700 transition-colors shadow-sm font-medium flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
-              @if (isDownloading()) {
-                <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                Descargando...
-              } @else {
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                  <polyline points="7 10 12 15 17 10"></polyline>
-                  <line x1="12" y1="15" x2="12" y2="3"></line>
-                </svg>
-                Descargar Excel
-              }
-            </button>
           </div>
         </div>
       </div>
     </div>
 
     <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-2">
-      <!-- Pagination Buttons -->
-      <div class="flex items-center gap-2">
+      <!-- Pagination Buttons and Total -->
+      <div class="flex items-center gap-4">
+        <div class="flex items-center gap-2">
         <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1" data-slot="button"
           class="inline-flex items-center justify-center whitespace-nowrap text-sm font-medium transition-all disabled:pointer-events-none disabled:opacity-50 [&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 shrink-0 [&_svg]:shrink-0 outline-none border bg-background shadow-xs rounded-md h-8 w-8 p-0"
           onmouseover="if(!this.disabled) { this.style.backgroundColor='#6aa591'; this.style.color='white'; this.style.borderColor='#6aa591'; }"
@@ -198,12 +178,33 @@
             <path d="m9 18 6-6-6-6"></path>
           </svg>
         </button>
+        </div>
+        <span class="text-sm text-muted-foreground">{{ totalSessions() }} sesiones</span>
       </div>
+
+      <!-- Download Excel Button -->
+      <button (click)="downloadExcel()" [disabled]="isDownloading() || totalSessions() === 0"
+        class="px-4 py-1.5 text-xs bg-primary text-primary-foreground rounded-md hover:bg-primary/90 transition-colors shadow-sm font-medium flex items-center gap-1.5 disabled:opacity-50 disabled:cursor-not-allowed">
+        @if (isDownloading()) {
+          <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Descargando...
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Descargar Excel
+        }
+      </button>
     </div>
 
     <!-- Sessions Table -->
-    <div class="bg-card rounded-xl border shadow-sm flex-1 overflow-hidden">
-      <div class="overflow-y-auto h-full">
+    <div class="bg-card rounded-xl border shadow-sm overflow-hidden">
+      <div class="overflow-y-auto">
         <div class="relative w-full overflow-x-auto">
           <table class="w-full text-sm">
             <thead class="border-b">
@@ -241,7 +242,7 @@
                 <td class="p-2">
                   <span [class]="getModeClass(session.SessionDetailData.mode)"
                     class="inline-flex items-center rounded-md border px-2 py-0.5 text-xs font-medium capitalize">
-                    {{ session.SessionDetailData.mode }}
+                    {{ formatMode(session.SessionDetailData.mode) }}
                   </span>
                 </td>
                 <td class="p-2">{{ formatDate(session.SessionDetailData.session_date) }}</td>

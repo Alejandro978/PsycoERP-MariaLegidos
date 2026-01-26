@@ -29,7 +29,7 @@ export interface SessionData {
     start_time: string; // "09:00:00"
     end_time: string; // "10:00:00"
     type: string; // "Terapia Individual"
-    mode: 'online' | 'presencial'; // Added mode to new DTO
+    mode: 'online' | 'presencial' | null; // Added mode to new DTO
     price: number; // 60
     net_price: number; // Price after applying clinic percentage
     payment_method:
@@ -37,7 +37,8 @@ export interface SessionData {
       | 'transferencia'
       | 'tarjeta'
       | 'efectivo'
-      | 'pendiente';
+      | 'pendiente'
+      | null;
     status: 'completada' | 'cancelada'; // Added unified status field
     completed: boolean; // true/false
     cancelled: boolean; // true/false - to handle cancelled sessions
