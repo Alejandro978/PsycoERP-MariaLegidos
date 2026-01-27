@@ -1,14 +1,10 @@
 <div class="h-full p-3 sm:p-4 lg:p-6 overflow-auto">
   <div class="h-full flex flex-col">
     <!-- Header -->
-    <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2 mb-3">
-      <div>
-        <h1 class="text-xl sm:text-2xl font-black font-montserrat text-foreground">Sesiones</h1>
-        <p class="text-xs sm:text-sm text-muted-foreground mt-1">
-          Control y filtrado de sesiones por clínica
-        </p>
-      </div>
-    </div>
+    <app-section-header
+      title="Sesiones"
+      subtitle="Control y filtrado de sesiones por clínica">
+    </app-section-header>
 
     <!-- Stats Cards -->
     <div class="grid grid-cols-2 md:grid-cols-5 gap-3 mb-3">

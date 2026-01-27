@@ -744,7 +744,81 @@ export class NewSessionFormComponent implements OnInit {
       return;
     }
 
-    this.executeSubmit();
+    // Auto-save pending note if valid before saving session
+    if ((this.isCreatingNote() || this.editingNote()) && this.isFormValidNote()) {
+      this.savePendingNoteThenSubmit();
+    } else {
+      this.executeSubmit();
+    }
+  }
+
+  /**
+   * Save pending clinical note, then submit the session
+   */
+  private savePendingNoteThenSubmit(): void {
+    const note = this.newNote();
+    const editingNote = this.editingNote();
+    const sessionData = this.prefilledData?.sessionData;
+
+    if (!sessionData) {
+      this.executeSubmit();
+      return;
+    }
+
+    const patientId = sessionData.SessionDetailData.PatientData.id;
+
+    if (editingNote && editingNote.id) {
+      // Update existing note
+      const noteIdNumber = parseInt(editingNote.id);
+
+      if (isNaN(noteIdNumber) || noteIdNumber === 0) {
+        this.executeSubmit();
+        return;
+      }
+
+      this.clinicalNotesService
+        .updateClinicalNote({
+          id: noteIdNumber,
+          title: note.title,
+          content: note.content,
+        })
+        .subscribe({
+          next: () => {
+            this.toastService.showSuccess('Nota clínica guardada');
+            this.isCreatingNote.set(false);
+            this.editingNote.set(null);
+            this.newNote.set({ title: '', content: '' });
+            this.executeSubmit();
+          },
+          error: (error) => {
+            console.error('Error saving note:', error);
+            // Continue with session save even if note fails
+            this.executeSubmit();
+          },
+        });
+    } else {
+      // Create new note
+      this.clinicalNotesService
+        .createClinicalNote({
+          patient_id: patientId,
+          title: note.title,
+          content: note.content,
+        })
+        .subscribe({
+          next: () => {
+            this.toastService.showSuccess('Nota clínica guardada');
+            this.isCreatingNote.set(false);
+            this.editingNote.set(null);
+            this.newNote.set({ title: '', content: '' });
+            this.executeSubmit();
+          },
+          error: (error) => {
+            console.error('Error saving note:', error);
+            // Continue with session save even if note fails
+            this.executeSubmit();
+          },
+        });
+    }
   }
 
   private executeSubmit(): void {

@@ -10,6 +10,7 @@ import { CommonModule } from '@angular/common';
 import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { SessionData, SessionUtils } from '../../shared/models/session.model';
 import { ClinicSelectorComponent } from '../../shared/components/clinic-selector/clinic-selector.component';
+import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
 import { HttpClient } from '@angular/common/http';
 import { Clinic } from '../clinics/models/clinic.model';
 import { environment } from '../../../environments/environment';
@@ -55,7 +56,7 @@ interface SessionKPIs {
 @Component({
   selector: 'app-session',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, ClinicSelectorComponent],
+  imports: [CommonModule, ReactiveFormsModule, ClinicSelectorComponent, SectionHeaderComponent],
   templateUrl: './session.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
