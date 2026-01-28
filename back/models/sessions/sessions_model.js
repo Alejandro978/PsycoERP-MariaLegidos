@@ -376,8 +376,8 @@ const getSessionsKPIs = async (db, filters = {}) => {
     SELECT
       SUM(CASE WHEN s.status = 'completada' THEN 1 ELSE 0 END) as completed_sessions,
       SUM(CASE WHEN s.status = 'cancelada' THEN 1 ELSE 0 END) as cancelled_sessions,
-      COALESCE(SUM(CASE WHEN s.payment_method != 'pendiente' THEN s.price ELSE 0 END), 0) as gross_income,
-      COALESCE(SUM(CASE WHEN s.payment_method != 'pendiente' THEN s.price * (COALESCE(c.percentage,0) / 100) ELSE 0 END), 0) as net_income
+      COALESCE(SUM(CASE WHEN ((s.payment_method IS NOT NULL AND s.payment_method != 'pendiente') OR (s.payment_method IS NULL AND c.is_external = true)) THEN s.price ELSE 0 END), 0) as gross_income,
+      COALESCE(SUM(CASE WHEN ((s.payment_method IS NOT NULL AND s.payment_method != 'pendiente') OR (s.payment_method IS NULL AND c.is_external = true)) THEN s.price * (COALESCE(c.percentage,0) / 100) ELSE 0 END), 0) as net_income
     FROM sessions s
     LEFT JOIN clinics c ON s.clinic_id = c.id AND c.is_active = true
     ${where}
