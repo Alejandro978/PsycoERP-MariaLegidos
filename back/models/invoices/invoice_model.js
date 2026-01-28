@@ -449,7 +449,7 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
      INNER JOIN sessions s ON s.clinic_id = c.id
        AND s.is_active = true
        AND s.invoiced = 0
-       AND s.payment_method != 'pendiente'
+       AND ((s.payment_method IS NOT NULL AND s.payment_method != 'pendiente') OR (s.payment_method IS NULL AND c.is_external = true))
        AND MONTH(s.session_date) = ?
        AND YEAR(s.session_date) = ?
      INNER JOIN (
@@ -461,7 +461,7 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
        FROM sessions
        WHERE is_active = true
          AND invoiced = 0
-         AND payment_method != 'pendiente'
+         AND ((payment_method IS NOT NULL AND payment_method != 'pendiente') OR (payment_method IS NULL AND clinic_id IN (SELECT id FROM clinics WHERE is_external = true)))
          AND MONTH(session_date) = ?
          AND YEAR(session_date) = ?
        GROUP BY clinic_id, price

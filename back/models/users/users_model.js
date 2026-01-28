@@ -4,6 +4,7 @@ const getUserById = async (db, userId) => {
       id,
       license_number,
       irpf,
+      iva,
       name,
       dni,
       street,
@@ -68,6 +69,10 @@ const updateUser = async (db, userId, userData) => {
   if (userData.postal_code !== undefined) {
     fields.push("postal_code = ?");
     values.push(userData.postal_code);
+  }
+  if (userData.iva !== undefined) {
+    fields.push("iva = ?");
+    values.push(userData.iva);
   }
 
   if (fields.length === 0) {
