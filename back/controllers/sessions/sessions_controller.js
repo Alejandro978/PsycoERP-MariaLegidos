@@ -536,7 +536,26 @@ const obtenerKPIsSesiones = async (req, res) => {
     const filters = {};
     if (fecha_desde) filters.fecha_desde = fecha_desde;
     if (fecha_hasta) filters.fecha_hasta = fecha_hasta;
-    if (clinic_id) filters.clinic_id = clinic_id;
+
+    // Parsear clinic_id como array de integers
+    if (clinic_id) {
+      // Si es array, mapear a integers
+      if (Array.isArray(clinic_id)) {
+        filters.clinic_ids = clinic_id.map(id => parseInt(id)).filter(id => !isNaN(id));
+      } else {
+        // Si es un solo valor, convertir a array de 1 elemento
+        const parsedId = parseInt(clinic_id);
+        if (!isNaN(parsedId)) {
+          filters.clinic_ids = [parsedId];
+        }
+      }
+
+      // Solo aplicar filtro si hay IDs válidos
+      if (!filters.clinic_ids || filters.clinic_ids.length === 0) {
+        delete filters.clinic_ids;
+      }
+    }
+
     if (status) filters.status = status;
     if (payment_method) filters.payment_method = payment_method;
 
