@@ -5,6 +5,7 @@ export interface User {
   last_login: string;
   license_number?: string;
   irpf?: string;
+  iva?: string;
   dni?: string;
   street?: string;
   street_number?: string;
@@ -22,6 +23,7 @@ export interface UpdateUserProfileRequest {
   name: string;
   license_number?: string;
   irpf?: string;
+  iva: string;
   dni: string;
   street: string;
   street_number: string;

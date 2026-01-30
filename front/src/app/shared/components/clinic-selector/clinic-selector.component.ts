@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   signal,
   computed,
   HostListener,
@@ -30,6 +32,9 @@ export class ClinicSelectorComponent {
   @Input() size: 'sm' | 'md' = 'md';
   @Input() disabled: boolean = false;
   @Input() multiple: boolean = false;
+
+  // Output emitted when modal is closed (user clicks "Aplicar" in multiple mode)
+  @Output() applied = new EventEmitter<void>();
 
   // Internal signals
   private searchTerm = signal<string>('');
@@ -151,6 +156,9 @@ export class ClinicSelectorComponent {
     const newIds = currentIds.filter(id => id !== clinicId);
     this.control?.setValue(newIds);
     this.control?.markAsTouched();
+
+    // Emitir evento para aplicar filtros inmediatamente
+    this.applied.emit();
   }
 
   // Toggle select all
@@ -166,7 +174,7 @@ export class ClinicSelectorComponent {
     this.control?.markAsTouched();
   }
 
-  clearSelection(event?: Event): void {
+  clearSelection(event?: Event, emitApplied: boolean = false): void {
     if (event) {
       event.stopPropagation();
     }
@@ -180,11 +188,16 @@ export class ClinicSelectorComponent {
     this.control.markAsTouched();
     this.searchTerm.set('');
     this.focusedIndex.set(-1);
+
+    // Emitir evento para aplicar filtros inmediatamente
+    if (emitApplied && this.multiple) {
+      this.applied.emit();
+    }
   }
 
   handleClearClick(event: Event): void {
     event.stopPropagation();
-    this.clearSelection();
+    this.clearSelection(undefined, true);
   }
 
   isClinicSelected(clinic: Clinic): boolean {
@@ -219,6 +232,11 @@ export class ClinicSelectorComponent {
     this.isModalOpen.set(false);
     this.searchTerm.set('');
     this.focusedIndex.set(-1);
+
+    // Emitir evento cuando se cierra el modal en modo múltiple (botón "Aplicar")
+    if (this.multiple) {
+      this.applied.emit();
+    }
   }
 
   // Keyboard navigation

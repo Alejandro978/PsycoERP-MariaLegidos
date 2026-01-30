@@ -158,19 +158,14 @@ export class InvitationsComponent implements OnInit {
   generateInvitation(clinicId: number): void {
     this.loading.set(true);
     this.invitationService.generateInvitation(clinicId).subscribe({
-      next: (response) => {
-        // Copy link to clipboard
-        navigator.clipboard.writeText(response.invitationLink).then(() => {
-          this.toast.showSuccess(`Enlace copiado al portapapeles (${response.clinic_name})`);
-        }).catch(() => {
-          this.toast.showError('Error al copiar el enlace');
-        });
-
+      next: () => {
+        this.toast.showSuccess('Invitación creada correctamente');
         // Reload list to show new invitation
         this.loadInvitations();
       },
       error: (error) => {
         console.error('Error generating invitation:', error);
+        this.toast.showError('Error al crear la invitación');
         this.loading.set(false);
       },
     });

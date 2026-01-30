@@ -79,6 +79,20 @@
                 class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6aa591] focus:border-[#6aa591] disabled:cursor-not-allowed disabled:opacity-50 transition-colors" />
             </div>
 
+            <div>
+              <label class="text-sm font-semibold leading-none text-gray-700 peer-disabled:cursor-not-allowed peer-disabled:opacity-70 mb-2 block" for="iva">
+                IVA (%)
+              </label>
+              <input id="iva" type="text" formControlName="iva" placeholder="Ej: 21.00"
+                class="flex h-9 w-full rounded-md border border-gray-300 bg-white px-3 py-1 text-sm text-gray-900 placeholder:text-gray-500 hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-[#6aa591] focus:border-[#6aa591] disabled:cursor-not-allowed disabled:opacity-50 transition-colors"
+                [class.border-red-500]="isFieldInvalid('iva')"
+                [class.focus:ring-red-500]="isFieldInvalid('iva')"
+                [class.focus:border-red-500]="isFieldInvalid('iva')" />
+              @if (isFieldInvalid('iva')) {
+              <p class="text-red-500 text-xs mt-1">{{ getFieldError('iva') }}</p>
+              }
+            </div>
+
           </div>
 
           <div class="space-y-4">

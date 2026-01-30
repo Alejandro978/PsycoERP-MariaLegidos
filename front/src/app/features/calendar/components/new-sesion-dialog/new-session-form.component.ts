@@ -864,11 +864,13 @@ export class NewSessionFormComponent implements OnInit {
             this.sessionDataCreated.emit(updatedSession);
 
             // Emit WhatsApp request only for internal clinics AND if date/time changed
-            if (!this.isExternalClinic() && patient.telefono && this.hasDateOrTimeChanged()) {
+            const shouldRequestWhatsApp = !this.isExternalClinic() && patient.telefono && this.hasDateOrTimeChanged();
+            if (shouldRequestWhatsApp) {
               this.emitWhatsAppRequest(true);
+              // NO llamar a onClose() - el padre cierra el modal vía onWhatsAppRequest
+            } else {
+              this.onClose();
             }
-
-            this.onClose();
           },
           error: (error) => {
             console.error('Error updating session:', error);
@@ -886,11 +888,13 @@ export class NewSessionFormComponent implements OnInit {
           this.sessionDataCreated.emit(createdSession);
 
           // Emit WhatsApp request only for internal clinics
-          if (!this.isExternalClinic() && patient.telefono) {
+          const shouldRequestWhatsApp = !this.isExternalClinic() && patient.telefono;
+          if (shouldRequestWhatsApp) {
             this.emitWhatsAppRequest(false);
+            // NO llamar a onClose() - el padre cierra el modal vía onWhatsAppRequest
+          } else {
+            this.onClose();
           }
-
-          this.onClose();
         },
         error: (error) => {
           console.error('Error creating session:', error);

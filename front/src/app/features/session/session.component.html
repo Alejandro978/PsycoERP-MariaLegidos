@@ -62,7 +62,7 @@
           <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
             <div>
               <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
-                placeholder="Todas las clínicas" size="sm" [multiple]="true">
+                placeholder="Todas las clínicas" size="sm" [multiple]="true" (applied)="onClinicFilterApplied()">
               </app-clinic-selector>
             </div>
           </div>

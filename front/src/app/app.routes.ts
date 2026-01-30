@@ -17,14 +17,14 @@ export const routes: Routes = [
     path: 'register/:token',
     loadComponent: () =>
       import('./features/patient-register/patient-register.component').then(
-        (m) => m.PatientRegisterComponent
+        (m) => m.PatientRegisterComponent,
       ),
   },
   {
     path: '',
     loadComponent: () =>
       import('./shared/layouts/main-layout/main-layout.component').then(
-        (m) => m.MainLayoutComponent
+        (m) => m.MainLayoutComponent,
       ),
     children: [
       {
@@ -42,22 +42,22 @@ export const routes: Routes = [
             path: '',
             loadComponent: () =>
               import('./features/patient/patient.component').then(
-                (m) => m.PatientComponent
+                (m) => m.PatientComponent,
               ),
           },
           {
             path: ':id',
             loadComponent: () =>
-              import(
-                './features/patient/patient-detail/patient-detail.component'
-              ).then((m) => m.PatientDetailComponent),
+              import('./features/patient/patient-detail/patient-detail.component').then(
+                (m) => m.PatientDetailComponent,
+              ),
           },
           {
             path: 'nuevo',
             loadComponent: () =>
-              import(
-                './features/patient/patient-detail/patient-detail.component'
-              ).then((m) => m.PatientDetailComponent),
+              import('./features/patient/patient-detail/patient-detail.component').then(
+                (m) => m.PatientDetailComponent,
+              ),
           },
         ],
       },
@@ -66,7 +66,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/reminder/reminder.component').then(
-            (m) => m.ReminderComponent
+            (m) => m.ReminderComponent,
           ),
         data: {
           menu: {
@@ -81,7 +81,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/notes/notes.component').then(
-            (m) => m.NotesComponent
+            (m) => m.NotesComponent,
           ),
         data: {
           menu: {
@@ -96,7 +96,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/calendar/calendar.component').then(
-            (m) => m.CalendarComponent
+            (m) => m.CalendarComponent,
           ),
         data: {
           menu: {
@@ -111,7 +111,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/session/session.component').then(
-            (m) => m.SessionComponent
+            (m) => m.SessionComponent,
           ),
         data: {
           menu: {
@@ -126,7 +126,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/billing/billing.component').then(
-            (m) => m.BillingComponent
+            (m) => m.BillingComponent,
           ),
         data: {
           menu: {
@@ -141,7 +141,7 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/clinics/clinics.component').then(
-            (m) => m.ClinicsComponent
+            (m) => m.ClinicsComponent,
           ),
         data: {
           menu: {
@@ -156,13 +156,13 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/configuration/configuration.component').then(
-            (m) => m.ConfigurationComponent
+            (m) => m.ConfigurationComponent,
           ),
         data: {
           menu: {
             label: 'Configuración',
             icon: 'M10.325 4.317c.426-1.756 2.924-1.756 3.35 0a1.724 1.724 0 002.573 1.066c1.543-.94 3.31.826 2.37 2.37a1.724 1.724 0 001.065 2.572c1.756.426 1.756 2.924 0 3.35a1.724 1.724 0 00-1.066 2.573c.94 1.543-.826 3.31-2.37 2.37a1.724 1.724 0 00-2.572 1.065c-.426 1.756-2.924 1.756-3.35 0a1.724 1.724 0 00-2.573-1.066c-1.543.94-3.31-.826-2.37-2.37a1.724 1.724 0 00-1.065-2.572c-1.756-.426-1.756-2.924 0-3.35a1.724 1.724 0 001.066-2.573c-.94-1.543.826-3.31 2.37-2.37.996.608 2.296.07 2.572-1.065z M15 12a3 3 0 11-6 0 3 3 0 016 0z',
-            order: 8,
+            order: 9,
           },
         },
       },
@@ -171,13 +171,13 @@ export const routes: Routes = [
         canActivate: [authGuard],
         loadComponent: () =>
           import('./features/invitations/invitations.component').then(
-            (m) => m.InvitationsComponent
+            (m) => m.InvitationsComponent,
           ),
         data: {
           menu: {
             label: 'Invitaciones',
             icon: 'M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z',
-            order: 9,
+            order: 8,
           },
         },
       },

@@ -54,7 +54,8 @@
           <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">
             {{ notesService.kpis().pending_notes }}
             @if (notesService.kpis().pending_notes > 0) {
-            <span class="ml-1 sm:ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
+            <span
+              class="ml-1 sm:ml-2 inline-flex items-center px-2 py-0.5 rounded-full text-xs font-medium bg-orange-100 text-orange-800">
               Activas
             </span>
             }
@@ -76,7 +77,8 @@
       <div class="flex items-center justify-between">
         <div>
           <p class="text-xs sm:text-sm font-medium text-gray-600">Completadas</p>
-          <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{{ notesService.kpis().completed_notes }}</p>
+          <p class="text-xl sm:text-2xl font-bold text-gray-900 mt-1 sm:mt-2">{{ notesService.kpis().completed_notes }}
+          </p>
         </div>
         <div class="p-2 sm:p-3 bg-green-100 rounded-lg">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
@@ -122,7 +124,7 @@
           <span class="font-medium">{{ notesService.pagination().total_records }}</span> notas en total
           @if (notesService.pagination().total_pages > 1) {
           <span class="sm:block ml-2 sm:ml-0 sm:mt-1">
-            · Página {{ notesService.pagination().current_page }} de {{ notesService.pagination().total_pages }}
+            Página {{ notesService.pagination().current_page }} de {{ notesService.pagination().total_pages }}
           </span>
           }
         </div>
@@ -153,10 +155,7 @@
       </div>
       } @else {
       @for (note of notesService.notes(); track note.id) {
-      <app-note-card
-        [note]="note"
-        (onComplete)="handleCompleteNote($event)"
-        (onDelete)="handleDeleteNote($event)">
+      <app-note-card [note]="note" (onComplete)="handleCompleteNote($event)" (onDelete)="handleDeleteNote($event)">
       </app-note-card>
       }
       }
@@ -169,9 +168,7 @@
       <!-- Multi-page pagination -->
       <div class="flex items-center justify-between gap-2">
         <!-- Previous Button -->
-        <button type="button"
-          (click)="prevPage()"
-          [disabled]="!notesService.pagination().has_previous_page"
+        <button type="button" (click)="prevPage()" [disabled]="!notesService.pagination().has_previous_page"
           class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
             stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
@@ -183,8 +180,7 @@
         <!-- Page Numbers - Hidden on mobile, show current/total instead -->
         <div class="hidden sm:flex items-center gap-1">
           @for (page of getPageNumbers(); track page) {
-          <button type="button"
-            (click)="goToPage(page)"
+          <button type="button" (click)="goToPage(page)"
             [class]="page === notesService.pagination().current_page
               ? 'px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-lg'
               : 'px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200'">
@@ -199,9 +195,7 @@
         </div>
 
         <!-- Next Button -->
-        <button type="button"
-          (click)="nextPage()"
-          [disabled]="!notesService.pagination().has_next_page"
+        <button type="button" (click)="nextPage()" [disabled]="!notesService.pagination().has_next_page"
           class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
           <span class="hidden sm:inline">Siguiente</span>
           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -223,20 +217,12 @@
 </div>
 
 <!-- Dialog Component -->
-<app-note-dialog
-  [isOpen]="isDialogOpen"
-  (onClose)="closeDialog()"
-  (onSave)="handleCreateNote($event)">
+<app-note-dialog [isOpen]="isDialogOpen" (onClose)="closeDialog()" (onSave)="handleCreateNote($event)">
 </app-note-dialog>
 
 <!-- Delete Confirmation Modal -->
-<app-confirmation-modal
-  [isOpen]="showDeleteConfirmation"
-  title="Eliminar nota"
-  message="¿Estás seguro de que deseas eliminar esta nota? Esta acción no se puede deshacer."
-  confirmText="Eliminar"
-  cancelText="Cancelar"
-  confirmButtonType="destructive"
-  (onConfirm)="confirmDeleteNote()"
+<app-confirmation-modal [isOpen]="showDeleteConfirmation" title="Eliminar nota"
+  message="¿Estás seguro de que deseas eliminar esta nota? Esta acción no se puede deshacer." confirmText="Eliminar"
+  cancelText="Cancelar" confirmButtonType="destructive" (onConfirm)="confirmDeleteNote()"
   (onCancel)="cancelDeleteNote()">
 </app-confirmation-modal>

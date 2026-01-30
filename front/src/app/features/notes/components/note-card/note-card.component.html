@@ -28,7 +28,7 @@
             <rect width="18" height="18" x="3" y="4" rx="2"></rect>
             <path d="M3 10h18"></path>
           </svg>
-          {{ formatDate(note.created_at) }}
+          {{ formatFullDate(note.created_at) }}
         </span>
 
         @if (note.status === 'completed') {

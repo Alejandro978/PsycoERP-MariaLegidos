@@ -122,32 +122,26 @@
             <div class="bg-gray-50 rounded-lg p-6">
               <div class="space-y-3">
                 <div class="flex justify-between text-gray-700">
-                  <span>SERV. DE ATENCIÓN PSICOLÓGICA:</span>
+                  <span>BASE IMPONIBLE:</span>
                   <span class="font-semibold">{{ formatCurrency(clinicInvoiceData.total) }}</span>
                 </div>
                 <div class="flex justify-between text-gray-700">
-                  <span>IVA (EXENTO):</span>
-                  <span>0,00€</span>
+                  <span>IVA @if (userData?.iva) {({{ userData?.iva }}%)}:</span>
+                  <span>{{ formatCurrency(getIvaAmount()) }}</span>
                 </div>
                 <div class="flex justify-between text-gray-700">
-                  <span>RETENCIÓN @if (userData) {({{ userData.irpf }}%)}:</span>
-                  <span class="text-red-600">{{ formatCurrency(getRetentionAmount()) }}</span>
+                  <span>RETENCIÓN IRPF @if (userData?.irpf) {({{ userData?.irpf }}%)}:</span>
+                  <span class="text-red-600">-{{ formatCurrency(getRetentionAmount()) }}</span>
                 </div>
                 <div class="border-t border-gray-300 pt-3">
                   <div class="flex justify-between text-xl font-bold text-gray-900">
                     <span>TOTAL A INGRESAR:</span>
-                    <span class="text-green-600">{{ formatCurrency(clinicInvoiceData.total - getRetentionAmount())
-                      }}</span>
+                    <span class="text-green-600">{{ formatCurrency(getTotalToReceive()) }}</span>
                   </div>
                 </div>
               </div>
             </div>
           </div>
-        </div>
-
-        <!-- Nota legal IVA -->
-        <div class="text-center text-sm text-gray-500 mb-4">
-          <p>Servicio exento de IVA según el artículo 20 3a de la ley 37/1992 del impuesto sobre el Valor Añadido.</p>
         </div>
 
       </div>

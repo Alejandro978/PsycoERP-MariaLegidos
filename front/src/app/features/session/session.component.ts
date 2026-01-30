@@ -155,9 +155,18 @@ export class SessionComponent implements OnInit {
   }
 
   private setupClinicControlSubscription(): void {
+    // Solo actualizar el estado local, NO hacer llamada al servidor
+    // La llamada al servidor se hace cuando el usuario hace clic en "Aplicar" del selector
     this.clinicControl.valueChanges.subscribe((value) => {
-      this.onFilterChange('clinicIds', value || []);
+      this.filters.update((f) => ({ ...f, clinicIds: value || [] }));
     });
+  }
+
+  /**
+   * Called when user clicks "Aplicar" in the clinic selector
+   */
+  onClinicFilterApplied(): void {
+    this.applyFilters();
   }
 
   private loadSessions(): void {
@@ -269,7 +278,7 @@ export class SessionComponent implements OnInit {
     if (filterName === 'dateFrom' && (!value || value === '')) {
       this.filters.update((f) => ({
         ...f,
-        dateFrom: this.getCurrentMonth(),
+        dateFrom: this.getFirstDayOfMonth(),
       }));
       this.dateFromError.set(null);
       this.applyFilters();
@@ -277,7 +286,7 @@ export class SessionComponent implements OnInit {
     }
 
     if (filterName === 'dateTo' && (!value || value === '')) {
-      this.filters.update((f) => ({ ...f, dateTo: this.getTodayDate() }));
+      this.filters.update((f) => ({ ...f, dateTo: this.getLastDayOfMonth() }));
       this.dateToError.set(null);
       this.applyFilters();
       return;
@@ -290,8 +299,8 @@ export class SessionComponent implements OnInit {
       this.validateDates();
     }
 
-    // Auto-apply filters if validations pass
-    if (!this.dateFromError() && !this.dateToError()) {
+    // Auto-apply filters if validations pass (excepto clinicIds que se maneja por separado)
+    if (filterName !== 'clinicIds' && !this.dateFromError() && !this.dateToError()) {
       this.applyFilters();
     }
   }

@@ -41,47 +41,21 @@ export class NoteCardComponent {
   }
 
   /**
-   * Format date string from API format to readable format
+   * Format date string to full date with time
    * @param dateString Date in format "YYYY-MM-DD HH:mm:ss"
    */
-  formatDate(dateString: string): string {
-    // Parse "YYYY-MM-DD HH:mm:ss" format
-    const [datePart] = dateString.split(' ');
+  formatFullDate(dateString: string): string {
+    const [datePart, timePart] = dateString.split(' ');
     const date = new Date(datePart);
-    const now = new Date();
+    const time = timePart ? timePart.substring(0, 5) : '';
 
-    // Reset time to compare just dates
-    const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
-    const noteDate = new Date(date.getFullYear(), date.getMonth(), date.getDate());
+    const formattedDate = date.toLocaleDateString('es-ES', {
+      day: 'numeric',
+      month: 'short',
+      year: 'numeric'
+    });
 
-    const diffTime = today.getTime() - noteDate.getTime();
-    const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
-
-    if (diffDays === 0) {
-      return 'Hoy';
-    } else if (diffDays === 1) {
-      return 'Ayer';
-    } else if (diffDays > 1 && diffDays < 7) {
-      return `Hace ${diffDays} días`;
-    } else {
-      return date.toLocaleDateString('es-ES', {
-        day: 'numeric',
-        month: 'short',
-        year: 'numeric'
-      });
-    }
+    return time ? `${formattedDate}, ${time}` : formattedDate;
   }
 
-  /**
-   * Format time from date string
-   * @param dateString Date in format "YYYY-MM-DD HH:mm:ss"
-   */
-  formatTime(dateString: string): string {
-    const parts = dateString.split(' ');
-    if (parts.length > 1) {
-      // Return just HH:mm
-      return parts[1].substring(0, 5);
-    }
-    return '';
-  }
 }

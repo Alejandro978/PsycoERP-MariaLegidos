@@ -84,21 +84,18 @@ export class NotesService {
    * @param request Note creation request with message
    */
   createNote(request: CreateNoteRequest): Observable<NoteApiResponse> {
-    this.loadingState.set(true);
     this.errorState.set(null);
 
     return this.http.post<NoteApiResponse>(this.baseUrl, request).pipe(
       tap(response => {
-        this.loadingState.set(false);
-        // Reload notes to get updated KPIs and list
+        // Reload notes silently to get updated KPIs and list
         if (response.success) {
-          this.loadNotes(this.paginationState().current_page, this.paginationState().records_per_page).subscribe();
+          this.reloadNotesSilently();
         }
       }),
       catchError(error => {
         console.error('Error creating note:', error);
         this.errorState.set('Error al crear la nota');
-        this.loadingState.set(false);
         return of({ success: false, message: 'Error al crear la nota' });
       })
     );
@@ -109,21 +106,18 @@ export class NotesService {
    * @param noteId Note ID to complete
    */
   completeNote(noteId: number): Observable<NoteApiResponse> {
-    this.loadingState.set(true);
     this.errorState.set(null);
 
     return this.http.patch<NoteApiResponse>(`${this.baseUrl}/${noteId}/complete`, {}).pipe(
       tap(response => {
-        this.loadingState.set(false);
-        // Reload notes to get updated KPIs and list
+        // Reload notes silently to get updated KPIs and list
         if (response.success) {
-          this.loadNotes(this.paginationState().current_page, this.paginationState().records_per_page).subscribe();
+          this.reloadNotesSilently();
         }
       }),
       catchError(error => {
         console.error('Error completing note:', error);
         this.errorState.set('Error al completar la nota');
-        this.loadingState.set(false);
         return of({ success: false, message: 'Error al completar la nota' });
       })
     );
@@ -134,13 +128,11 @@ export class NotesService {
    * @param noteId Note ID to delete
    */
   deleteNote(noteId: number): Observable<NoteApiResponse> {
-    this.loadingState.set(true);
     this.errorState.set(null);
 
     return this.http.delete<NoteApiResponse>(`${this.baseUrl}/${noteId}`).pipe(
       tap(response => {
-        this.loadingState.set(false);
-        // Reload notes to get updated KPIs and list
+        // Reload notes silently to get updated KPIs and list
         if (response.success) {
           // If we deleted the last item on the page, go to previous page
           const pagination = this.paginationState();
@@ -151,16 +143,39 @@ export class NotesService {
             targetPage = pagination.current_page - 1;
           }
 
-          this.loadNotes(targetPage, pagination.records_per_page).subscribe();
+          this.reloadNotesSilently(targetPage);
         }
       }),
       catchError(error => {
         console.error('Error deleting note:', error);
         this.errorState.set('Error al eliminar la nota');
-        this.loadingState.set(false);
         return of({ success: false, message: 'Error al eliminar la nota' });
       })
     );
+  }
+
+  /**
+   * Reload notes silently (without showing loading spinner)
+   * Used after CRUD operations for a fluid experience
+   * @param page Optional target page (defaults to current page)
+   */
+  private reloadNotesSilently(page?: number): void {
+    const pagination = this.paginationState();
+    const targetPage = page ?? pagination.current_page;
+
+    this.http.get<NotesApiResponse>(`${this.baseUrl}?page=${targetPage}&limit=${pagination.records_per_page}`).pipe(
+      tap(response => {
+        if (response.success) {
+          this.notesState.set(response.data);
+          this.kpisState.set(response.kpis);
+          this.paginationState.set(response.pagination);
+        }
+      }),
+      catchError(error => {
+        console.error('Error reloading notes:', error);
+        return of(null);
+      })
+    ).subscribe();
   }
 
   /**

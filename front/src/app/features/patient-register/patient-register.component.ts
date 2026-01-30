@@ -32,7 +32,12 @@ import { PatientDocumentPreviewComponent } from './components/patient-document-p
 @Component({
   selector: 'app-patient-register',
   standalone: true,
-  imports: [CommonModule, ReactiveFormsModule, DatePipe, PatientDocumentPreviewComponent],
+  imports: [
+    CommonModule,
+    ReactiveFormsModule,
+    DatePipe,
+    PatientDocumentPreviewComponent,
+  ],
   templateUrl: './patient-register.component.html',
   styleUrls: ['./patient-register.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -62,20 +67,18 @@ export class PatientRegisterComponent implements OnInit {
   // Signal derivado del valor de birth_date del formulario
   private birthDateValue = toSignal(
     this.registerForm.get('birth_date')!.valueChanges,
-    { initialValue: '' }
+    { initialValue: '' },
   );
 
   // Signal derivado de los valores de progenitor 2
-  private progenitor2Values = toSignal(
-    this.registerForm.valueChanges,
-    { initialValue: this.registerForm.value }
-  );
+  private progenitor2Values = toSignal(this.registerForm.valueChanges, {
+    initialValue: this.registerForm.value,
+  });
 
   // Signal derivado del estado de validez del formulario
-  private formStatus = toSignal(
-    this.registerForm.statusChanges,
-    { initialValue: this.registerForm.status }
-  );
+  private formStatus = toSignal(this.registerForm.statusChanges, {
+    initialValue: this.registerForm.status,
+  });
 
   /**
    * Computed: calcula la edad basándose en la fecha de nacimiento
@@ -120,11 +123,14 @@ export class PatientRegisterComponent implements OnInit {
   ];
 
   // Signature canvas references
-  @ViewChild('patientSignature') patientSignatureCanvas!: ElementRef<HTMLCanvasElement>;
-  @ViewChild('guardian1Signature') guardian1SignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('patientSignature')
+  patientSignatureCanvas!: ElementRef<HTMLCanvasElement>;
+  @ViewChild('guardian1Signature')
+  guardian1SignatureCanvas!: ElementRef<HTMLCanvasElement>;
 
   // Preview component reference for PDF generation
-  @ViewChild(PatientDocumentPreviewComponent) documentPreview!: PatientDocumentPreviewComponent;
+  @ViewChild(PatientDocumentPreviewComponent)
+  documentPreview!: PatientDocumentPreviewComponent;
 
   // Signature state
   private signatureContexts = new Map<string, CanvasRenderingContext2D>();
@@ -225,7 +231,6 @@ export class PatientRegisterComponent implements OnInit {
     });
   }
 
-
   /**
    * Inicializa el canvas de firma del paciente
    */
@@ -262,14 +267,15 @@ export class PatientRegisterComponent implements OnInit {
         this.signatureContexts.set('guardian1', ctx1);
       }
     }
-
   }
 
   /**
    * Actualiza validadores del checkbox de tutor legal
    */
   private updateConsentValidators(isMinorValue: boolean): void {
-    const consentLegalRep = this.registerForm.get('consent_legal_representative');
+    const consentLegalRep = this.registerForm.get(
+      'consent_legal_representative',
+    );
 
     if (isMinorValue) {
       consentLegalRep?.setValidators([Validators.requiredTrue]);
@@ -291,7 +297,7 @@ export class PatientRegisterComponent implements OnInit {
           this.clinicName.set(response.clinic_name);
         } else {
           this.errorMessage.set(
-            'El enlace de invitacion ha expirado o no es valido'
+            'El enlace de invitacion ha expirado o no es valido',
           );
         }
         this.isLoading.set(false);
@@ -314,7 +320,10 @@ export class PatientRegisterComponent implements OnInit {
 
     if (isMinorValue) {
       // Progenitor 1 es obligatorio para menores
-      progenitor1FullName?.setValidators([Validators.required, Validators.minLength(2)]);
+      progenitor1FullName?.setValidators([
+        Validators.required,
+        Validators.minLength(2),
+      ]);
       progenitor1Dni?.setValidators([Validators.required, dniValidator()]);
       progenitor1Phone?.setValidators([Validators.required, phoneValidator()]);
     } else {
@@ -347,7 +356,10 @@ export class PatientRegisterComponent implements OnInit {
 
     if (hasAnyValue) {
       // Si algún campo tiene valor, todos son obligatorios
-      progenitor2FullName?.setValidators([Validators.required, Validators.minLength(2)]);
+      progenitor2FullName?.setValidators([
+        Validators.required,
+        Validators.minLength(2),
+      ]);
       progenitor2Dni?.setValidators([Validators.required, dniValidator()]);
       progenitor2Phone?.setValidators([Validators.required, phoneValidator()]);
     } else {
@@ -455,7 +467,10 @@ export class PatientRegisterComponent implements OnInit {
   /**
    * Obtiene la posición del mouse/touch relativa al canvas
    */
-  private getMousePos(event: MouseEvent | TouchEvent, type: string): { x: number; y: number } {
+  private getMousePos(
+    event: MouseEvent | TouchEvent,
+    type: string,
+  ): { x: number; y: number } {
     const canvas = this.getCanvasElement(type);
     if (!canvas) return { x: 0, y: 0 };
 
@@ -464,13 +479,13 @@ export class PatientRegisterComponent implements OnInit {
     if (event instanceof MouseEvent) {
       return {
         x: event.clientX - rect.left,
-        y: event.clientY - rect.top
+        y: event.clientY - rect.top,
       };
     } else {
       const touch = event.touches[0];
       return {
         x: touch.clientX - rect.left,
-        y: touch.clientY - rect.top
+        y: touch.clientY - rect.top,
       };
     }
   }
@@ -522,7 +537,9 @@ export class PatientRegisterComponent implements OnInit {
     this.signatureError.set('');
 
     if (!this.signatures.has('patient')) {
-      this.signatureError.set('Por favor, firme el documento antes de continuar');
+      this.signatureError.set(
+        'Por favor, firme el documento antes de continuar',
+      );
       return false;
     }
 
@@ -566,16 +583,30 @@ export class PatientRegisterComponent implements OnInit {
     // Clean progenitor data if minor
     if (this.isMinor()) {
       if (formData.progenitor1_phone) {
-        formData.progenitor1_phone = formData.progenitor1_phone.toString().replace(/\s+/g, '').trim();
+        formData.progenitor1_phone = formData.progenitor1_phone
+          .toString()
+          .replace(/\s+/g, '')
+          .trim();
       }
       if (formData.progenitor1_dni) {
-        formData.progenitor1_dni = formData.progenitor1_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
+        formData.progenitor1_dni = formData.progenitor1_dni
+          .toString()
+          .replace(/\s+/g, '')
+          .trim()
+          .toUpperCase();
       }
       if (formData.progenitor2_phone) {
-        formData.progenitor2_phone = formData.progenitor2_phone.toString().replace(/\s+/g, '').trim();
+        formData.progenitor2_phone = formData.progenitor2_phone
+          .toString()
+          .replace(/\s+/g, '')
+          .trim();
       }
       if (formData.progenitor2_dni) {
-        formData.progenitor2_dni = formData.progenitor2_dni.toString().replace(/\s+/g, '').trim().toUpperCase();
+        formData.progenitor2_dni = formData.progenitor2_dni
+          .toString()
+          .replace(/\s+/g, '')
+          .trim()
+          .toUpperCase();
       }
     } else {
       // Remove progenitor fields if not minor
@@ -589,82 +620,96 @@ export class PatientRegisterComponent implements OnInit {
 
     // Paso 1: Registrar paciente
     // Paso 2: Generar y subir PDF automáticamente
-    this.registerService.registerPatient(this.token, formData).pipe(
-      switchMap((response) => {
-        // El backend devuelve: { success, message, data: { patient: { id, ... } } }
-        const patientId = response.data?.patient?.id;
+    this.registerService
+      .registerPatient(this.token, formData)
+      .pipe(
+        switchMap((response) => {
+          // El backend devuelve: { success, message, data: { patient: { id, ... } } }
+          const patientId = response.data?.patient?.id;
 
-        if (!response.success || !patientId) {
-          console.error('Error al crear paciente:', response);
-          throw new Error('Error al crear el paciente');
-        }
+          if (!response.success || !patientId) {
+            console.error('Error al crear paciente:', response);
+            throw new Error('Error al crear el paciente');
+          }
 
-        // Generar PDF y subirlo
-        return from(this.documentPreview.getPdfBlob()).pipe(
-          catchError((pdfError) => {
-            console.error('Error generando PDF:', pdfError);
-            // Si falla la generación del PDF, continuar sin documento
-            return of({ blob: null, fileName: null });
-          }),
-          switchMap((pdfResult: any) => {
-            if (!pdfResult.blob) {
-              console.warn('No se pudo generar el PDF, continuando sin documento');
-              return of({ success: false, message: 'Error generando PDF' });
+          // Generar PDF y subirlo
+          return from(this.documentPreview.getPdfBlob()).pipe(
+            catchError((pdfError) => {
+              console.error('Error generando PDF:', pdfError);
+              // Si falla la generación del PDF, continuar sin documento
+              return of({ blob: null, fileName: null });
+            }),
+            switchMap((pdfResult: any) => {
+              if (!pdfResult.blob) {
+                console.warn(
+                  'No se pudo generar el PDF, continuando sin documento',
+                );
+                return of({ success: false, message: 'Error generando PDF' });
+              }
+              const { blob, fileName } = pdfResult;
+              return this.registerService
+                .uploadDocument(
+                  patientId,
+                  blob,
+                  fileName,
+                  'Documento de consentimiento informado',
+                )
+                .pipe(
+                  // Si falla la subida del documento, no bloqueamos el registro
+                  catchError((uploadError) => {
+                    console.warn(
+                      'Error subiendo documento (el paciente fue creado):',
+                      uploadError,
+                    );
+                    return of({
+                      success: false,
+                      message: 'Error al subir documento',
+                      documentError: true,
+                    });
+                  }),
+                );
+            }),
+            // Pasar información del paciente junto con resultado del upload
+            switchMap((uploadResult: any) => {
+              return of({
+                patientCreated: true,
+                documentUploaded: uploadResult.success,
+                uploadResult,
+              });
+            }),
+          );
+        }),
+        catchError((error) => {
+          // Error al crear el paciente
+          return of({ patientCreated: false, error });
+        }),
+      )
+      .subscribe({
+        next: (result: any) => {
+          this.isSubmitting.set(false);
+
+          if (result.patientCreated) {
+            if (result.documentUploaded) {
+              this.successMessage.set('Registro completado exitosamente.');
+            } else {
+              // Paciente creado pero documento no subido
+              this.successMessage.set('Registro completado exitosamente.');
             }
-            const { blob, fileName } = pdfResult;
-            return this.registerService.uploadDocument(
-              patientId,
-              blob,
-              fileName,
-              'Documento de consentimiento informado'
-            ).pipe(
-              // Si falla la subida del documento, no bloqueamos el registro
-              catchError((uploadError) => {
-                console.warn('Error subiendo documento (el paciente fue creado):', uploadError);
-                return of({ success: false, message: 'Error al subir documento', documentError: true });
-              })
-            );
-          }),
-          // Pasar información del paciente junto con resultado del upload
-          switchMap((uploadResult: any) => {
-            return of({ patientCreated: true, documentUploaded: uploadResult.success, uploadResult });
-          })
-        );
-      }),
-      catchError((error) => {
-        // Error al crear el paciente
-        return of({ patientCreated: false, error });
-      })
-    ).subscribe({
-      next: (result: any) => {
-        this.isSubmitting.set(false);
-
-        if (result.patientCreated) {
-          if (result.documentUploaded) {
-            this.successMessage.set(
-              'Registro completado exitosamente. La psicóloga se pondrá en contacto contigo pronto.'
-            );
+            this.isValidToken.set(false);
           } else {
-            // Paciente creado pero documento no subido
-            this.successMessage.set(
-              'Registro completado exitosamente. Nota: El documento de consentimiento no pudo guardarse automáticamente, pero tu registro está completo. La psicóloga se pondrá en contacto contigo pronto.'
+            this.errorMessage.set(
+              'Error al completar el registro. Por favor, intenta nuevamente.',
             );
           }
-          this.isValidToken.set(false);
-        } else {
+        },
+        error: (error) => {
+          console.error('Error en el proceso de registro:', error);
           this.errorMessage.set(
-            'Error al completar el registro. Por favor, intenta nuevamente.'
+            'Error al completar el registro. Por favor, intenta nuevamente.',
           );
-        }
-      },
-      error: (error) => {
-        console.error('Error en el proceso de registro:', error);
-        this.errorMessage.set(
-          'Error al completar el registro. Por favor, intenta nuevamente.'
-        );
-        this.isSubmitting.set(false);
-      },
-    });
+          this.isSubmitting.set(false);
+        },
+      });
   }
 
   getFieldError(fieldName: string): string | null {

@@ -234,10 +234,11 @@ export class CalendarComponent implements OnInit {
   }
 
   onSessionDataCreated(sessionData: SessionData): void {
-    this.showNewSessionDialog.set(false);
-    this.prefilledSessionData = null;
+    // NO cerrar el modal ni limpiar datos aquí
+    // El modal de sesión permanece visible (detrás del modal de WhatsApp si aplica)
+    // Se cierra por onCloseNewSessionDialog, onConfirmWhatsApp o onCancelWhatsApp
 
-    // Wait a moment for the API to process, then reload sessions
+    // Recargar sesiones para reflejar los cambios
     setTimeout(() => {
       this.calendarService.reloadSessions();
     }, 100);
@@ -747,7 +748,8 @@ export class CalendarComponent implements OnInit {
 
   /**
    * Handles WhatsApp request from session form
-   * Shows the confirmation modal after a small delay to allow smooth transition
+   * Shows WhatsApp confirmation modal ON TOP of the session dialog
+   * Both modals will be closed together when user confirms or cancels
    */
   onWhatsAppRequest(data: {
     patientName: string;
@@ -757,11 +759,10 @@ export class CalendarComponent implements OnInit {
     clinicName: string;
     isEdit: boolean;
   }): void {
+    // Mostrar el modal de WhatsApp encima del de sesión (z-[9999] > z-50)
+    // El modal de sesión permanece abierto debajo
     this.whatsAppData.set(data);
-    // Small delay to allow the session dialog to close first and prevent backdrop flicker
-    setTimeout(() => {
-      this.showWhatsAppConfirmation.set(true);
-    }, 200);
+    this.showWhatsAppConfirmation.set(true);
   }
 
   /**
@@ -780,22 +781,30 @@ export class CalendarComponent implements OnInit {
 
   /**
    * Confirms sending WhatsApp message
+   * Closes both WhatsApp modal and session dialog
    */
   onConfirmWhatsApp(): void {
     const data = this.whatsAppData();
     if (data) {
       this.sendSessionWhatsApp(data);
     }
+    // Cerrar ambos modales
     this.showWhatsAppConfirmation.set(false);
     this.whatsAppData.set(null);
+    this.showNewSessionDialog.set(false);
+    this.prefilledSessionData = null;
   }
 
   /**
    * Cancels WhatsApp message
+   * Closes both WhatsApp modal and session dialog
    */
   onCancelWhatsApp(): void {
+    // Cerrar ambos modales
     this.showWhatsAppConfirmation.set(false);
     this.whatsAppData.set(null);
+    this.showNewSessionDialog.set(false);
+    this.prefilledSessionData = null;
   }
 
   /**

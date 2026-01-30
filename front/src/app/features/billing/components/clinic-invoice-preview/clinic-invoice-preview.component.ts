@@ -96,16 +96,40 @@ export class ClinicInvoicePreviewComponent {
   onContainerClick(event: Event) {
     event.stopPropagation();
   }
- // Función para calcular la retención
-getRetentionAmount(): number {
-  if (this.clinicInvoiceData?.total && this.userData?.irpf) {
-    const price = this.clinicInvoiceData.total;
-    const irpfRate = +this.userData.irpf / 100;
-
-    const retention = price * irpfRate;
-
-    return retention;
+  /**
+   * Calcula el importe del IVA
+   */
+  getIvaAmount(): number {
+    if (this.clinicInvoiceData?.total && this.userData?.iva) {
+      const baseImponible = this.clinicInvoiceData.total;
+      const ivaRate = +this.userData.iva / 100;
+      return baseImponible * ivaRate;
+    }
+    return 0;
   }
-  return 0; // Devuelve 0 si faltan datos
-}
+
+  /**
+   * Calcula la retención IRPF
+   */
+  getRetentionAmount(): number {
+    if (this.clinicInvoiceData?.total && this.userData?.irpf) {
+      const baseImponible = this.clinicInvoiceData.total;
+      const irpfRate = +this.userData.irpf / 100;
+      return baseImponible * irpfRate;
+    }
+    return 0;
+  }
+
+  /**
+   * Calcula el total a ingresar (Base + IVA - Retención)
+   */
+  getTotalToReceive(): number {
+    if (this.clinicInvoiceData?.total) {
+      const baseImponible = this.clinicInvoiceData.total;
+      const iva = this.getIvaAmount();
+      const retencion = this.getRetentionAmount();
+      return baseImponible + iva - retencion;
+    }
+    return 0;
+  }
 }
