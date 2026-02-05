@@ -5,38 +5,31 @@ import {
   computed,
   ChangeDetectionStrategy,
   OnInit,
-  effect,
+  HostListener,
 } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { FormsModule } from '@angular/forms';
+import { FormControl, ReactiveFormsModule } from '@angular/forms';
 import { Router } from '@angular/router';
-import { Patient, PatientFilters } from '../../shared/models/patient.model';
+import { Patient, PatientFiltersExtended } from '../../shared/models/patient.model';
 import { PatientsService } from './services/patients.service';
 import { ConfirmationModalComponent } from '../../shared/components/confirmation-modal/confirmation-modal.component';
-import { SectionHeaderComponent } from '../../shared/components/section-header/section-header.component';
-import { PatientsListComponent } from './components/patients-list/patients-list.component';
-import { PaginationComponent } from '../../shared/components/pagination/pagination.component';
 import { PatientFormComponent } from './components/patient-form/patient-form.component';
-import { PatientFiltersModalComponent } from './components/patient-filters-modal/patient-filters-modal.component';
 import { Clinic } from '../clinics/models/clinic.model';
 import { ClinicsService } from '../clinics/services/clinics.service';
-
-type TabType = 'active' | 'inactive';
+import { ClinicSelectorComponent } from '../../shared/components/clinic-selector/clinic-selector.component';
 
 @Component({
   selector: 'app-patient',
   standalone: true,
   templateUrl: './patient.component.html',
+  styleUrls: ['./patient.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
   imports: [
     CommonModule,
-    FormsModule,
+    ReactiveFormsModule,
     ConfirmationModalComponent,
-    SectionHeaderComponent,
-    PatientsListComponent,
-    PaginationComponent,
     PatientFormComponent,
-    PatientFiltersModalComponent,
+    ClinicSelectorComponent,
   ],
 })
 export class PatientComponent implements OnInit {
@@ -46,66 +39,85 @@ export class PatientComponent implements OnInit {
   private router = inject(Router);
 
   // State signals
+  patients = signal<Patient[]>([]);
+  clinics = signal<Clinic[]>([]);
+  isLoading = signal(false);
+  totalPatients = signal(0);
+
+  // Pagination signals
+  currentPage = signal(1);
+  pageSize = signal(5);
+
+  // Filter control (single clinic selection)
+  clinicControl = new FormControl<number | null>(null);
+
+  // Filters state
+  filters = signal<PatientFiltersExtended>({
+    patientStatus: 'active',
+    clinicIds: [],
+    first_name: null,
+    last_name: null,
+    dni: null,
+    email: null,
+    gender: null,
+    treatmentStatus: null,
+  });
+
+  // Modal states
   showCreateForm = signal(false);
   editingPatient = signal<Patient | null>(null);
   deletingPatient = signal<Patient | null>(null);
   restoringPatient = signal<Patient | null>(null);
-  activeTab = signal<TabType>('active');
 
-  // Filters state
-  showFiltersModal = signal(false);
-  currentFilters = signal<PatientFilters>({});
+  // Actions dropdown state
+  openDropdownId = signal<number | null>(null);
 
-  // Clinics shared state
-  clinics = signal<Clinic[]>([]);
-
-  // Separate state for each tab
-  activePatients = signal<Patient[]>([]);
-  deletedPatients = signal<Patient[]>([]);
-
-  // Loading is handled globally by LoadingInterceptor - no local loading needed
-
-  // Separate pagination states
-  activePagination = signal<any>(null);
-  deletedPagination = signal<any>(null);
-
-  // Separate counts
-  activePatientsCount = signal(0);
-  deletedPatientsCount = signal(0);
-
-  // Computed signals based on active tab
-  patientsList = computed(() => {
-    return this.activeTab() === 'active'
-      ? this.activePatients()
-      : this.deletedPatients();
-  });
-
-  paginationData = computed(() => {
-    return this.activeTab() === 'active'
-      ? this.activePagination()
-      : this.deletedPagination();
-  });
-
+  // Computed
   showForm = computed(
     () => this.showCreateForm() || this.editingPatient() !== null
   );
 
-  constructor() {
-    // No effect needed - load data explicitly
+  totalPages = computed(() => {
+    const total = this.totalPatients();
+    const size = this.pageSize();
+    return Math.ceil(total / size) || 1;
+  });
+
+  // Gender options
+  genderOptions = [
+    { value: 'M', label: 'Masculino' },
+    { value: 'F', label: 'Femenino' },
+    { value: 'O', label: 'Otro' },
+  ];
+
+  // Treatment status options
+  treatmentStatusOptions = [
+    { value: 'en curso', label: 'En curso' },
+    { value: 'fin del tratamiento', label: 'Finalizado' },
+    { value: 'en pausa', label: 'En pausa' },
+    { value: 'abandono', label: 'Abandono' },
+    { value: 'derivación', label: 'Derivación' },
+  ];
+
+  @HostListener('document:click', ['$event'])
+  onDocumentClick(event: MouseEvent): void {
+    if (this.openDropdownId() === null) return;
+
+    const target = event.target as HTMLElement;
+    // Verificar si el clic fue dentro del dropdown o en el botón de acciones
+    if (target.closest('.dropdown-menu') || target.closest('.actions-toggle')) {
+      return;
+    }
+
+    this.closeActionsDropdown();
   }
 
-  ngOnInit() {
-    // Load clinics once for all child components
+  ngOnInit(): void {
     this.loadClinics();
-
-    // Load data for both tabs to show correct counts
-    this.loadActivePatients(1, 12);
-    this.loadDeletedPatients(1, 12);
+    this.loadPatients();
+    this.setupClinicControlSubscription();
   }
 
-  /**
-   * Load clinics once to share with child components
-   */
   private loadClinics(): void {
     this.clinicsService.loadActiveClinics(1, 1000).subscribe({
       next: (response) => {
@@ -118,92 +130,109 @@ export class PatientComponent implements OnInit {
     });
   }
 
-  /**
-   * Cargar pacientes activos
-   */
-  private loadActivePatients(page: number, perPage: number): void {
-    const filters = this.currentFilters();
+  private setupClinicControlSubscription(): void {
+    this.clinicControl.valueChanges.subscribe((value) => {
+      // Single clinic selection - convert to array for the filter
+      this.filters.update((f) => ({ ...f, clinicIds: value ? [value] : [] }));
+    });
+  }
+
+  onClinicFilterApplied(): void {
+    // No auto-apply - user must click "Buscar" button
+  }
+
+  private loadPatients(): void {
+    this.isLoading.set(true);
+    const currentFilters = this.filters();
+    const page = this.currentPage();
+    const size = this.pageSize();
+
     this.patientsService
-      .loadActivePatientsPaginated(page, perPage, filters)
+      .loadPatientsWithExtendedFilters(page, size, currentFilters)
       .subscribe({
         next: (response) => {
-          this.activePatients.set(response.data);
-          this.activePagination.set(response.pagination);
-          this.activePatientsCount.set(response.pagination?.totalRecords || 0);
+          this.patients.set(response.data);
+          this.totalPatients.set(response.pagination?.totalRecords || 0);
+          this.isLoading.set(false);
         },
-        error: () => {
-          // Error handling is managed by error interceptor
+        error: (error) => {
+          console.error('Error loading patients:', error);
+          this.isLoading.set(false);
         },
       });
   }
 
-  /**
-   * Cargar pacientes eliminados
-   */
-  private loadDeletedPatients(page: number, perPage: number): void {
-    const filters = this.currentFilters();
-    this.patientsService
-      .loadDeletedPatientsPaginated(page, perPage, filters)
-      .subscribe({
-        next: (response) => {
-          this.deletedPatients.set(response.data);
-          this.deletedPagination.set(response.pagination);
-          this.deletedPatientsCount.set(response.pagination?.totalRecords || 0);
-        },
-        error: () => {
-          // Error handling is managed by error interceptor
-        },
-      });
+  onFilterChange(
+    filterName: keyof PatientFiltersExtended,
+    value: any
+  ): void {
+    // Handle empty string as null for text fields
+    const processedValue =
+      typeof value === 'string' && value.trim() === '' ? null : value;
+
+    this.filters.update((f) => ({ ...f, [filterName]: processedValue }));
+    // No auto-apply - user must click "Buscar" button
   }
 
-  /**
-   * Abrir modal para crear nuevo paciente
-   */
+  applyFilters(): void {
+    this.currentPage.set(1);
+    this.loadPatients();
+  }
+
+  clearFilters(): void {
+    this.filters.set({
+      patientStatus: 'active',
+      clinicIds: [],
+      first_name: null,
+      last_name: null,
+      dni: null,
+      email: null,
+      gender: null,
+      treatmentStatus: null,
+    });
+    this.clinicControl.setValue(null);
+    this.currentPage.set(1);
+    this.loadPatients();
+  }
+
+  // Pagination methods
+  goToPage(page: number): void {
+    if (page >= 1 && page <= this.totalPages()) {
+      this.currentPage.set(page);
+      this.loadPatients();
+    }
+  }
+
+  // Form methods
   openCreateForm(): void {
     this.editingPatient.set(null);
     this.showCreateForm.set(true);
   }
 
-  /**
-   * Abrir modal para editar paciente
-   */
   openEditForm(patient: Patient): void {
+    this.closeActionsDropdown();
     this.showCreateForm.set(false);
     this.editingPatient.set(patient);
   }
 
-  /**
-   * Cerrar modal de formulario
-   */
   closeForm(): void {
     this.showCreateForm.set(false);
     this.editingPatient.set(null);
   }
 
-  /**
-   * Manejar guardado del formulario (crear/editar)
-   */
   handleSave(patientData: Patient): void {
     const editing = this.editingPatient();
 
     if (editing) {
-      // Editar paciente existente
       this.patientsService.update(editing.id!, patientData).subscribe({
         next: () => {
-          // Reload both tabs to update counts and data
-          this.reloadBothTabs();
+          this.loadPatients();
         },
       });
     } else {
-      // Crear nuevo paciente
       this.patientsService.create(patientData).subscribe({
         next: () => {
-          // Reload active patients (new patients go to active)
-          const activePag = this.activePagination();
-          this.loadActivePatients(
-            activePag?.currentPage || 1,
-            activePag?.recordsPerPage || 10
-          );
+          this.loadPatients();
         },
       });
     }
@@ -211,211 +240,105 @@ export class PatientComponent implements OnInit {
     this.closeForm();
   }
 
-  /**
-   * Abrir modal de confirmación de eliminación
-   */
+  // Delete methods
   openDeleteModal(patient: Patient): void {
+    this.closeActionsDropdown();
     this.deletingPatient.set(patient);
   }
 
-  /**
-   * Cerrar modal de eliminación
-   */
   closeDeleteModal(): void {
     this.deletingPatient.set(null);
   }
 
-  /**
-   * Eliminar paciente
-   */
   handleDeletePatient(): void {
     const deleting = this.deletingPatient();
     if (deleting) {
       this.patientsService.delete(deleting.id!).subscribe({
         next: () => {
-          // Reload both tabs to update counts
-          this.reloadBothTabs();
+          this.loadPatients();
         },
       });
       this.closeDeleteModal();
     }
   }
 
-  /**
-   * Abrir modal de confirmación de restauración
-   */
+  // Restore methods
   openRestoreModal(patient: Patient): void {
+    this.closeActionsDropdown();
     this.restoringPatient.set(patient);
   }
 
-  /**
-   * Cerrar modal de restauración
-   */
   closeRestoreModal(): void {
     this.restoringPatient.set(null);
   }
 
-  /**
-   * Restaurar paciente
-   */
   handleRestorePatient(): void {
     const restoring = this.restoringPatient();
     if (restoring) {
       this.patientsService.restorePatient(restoring.id!).then((success) => {
         if (success) {
-          // Reload both tabs to update counts
-          this.reloadBothTabs();
+          this.loadPatients();
         }
         this.closeRestoreModal();
       });
     }
   }
 
-  /**
-   * Recargar datos de la pestaña actual
-   */
-  private reloadCurrentTab(): void {
-    const tab = this.activeTab();
-    if (tab === 'active') {
-      const activePag = this.activePagination();
-      this.loadActivePatients(
-        activePag?.currentPage || 1,
-        activePag?.recordsPerPage || 10
-      );
-    } else {
-      const deletedPag = this.deletedPagination();
-      this.loadDeletedPatients(
-        deletedPag?.currentPage || 1,
-        deletedPag?.recordsPerPage || 10
-      );
-    }
-  }
-
-  /**
-   * Recargar datos de ambas pestañas para actualizar contadores
-   */
-  private reloadBothTabs(): void {
-    const activePag = this.activePagination();
-    const deletedPag = this.deletedPagination();
-
-    this.loadActivePatients(
-      activePag?.currentPage || 1,
-      activePag?.recordsPerPage || 10
-    );
-    this.loadDeletedPatients(
-      deletedPag?.currentPage || 1,
-      deletedPag?.recordsPerPage || 10
-    );
-  }
-
-  /**
-   * Cambiar pestaña activa
-   */
-  setActiveTab(tab: TabType): void {
-    this.activeTab.set(tab);
-    // No need to load data - both tabs are loaded on init
-  }
-
-  /**
-   * Obtener clases CSS para las pestañas
-   */
-  getTabClasses(tab: TabType): string {
-    const baseClasses =
-      "data-[state=active]:bg-background dark:data-[state=active]:text-foreground focus-visible:border-ring focus-visible:ring-ring/50 focus-visible:outline-ring dark:data-[state=active]:border-input dark:data-[state=active]:bg-input/30 text-foreground dark:text-muted-foreground h-[calc(100%-1px)] flex-1 justify-center rounded-md border border-transparent px-2 py-1 whitespace-nowrap transition-[color,box-shadow] focus-visible:ring-[3px] focus-visible:outline-1 disabled:pointer-events-none disabled:opacity-50 data-[state=active]:shadow-sm [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 flex items-center gap-2 text-sm font-medium";
-
-    return this.activeTab() === tab
-      ? `${baseClasses} bg-background text-foreground shadow-sm`
-      : baseClasses;
-  }
-
-  /**
-   * Manejar cambio de página
-   */
-  onPageChange(page: number): void {
-    const tab = this.activeTab();
-    const perPage = this.paginationData()?.recordsPerPage || 10;
-
-    if (tab === 'active') {
-      this.loadActivePatients(page, perPage);
-    } else {
-      this.loadDeletedPatients(page, perPage);
-    }
-  }
-
-  /**
-   * Manejar cambio de tamaño de página
-   */
-  onPageSizeChange(size: number): void {
-    const tab = this.activeTab();
-
-    if (tab === 'active') {
-      this.loadActivePatients(1, size);
-    } else {
-      this.loadDeletedPatients(1, size);
-    }
-  }
-
-  /**
-   * Navigate to patient detail
-   */
+  // Navigation
   navigateToDetail(patient: Patient): void {
+    this.closeActionsDropdown();
     this.router.navigate(['/patient', patient.id]);
   }
 
-  /**
-   * Track by function para ngFor
-   */
+  // Actions dropdown
+  toggleActionsDropdown(patientId: number, event: Event): void {
+    event.stopPropagation();
+    if (this.openDropdownId() === patientId) {
+      this.openDropdownId.set(null);
+    } else {
+      this.openDropdownId.set(patientId);
+    }
+  }
+
+  closeActionsDropdown(): void {
+    this.openDropdownId.set(null);
+  }
+
+  // Helper methods
+  getInitials(patient: Patient): string {
+    const first = patient.first_name?.charAt(0)?.toUpperCase() || '';
+    const last = patient.last_name?.charAt(0)?.toUpperCase() || '';
+    return `${first}${last}`;
+  }
+
+  formatDate(dateStr: string | null | undefined): string {
+    if (!dateStr) return '-';
+    const [year, month, day] = dateStr.split('-');
+    return `${day}/${month}/${year}`;
+  }
+
+  getStatusBadgeClasses(status: string): string {
+    const statusMap: Record<string, string> = {
+      'en curso': 'bg-green-50 text-green-600',
+      'fin del tratamiento': 'bg-blue-50 text-blue-600',
+      'en pausa': 'bg-yellow-50 text-yellow-600',
+      abandono: 'bg-red-50 text-red-600',
+      derivación: 'bg-purple-50 text-purple-600',
+    };
+    return statusMap[status] || 'bg-gray-50 text-gray-500';
+  }
+
+  getStatusLabel(status: string): string {
+    const option = this.treatmentStatusOptions.find((o) => o.value === status);
+    return option?.label || status;
+  }
+
+  getGenderLabel(gender: string): string {
+    const option = this.genderOptions.find((o) => o.value === gender);
+    return option?.label || gender;
+  }
+
   trackByPatientId(index: number, patient: Patient): number {
     return patient?.id || index;
-  }
-
-  /**
-   * Open filters modal
-   */
-  openFiltersModal(): void {
-    this.showFiltersModal.set(true);
-  }
-
-  /**
-   * Close filters modal
-   */
-  closeFiltersModal(): void {
-    this.showFiltersModal.set(false);
-  }
-
-  /**
-   * Apply filters and reload data
-   */
-  handleApplyFilters(filters: PatientFilters): void {
-    this.currentFilters.set(filters);
-    this.closeFiltersModal();
-
-    // Reload current tab with filters from page 1
-    this.reloadCurrentTabFromBeginning();
-  }
-
-  /**
-   * Clear all filters and reload data
-   */
-  handleClearFilters(): void {
-    this.currentFilters.set({});
-    this.closeFiltersModal();
-
-    // Reload current tab without filters from page 1
-    this.reloadCurrentTabFromBeginning();
-  }
-
-  /**
-   * Reload current tab from page 1 (used when filters change)
-   */
-  private reloadCurrentTabFromBeginning(): void {
-    const tab = this.activeTab();
-    const perPage = this.paginationData()?.recordsPerPage || 12;
-
-    if (tab === 'active') {
-      this.loadActivePatients(1, perPage);
-    } else {
-      this.loadDeletedPatients(1, perPage);
-    }
   }
 }

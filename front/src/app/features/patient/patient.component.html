@@ -1,97 +1,320 @@
-<!-- Main container following project standards -->
-<div class="p-4 sm:p-6 h-screen overflow-hidden">
-  <div class="w-full h-full flex flex-col max-h-full">
+<div class="min-h-screen p-6" style="background-color: rgb(248, 250, 252);">
 
-  <!-- Header section (fijo) -->
-  <app-section-header title="Gestión de Pacientes" subtitle="Administra los pacientes registrados en la plataforma"
-    buttonText="Nuevo Paciente" [showButton]="true" (onButtonClick)="openCreateForm()" [showFiltersButton]="true" (onFiltersClick)="openFiltersModal()">
-  </app-section-header>
+  <!-- HEADER -->
+  <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div>
+      <h1 class="text-3xl font-black font-montserrat" style="color: rgb(15, 23, 41);">
+        Gestión de Pacientes
+      </h1>
+      <p class="text-sm text-gray-600 mt-1">
+        Administra los pacientes registrados en la plataforma
+      </p>
+    </div>
+    <button (click)="openCreateForm()" style="background-color: #6aa591"
+      class="hover:opacity-90 w-full sm:w-auto inline-flex items-center justify-center px-4 py-2 text-white rounded-md transition-opacity font-medium">
+      <svg class="h-4 w-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+      </svg>
+      Nuevo Paciente
+    </button>
+  </div>
 
-  <!-- Sistema de pestañas -->
-  <div class="flex-1 overflow-hidden">
-    <div class="gap-2 h-full flex flex-col">
-      <!-- Tabs header -->
-      <div role="tablist"
-        class="bg-muted text-muted-foreground items-center justify-center rounded-lg p-[3px] grid w-full grid-cols-2 h-12 mt-6">
-        <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'active'"
-          [class]="getTabClasses('active')" (click)="setActiveTab('active')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-users h-4 w-4">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
-            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-          </svg>
-          Pacientes Activos
-          <span
-            class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap shrink-0 gap-1 ml-1 px-2 py-0.5 text-xs bg-green-50 text-green-700 border-green-200">
-            {{ activePatientsCount() }}
-          </span>
-        </button>
-        <button type="button" role="tab" [attr.aria-selected]="activeTab() === 'inactive'"
-          [class]="getTabClasses('inactive')" (click)="setActiveTab('inactive')">
-          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-user-x h-4 w-4">
-            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
-            <circle cx="9" cy="7" r="4"></circle>
-            <line x1="17" x2="22" y1="8" y2="13"></line>
-            <line x1="22" x2="17" y1="8" y2="13"></line>
-          </svg>
-          Pacientes Inactivos
-          <span
-            class="inline-flex items-center justify-center rounded-md border font-medium w-fit whitespace-nowrap shrink-0 gap-1 ml-1 px-2 py-0.5 text-xs bg-gray-50 text-gray-700 border-gray-200">
-            {{ deletedPatientsCount() }}
-          </span>
-        </button>
+  <!-- FILTROS CARD -->
+  <div class="card-elevated p-4 mb-6">
+    <div class="flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
+      <!-- Clínica -->
+      <div class="w-full md:w-[220px]">
+        <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
+          placeholder="Todas las clínicas" size="sm" [multiple]="false">
+        </app-clinic-selector>
       </div>
 
-      <!-- Tab content -->
-      <div class="flex-1 overflow-hidden mt-6">
-        @if (activeTab() === 'active') {
-        <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col relative">
-          <div class="flex-1 overflow-y-auto pb-20">
-            <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId"
-              (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)" (onViewDetail)="navigateToDetail($event)">
-            </app-patients-list>
-          </div>
+      <!-- Estado (Activos/Inactivos) -->
+      <select (change)="onFilterChange('patientStatus', $any($event.target).value)"
+        [value]="filters().patientStatus"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[180px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+        <option value="active">Activos</option>
+        <option value="inactive">Inactivos</option>
+      </select>
 
-          <!-- Paginación para pacientes activos -->
-          @if (paginationData()) {
-          <div class="absolute bottom-0 left-0 right-0">
-            <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
-              [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
-              [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
-              (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
-            </app-pagination>
-          </div>
-          }
-        </div>
+      <!-- Género -->
+      <select (change)="onFilterChange('gender', $any($event.target).value || null)"
+        [value]="filters().gender || ''"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[160px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+        <option value="">Género</option>
+        @for (option of genderOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
         }
+      </select>
 
-        @if (activeTab() === 'inactive') {
-        <div role="tabpanel" class="flex-1 outline-none h-full flex flex-col relative">
-          <div class="flex-1 overflow-y-auto pb-20">
-            <app-patients-list [patients]="patientsList()" [trackByFn]="trackByPatientId" [isDeletedView]="true"
-              (onEdit)="openEditForm($event)" (onDelete)="openDeleteModal($event)"
-              (onRestore)="openRestoreModal($event)" (onViewDetail)="navigateToDetail($event)">
-            </app-patients-list>
-          </div>
-
-          <!-- Paginación para pacientes inactivos -->
-          @if (paginationData()) {
-          <div class="absolute bottom-0 left-0 right-0">
-            <app-pagination [currentPage]="paginationData()!.currentPage" [totalPages]="paginationData()!.totalPages"
-              [totalRecords]="paginationData()!.totalRecords" [recordsPerPage]="paginationData()!.recordsPerPage"
-              [hasNextPage]="paginationData()!.hasNextPage" [hasPrevPage]="paginationData()!.hasPrevPage"
-              (onPageChange)="onPageChange($event)" (onPageSizeChange)="onPageSizeChange($event)">
-            </app-pagination>
-          </div>
-          }
-        </div>
+      <!-- Estado del tratamiento -->
+      <select (change)="onFilterChange('treatmentStatus', $any($event.target).value || null)"
+        [value]="filters().treatmentStatus || ''"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[180px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+        <option value="">Tratamiento</option>
+        @for (option of treatmentStatusOptions; track option.value) {
+          <option [value]="option.value">{{ option.label }}</option>
         }
+      </select>
+
+      <!-- Búsqueda por nombre -->
+      <input type="text" placeholder="Nombre..."
+        [value]="filters().first_name || ''"
+        (input)="onFilterChange('first_name', $any($event.target).value)"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:flex-1 md:min-w-[180px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+
+      <!-- Búsqueda por DNI -->
+      <input type="text" placeholder="DNI..."
+        [value]="filters().dni || ''"
+        (input)="onFilterChange('dni', $any($event.target).value)"
+        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[150px]"
+        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+
+      <!-- Botones -->
+      <div class="flex gap-2">
+        <button (click)="applyFilters()"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap gap-2 text-white transition-colors hover:opacity-90"
+          style="background-color: #6aa591; border-radius: 0.5rem;">
+          <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+              d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path>
+          </svg>
+          Buscar
+        </button>
+
+        <button (click)="clearFilters()"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap border transition-colors bg-white hover:bg-gray-50 text-gray-700"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.5rem;">
+          Limpiar
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- TABLA -->
+  <div class="card-elevated" style="overflow: visible;">
+    <div style="overflow: visible;">
+      <table class="w-full">
+        <thead style="background-color: rgba(225, 231, 239, 0.5);">
+          <tr>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Paciente</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">DNI</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Contacto</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Estado</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Fecha inicio</th>
+            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Acciones</th>
+          </tr>
+        </thead>
+        <tbody>
+          @if (isLoading()) {
+          <tr>
+            <td colspan="6" class="p-8 text-center">
+              <div class="flex items-center justify-center">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: rgb(60, 131, 246);"></div>
+              </div>
+            </td>
+          </tr>
+          } @else if (patients().length === 0) {
+          <tr>
+            <td colspan="6" class="p-8 text-center">
+              <p class="text-base" style="color: rgb(101, 117, 139);">
+                No hay pacientes que mostrar
+              </p>
+            </td>
+          </tr>
+          } @else {
+          @for (patient of patients(); track patient.id; let i = $index) {
+          <tr class="animate-fade-in cursor-pointer transition-colors hover:bg-slate-50"
+            [style.animation-delay.ms]="i * 30"
+            [style.position]="openDropdownId() === patient.id ? 'relative' : 'static'"
+            [style.z-index]="openDropdownId() === patient.id ? '100' : 'auto'"
+            style="border-bottom: 1px solid rgb(225, 231, 239);"
+            (click)="filters().patientStatus === 'active' && !patient.is_external ? navigateToDetail(patient) : null">
+
+            <!-- Paciente (avatar + nombre + menor badge + ocupación) -->
+            <td class="p-4">
+              <div class="flex items-center gap-3">
+                <!-- Avatar -->
+                <div class="w-10 h-10 rounded-full flex items-center justify-center border text-sm font-medium"
+                  style="background-color: hsl(217 91% 95%); color: hsl(217 91% 60%); border-color: hsl(214 32% 91%);">
+                  {{ getInitials(patient) }}
+                </div>
+
+                <!-- Nombre y ocupación -->
+                <div>
+                  <div class="flex items-center gap-2">
+                    <span class="font-medium" style="color: rgb(15, 23, 41);">
+                      {{ patient.first_name }} {{ patient.last_name }}
+                    </span>
+                    @if (patient.is_minor) {
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs"
+                      style="background-color: hsl(262 83% 95%); color: hsl(262 83% 58%);">
+                      <svg class="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                          d="M12 4.354a4 4 0 110 5.292M15 21H3v-1a6 6 0 0112 0v1zm0 0h6v-1a6 6 0 00-9-5.197M13 7a4 4 0 11-8 0 4 4 0 018 0z">
+                        </path>
+                      </svg>
+                      Menor
+                    </span>
+                    }
+                    @if (patient.is_external) {
+                    <span class="inline-flex items-center gap-1 px-1.5 py-0.5 rounded-full text-xs"
+                      style="background-color: hsl(38 92% 95%); color: hsl(38 92% 40%);">
+                      Externo
+                    </span>
+                    }
+                  </div>
+                  <p class="text-sm" style="color: hsl(215 16% 47%);">
+                    {{ patient.occupation || 'Sin ocupación' }}
+                  </p>
+                </div>
+              </div>
+            </td>
+
+            <!-- DNI -->
+            <td class="p-4">
+              <span class="font-mono text-sm" style="color: hsl(215 16% 47%);">
+                {{ patient.dni }}
+              </span>
+            </td>
+
+            <!-- Contacto (teléfono + email) -->
+            <td class="p-4">
+              <div class="flex flex-col gap-1">
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" style="color: hsl(215 16% 47%);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z">
+                    </path>
+                  </svg>
+                  <span class="text-sm" style="color: hsl(215 16% 47%);">
+                    {{ patient.phone }}
+                  </span>
+                </div>
+                <div class="flex items-center gap-1.5">
+                  <svg class="w-3.5 h-3.5" style="color: hsl(215 16% 47%);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                      d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z">
+                    </path>
+                  </svg>
+                  <span class="text-sm truncate max-w-[200px]" style="color: hsl(215 16% 47%);">
+                    {{ patient.email }}
+                  </span>
+                </div>
+              </div>
+            </td>
+
+            <!-- Estado (badge de tratamiento) -->
+            <td class="p-4">
+              <span [class]="getStatusBadgeClasses(patient.status)"
+                class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold">
+                {{ getStatusLabel(patient.status) }}
+              </span>
+            </td>
+
+            <!-- Fecha inicio -->
+            <td class="p-4">
+              <span class="text-sm" style="color: hsl(215 16% 47%);">
+                {{ formatDate(patient.treatment_start_date) }}
+              </span>
+            </td>
+
+            <!-- Acciones -->
+            <td class="p-4" (click)="$event.stopPropagation()">
+              <div class="relative">
+                <button type="button" (click)="toggleActionsDropdown(patient.id!, $event)"
+                  class="actions-toggle p-2 hover:bg-slate-100 rounded-md transition-colors">
+                  <svg class="w-5 h-5" style="color: hsl(215 16% 47%);" fill="currentColor" viewBox="0 0 20 20">
+                    <path d="M10 6a2 2 0 110-4 2 2 0 010 4zM10 12a2 2 0 110-4 2 2 0 010 4zM10 18a2 2 0 110-4 2 2 0 010 4z"/>
+                  </svg>
+                </button>
+
+                <!-- Dropdown Menu -->
+                @if (openDropdownId() === patient.id) {
+                <div class="dropdown-menu absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+                  style="z-index: 9999;">
+                  <div class="py-1" role="menu">
+                    @if (filters().patientStatus === 'active') {
+                      @if (!patient.is_external) {
+                      <button type="button" (click)="navigateToDetail(patient)"
+                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"></path>
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"></path>
+                        </svg>
+                        Ver ficha
+                      </button>
+                      }
+                      <button type="button" (click)="openEditForm(patient)"
+                        class="w-full text-left px-4 py-2 text-sm text-gray-700 hover:bg-gray-100 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z"></path>
+                        </svg>
+                        Editar
+                      </button>
+                      <button type="button" (click)="openDeleteModal(patient)"
+                        class="w-full text-left px-4 py-2 text-sm text-red-600 hover:bg-red-50 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"></path>
+                        </svg>
+                        Eliminar
+                      </button>
+                    } @else {
+                      <button type="button" (click)="openRestoreModal(patient)"
+                        class="w-full text-left px-4 py-2 text-sm text-green-600 hover:bg-green-50 flex items-center gap-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                        Restaurar
+                      </button>
+                    }
+                  </div>
+                </div>
+                }
+              </div>
+            </td>
+          </tr>
+          }
+          }
+        </tbody>
+      </table>
+    </div>
+
+    <!-- PAGINACIÓN -->
+    <div class="p-4 border-t flex items-center justify-between" style="border-color: rgb(225, 231, 239);">
+      <div class="text-sm" style="color: rgb(101, 117, 139);">
+        Mostrando {{ patients().length }} de {{ totalPatients() }} pacientes
+      </div>
+
+      <div class="flex gap-2">
+        <button (click)="goToPage(currentPage() - 1)" [disabled]="currentPage() === 1"
+          class="px-3 py-1 rounded-md border text-sm transition-opacity"
+          [class.opacity-50]="currentPage() === 1"
+          [class.cursor-not-allowed]="currentPage() === 1"
+          style="border-color: rgb(225, 231, 239);">
+          Anterior
+        </button>
+
+        <span class="px-3 py-1 text-sm" style="color: rgb(101, 117, 139);">
+          Página {{ currentPage() }} de {{ totalPages() }}
+        </span>
+
+        <button (click)="goToPage(currentPage() + 1)" [disabled]="currentPage() >= totalPages()"
+          class="px-3 py-1 rounded-md border text-sm transition-opacity"
+          [class.opacity-50]="currentPage() >= totalPages()"
+          [class.cursor-not-allowed]="currentPage() >= totalPages()"
+          style="border-color: rgb(225, 231, 239);">
+          Siguiente
+        </button>
       </div>
     </div>
   </div>
@@ -120,14 +343,3 @@
   confirmText="Restaurar" cancelText="Cancelar" confirmButtonType="primary" [isRestore]="true" (onConfirm)="handleRestorePatient()"
   (onCancel)="closeRestoreModal()">
 </app-confirmation-modal>
-
-<!-- Filters Modal -->
-<app-patient-filters-modal
-  [isOpen]="showFiltersModal()"
-  [currentFilters]="currentFilters()"
-  [showInactiveTab]="activeTab() === 'inactive'"
-  [clinics]="clinics()"
-  (onApplyFilters)="handleApplyFilters($event)"
-  (onClearFilters)="handleClearFilters()"
-  (onCancel)="closeFiltersModal()">
-</app-patient-filters-modal>

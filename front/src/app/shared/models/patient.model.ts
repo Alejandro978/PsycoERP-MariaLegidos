@@ -122,6 +122,24 @@ export interface PatientFilters {
     | 'derivación';
 }
 
+// Extended interface for inline filters (table view)
+export interface PatientFiltersExtended {
+  patientStatus: 'active' | 'inactive'; // Determines API endpoint
+  clinicIds: number[];
+  first_name: string | null;
+  last_name: string | null;
+  dni: string | null;
+  email: string | null;
+  gender: 'M' | 'F' | 'O' | null;
+  treatmentStatus:
+    | 'en curso'
+    | 'fin del tratamiento'
+    | 'en pausa'
+    | 'abandono'
+    | 'derivación'
+    | null;
+}
+
 // Create patient interface (without id and timestamps)
 export type CreatePatientRequest = Omit<
   Patient,

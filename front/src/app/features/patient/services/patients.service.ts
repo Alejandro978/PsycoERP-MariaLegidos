@@ -8,6 +8,7 @@ import {
 import {
   Patient,
   PatientFilters,
+  PatientFiltersExtended,
   CreatePatientRequest,
 } from '../../../shared/models/patient.model';
 import { PaginationResponse } from '../../../shared/models/pagination.interface';
@@ -556,6 +557,64 @@ export class PatientsService extends BaseCrudService<Patient> {
       error: () => {
         this.isLoading.set(false);
       },
+    });
+  }
+
+  /**
+   * Load patients with extended filters (unified method for table view)
+   * Handles both active and inactive patients based on patientStatus filter
+   */
+  loadPatientsWithExtendedFilters(
+    page: number,
+    perPage: number,
+    filters: PatientFiltersExtended
+  ): Observable<PaginationResponse<Patient>> {
+    let params = new HttpParams()
+      .set('page', page.toString())
+      .set('limit', perPage.toString());
+
+    // Add clinic IDs
+    if (filters.clinicIds && filters.clinicIds.length > 0) {
+      filters.clinicIds.forEach((id) => {
+        params = params.append('clinic_id', id.toString());
+      });
+    }
+
+    // Add text filters
+    if (filters.first_name?.trim()) {
+      params = params.set('first_name', filters.first_name.trim());
+    }
+
+    if (filters.last_name?.trim()) {
+      params = params.set('last_name', filters.last_name.trim());
+    }
+
+    if (filters.dni?.trim()) {
+      params = params.set('dni', filters.dni.trim());
+    }
+
+    if (filters.email?.trim()) {
+      params = params.set('email', filters.email.trim());
+    }
+
+    // Add enum filters
+    if (filters.gender) {
+      params = params.set('gender', filters.gender);
+    }
+
+    if (filters.treatmentStatus) {
+      params = params.set('status', filters.treatmentStatus);
+    }
+
+    // Choose endpoint based on patient status filter
+    const endpoint =
+      filters.patientStatus === 'active'
+        ? this.apiUrl
+        : `${this.apiUrl}/inactive`;
+
+    return this.http.get<PaginationResponse<Patient>>(endpoint, {
+      ...this.httpOptions,
+      params,
     });
   }
 }
