@@ -2064,23 +2064,61 @@ const definitions = {
               type: "integer",
               format: "int64",
               description: "ID de la clínica",
-              example: 1,
+              example: 70,
             },
             clinic_name: {
               type: "string",
               description: "Nombre de la clínica",
-              example: "Clínica Central",
+              example: "Colaboración Maite",
             },
-            sessions_count: {
+            billing_address: {
+              type: "string",
+              description: "Dirección de facturación de la clínica",
+              example: "Calle Principal 123, Madrid",
+              nullable: true,
+            },
+            cif: {
+              type: "string",
+              description: "CIF de la clínica",
+              example: "A12345678",
+              nullable: true,
+            },
+            total_sessions: {
               type: "integer",
-              description: "Número de sesiones pendientes de facturar",
-              example: 15,
+              description: "Número total de sesiones pendientes de facturar",
+              example: 1,
             },
-            total_net: {
+            total_net_clinic: {
               type: "number",
               format: "float",
-              description: "Total neto a facturar (precio * porcentaje de la clínica)",
-              example: 225.00,
+              description: "Total neto a facturar por la clínica (precio * porcentaje de la clínica)",
+              example: 7.5,
+            },
+            sessions_data: {
+              type: "array",
+              description: "Desglose de sesiones por precio unitario",
+              items: {
+                type: "object",
+                properties: {
+                  unit_price: {
+                    type: "number",
+                    format: "float",
+                    description: "Precio unitario neto por sesión",
+                    example: 7.5,
+                  },
+                  sessions_count: {
+                    type: "integer",
+                    description: "Número de sesiones con este precio unitario",
+                    example: 1,
+                  },
+                  total_net: {
+                    type: "number",
+                    format: "float",
+                    description: "Total neto para este grupo de sesiones",
+                    example: 7.5,
+                  },
+                },
+              },
             },
           },
         },

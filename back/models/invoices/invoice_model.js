@@ -436,6 +436,8 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
     `SELECT
        c.id as clinic_id,
        c.name as clinic_name,
+       c.billing_address,
+       c.cif,
        COUNT(s.id) as total_sessions,
        COALESCE(SUM(s.price * (c.percentage / 100)), 0) as total_net_clinic,
        JSON_ARRAYAGG(
@@ -467,7 +469,7 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
        GROUP BY clinic_id, price
      ) as sessions_by_price ON sessions_by_price.clinic_id = c.id AND sessions_by_price.price = s.price
      WHERE c.is_active = true AND c.is_billable = true
-     GROUP BY c.id, c.name
+     GROUP BY c.id, c.name, c.billing_address, c.cif
      ORDER BY clinic_name ASC`,
     [targetMonth, targetYear, targetMonth, targetYear]
   );
@@ -493,6 +495,8 @@ const getPendingInvoicesOfClinics = async (db, filters = {}) => {
     return {
       clinic_id: parseInt(row.clinic_id),
       clinic_name: row.clinic_name,
+      billing_address: row.billing_address,
+      cif: row.cif,
       total_sessions: parseInt(row.total_sessions),
       total_net_clinic: parseFloat(row.total_net_clinic),
       sessions_data: uniqueSessionsData
