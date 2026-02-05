@@ -69,7 +69,21 @@ const obtenerSesiones = async (req, res) => {
       }
     }
 
-    if (payment_method) filters.payment_method = payment_method;
+    // Parsear payment_method como array de strings
+    if (payment_method) {
+      // Si es array, mantener como está
+      if (Array.isArray(payment_method)) {
+        filters.payment_methods = payment_method.filter(method => method && method.length > 0);
+      } else {
+        // Si es un solo valor, convertir a array de 1 elemento
+        filters.payment_methods = [payment_method];
+      }
+
+      // Solo aplicar filtro si hay métodos válidos
+      if (!filters.payment_methods || filters.payment_methods.length === 0) {
+        delete filters.payment_methods;
+      }
+    }
 
     // Parámetros de paginación
     filters.page = pageNum;
@@ -557,7 +571,22 @@ const obtenerKPIsSesiones = async (req, res) => {
     }
 
     if (status) filters.status = status;
-    if (payment_method) filters.payment_method = payment_method;
+
+    // Parsear payment_method como array de strings
+    if (payment_method) {
+      // Si es array, mantener como está
+      if (Array.isArray(payment_method)) {
+        filters.payment_methods = payment_method.filter(method => method && method.length > 0);
+      } else {
+        // Si es un solo valor, convertir a array de 1 elemento
+        filters.payment_methods = [payment_method];
+      }
+
+      // Solo aplicar filtro si hay métodos válidos
+      if (!filters.payment_methods || filters.payment_methods.length === 0) {
+        delete filters.payment_methods;
+      }
+    }
 
     // Validación de rango de fechas no mayor a 3 años
     if (fecha_desde && fecha_hasta) {

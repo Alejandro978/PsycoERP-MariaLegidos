@@ -74,10 +74,13 @@ const sessionsPaths = {
           in: "query",
           required: false,
           schema: {
-            type: "string",
-            enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+            type: "array",
+            items: {
+              type: "string",
+              enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+            },
           },
-          description: "Método de pago",
+          description: "Método(s) de pago para filtrar. Puede ser uno o múltiples. En query params: ?payment_method=transferencia&payment_method=tarjeta",
         },
         {
           name: "page",
@@ -773,9 +776,12 @@ const sessionsPaths = {
           in: "query",
           required: false,
           schema: {
-            type: "integer",
+            type: "array",
+            items: {
+              type: "integer",
+            },
           },
-          description: "ID de la clínica para filtrar las sesiones.",
+          description: "ID(s) de la(s) clínica(s) para filtrar. Puede ser uno o múltiples IDs. En query params: ?clinic_id=71&clinic_id=69",
         },
         {
           name: "status",
@@ -792,10 +798,13 @@ const sessionsPaths = {
           in: "query",
           required: false,
           schema: {
-            type: "string",
-            enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+            type: "array",
+            items: {
+              type: "string",
+              enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+            },
           },
-          description: "Método de pago para filtrar las sesiones.",
+          description: "Método(s) de pago para filtrar. Puede ser uno o múltiples. En query params: ?payment_method=transferencia&payment_method=tarjeta",
         },
       ],
       responses: {

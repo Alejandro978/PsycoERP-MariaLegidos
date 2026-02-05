@@ -67,6 +67,13 @@ const getSessions = async (db, filters = {}) => {
     params.push(filters.payment_method);
   }
 
+  // Soporte para múltiples payment_methods
+  if (filters.payment_methods && filters.payment_methods.length > 0) {
+    const placeholders = filters.payment_methods.map(() => '?').join(',');
+    conditions.push(`s.payment_method IN (${placeholders})`);
+    params.push(...filters.payment_methods);
+  }
+
   // Lógica inteligente de fechas
   if (filters.session_date) {
     // Fecha específica
@@ -370,6 +377,13 @@ const getSessionsKPIs = async (db, filters = {}) => {
   if (filters.payment_method) {
     where += ' AND s.payment_method = ?';
     params.push(filters.payment_method);
+  }
+
+  // Soporte para múltiples payment_methods
+  if (filters.payment_methods && filters.payment_methods.length > 0) {
+    const placeholders = filters.payment_methods.map(() => '?').join(',');
+    where += ` AND s.payment_method IN (${placeholders})`;
+    params.push(...filters.payment_methods);
   }
 
   const query = `
