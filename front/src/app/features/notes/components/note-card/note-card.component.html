@@ -1,4 +1,4 @@
-<div class="group relative p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-200"
+<div class="group p-3 sm:p-4 hover:bg-gray-50 transition-colors duration-200"
   [class.opacity-60]="note.status === 'completed'">
   <div class="flex items-start gap-2 sm:gap-3">
     <!-- Checkbox -->
@@ -59,7 +59,8 @@
 
       <!-- Dropdown Menu -->
       @if (showMenu) {
-      <div class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5 z-10">
+      <div class="absolute right-0 mt-2 w-48 rounded-md shadow-lg bg-white ring-1 ring-black ring-opacity-5"
+        style="z-index: 9999;">
         <div class="py-1" role="menu">
           @if (note.status === 'pending') {
           <button type="button" (click)="handleComplete()"
@@ -95,5 +96,5 @@
 
 <!-- Click outside to close menu -->
 @if (showMenu) {
-<div class="fixed inset-0 z-0" (click)="closeMenu()"></div>
+<div class="fixed inset-0" style="z-index: 9998;" (click)="closeMenu()"></div>
 }

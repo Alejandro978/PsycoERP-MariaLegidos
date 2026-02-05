@@ -1,21 +1,15 @@
-<div class="min-h-screen bg-gray-50 p-4 sm:p-6 lg:p-8">
+<div class="min-h-screen p-6" style="background-color: rgb(248, 250, 252);">
   <!-- Header -->
   <div class="mb-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
     <div>
-      <h1 class="text-xl sm:text-2xl font-bold text-gray-900 flex items-center gap-2">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-sticky-note h-5 w-5 sm:h-6 sm:w-6 text-primary">
-          <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"></path>
-          <path d="M15 3v4a2 2 0 0 0 2 2h4"></path>
-        </svg>
+      <h1 class="text-3xl font-black font-montserrat" style="color: rgb(15, 23, 41);">
         Notas y Recordatorios
       </h1>
-      <p class="text-sm text-gray-500 mt-1">Gestiona tus notas y recordatorios</p>
     </div>
 
     <button type="button" (click)="openDialog()"
-      class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium text-white bg-primary rounded-lg hover:bg-primary/90 focus:outline-none focus:ring-2 focus:ring-primary/20 transition-all duration-200 w-full sm:w-auto">
+      class="inline-flex items-center justify-center gap-2 px-4 py-2 text-sm font-medium rounded-lg w-full sm:w-auto"
+      style="background-color: rgb(60, 131, 246); color: rgb(255, 255, 255); border-radius: 0.5rem; font-weight: 500; box-shadow: rgba(15, 23, 41, 0.1) 0px 4px 6px -1px;">
       <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
         class="lucide lucide-plus h-4 w-4">
@@ -108,110 +102,65 @@
   }
 
   <!-- Lista de Notas -->
-  <div class="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-    <div class="p-4 sm:p-6 border-b border-gray-200">
+  <div class="card-elevated overflow-hidden">
+    <div class="p-4 border-b" style="border-color: rgb(225, 231, 239);">
       <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-2">
         <div>
-          <h2 class="text-base sm:text-lg font-semibold text-gray-900">Mis Notas</h2>
-          <p class="text-xs sm:text-sm text-gray-500 mt-1">
+          <h2 class="text-base sm:text-lg font-semibold" style="color: rgb(15, 23, 41);">Mis Notas</h2>
+          <p class="text-xs sm:text-sm mt-1" style="color: rgb(101, 117, 139);">
             Lista de todas tus notas y recordatorios
           </p>
         </div>
-
-        <!-- Pagination Info -->
-        @if (notesService.pagination().total_records > 0) {
-        <div class="text-xs sm:text-sm text-gray-500 sm:text-right">
-          <span class="font-medium">{{ notesService.pagination().total_records }}</span> notas en total
-          @if (notesService.pagination().total_pages > 1) {
-          <span class="sm:block ml-2 sm:ml-0 sm:mt-1">
-            Página {{ notesService.pagination().current_page }} de {{ notesService.pagination().total_pages }}
-          </span>
-          }
-        </div>
-        }
       </div>
     </div>
 
     <!-- Loading State -->
     @if (notesService.isLoading()) {
-    <div class="flex items-center justify-center p-8 sm:p-12">
-      <div class="flex flex-col items-center gap-3">
-        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-        <p class="text-sm text-gray-500">Cargando notas...</p>
+    <div class="p-8 text-center">
+      <div class="flex items-center justify-center">
+        <div class="animate-spin rounded-full h-8 w-8 border-b-2" style="border-color: rgb(60, 131, 246);"></div>
       </div>
+    </div>
+    } @else if (notesService.notes().length === 0) {
+    <div class="p-8 text-center">
+      <p class="text-base" style="color: rgb(101, 117, 139);">
+        No hay notas que mostrar
+      </p>
     </div>
     } @else {
-    <div class="divide-y divide-gray-200">
-      @if (notesService.notes().length === 0) {
-      <div class="p-8 sm:p-12 text-center">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-sticky-note h-10 w-10 sm:h-12 sm:w-12 text-gray-400 mx-auto mb-4">
-          <path d="M16 3H5a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V8Z"></path>
-          <path d="M15 3v4a2 2 0 0 0 2 2h4"></path>
-        </svg>
-        <h3 class="text-sm font-medium text-gray-900">No hay notas</h3>
-        <p class="text-xs sm:text-sm text-gray-500 mt-1">Crea tu primera nota para comenzar</p>
-      </div>
-      } @else {
+    <div style="overflow: visible;">
       @for (note of notesService.notes(); track note.id) {
-      <app-note-card [note]="note" (onComplete)="handleCompleteNote($event)" (onDelete)="handleDeleteNote($event)">
-      </app-note-card>
-      }
+      <div style="border-bottom: 1px solid rgb(225, 231, 239);">
+        <app-note-card [note]="note" (onComplete)="handleCompleteNote($event)" (onDelete)="handleDeleteNote($event)">
+        </app-note-card>
+      </div>
       }
     </div>
 
-    <!-- Pagination Footer - Always visible when there are notes -->
-    @if (notesService.notes().length > 0) {
-    <div class="p-3 sm:p-4 border-t border-gray-200 bg-gray-50">
-      @if (notesService.pagination().total_pages > 1) {
-      <!-- Multi-page pagination -->
-      <div class="flex items-center justify-between gap-2">
-        <!-- Previous Button -->
-        <button type="button" (click)="prevPage()" [disabled]="!notesService.pagination().has_previous_page"
-          class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m15 18-6-6 6-6"></path>
-          </svg>
-          <span class="hidden sm:inline">Anterior</span>
-        </button>
-
-        <!-- Page Numbers - Hidden on mobile, show current/total instead -->
-        <div class="hidden sm:flex items-center gap-1">
-          @for (page of getPageNumbers(); track page) {
-          <button type="button" (click)="goToPage(page)"
-            [class]="page === notesService.pagination().current_page
-              ? 'px-3 py-1.5 text-sm font-medium text-white bg-primary rounded-lg'
-              : 'px-3 py-1.5 text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 transition-all duration-200'">
-            {{ page }}
-          </button>
-          }
-        </div>
-
-        <!-- Mobile: Show current page indicator -->
-        <div class="sm:hidden text-xs text-gray-600 font-medium">
-          {{ notesService.pagination().current_page }} / {{ notesService.pagination().total_pages }}
-        </div>
-
-        <!-- Next Button -->
-        <button type="button" (click)="nextPage()" [disabled]="!notesService.pagination().has_next_page"
-          class="inline-flex items-center gap-1 sm:gap-2 px-2 sm:px-4 py-2 text-xs sm:text-sm font-medium text-gray-700 bg-white border border-gray-300 rounded-lg hover:bg-gray-50 disabled:opacity-50 disabled:cursor-not-allowed transition-all duration-200">
-          <span class="hidden sm:inline">Siguiente</span>
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="m9 18 6-6-6-6"></path>
-          </svg>
-        </button>
-      </div>
-      } @else {
-      <!-- Single page info -->
-      <div class="text-center text-xs sm:text-sm text-gray-500">
+    <!-- Pagination Footer -->
+    <div class="p-4 border-t flex items-center justify-between" style="border-color: rgb(225, 231, 239);">
+      <div class="text-sm" style="color: rgb(101, 117, 139);">
         Mostrando {{ notesService.notes().length }} de {{ notesService.pagination().total_records }} notas
       </div>
-      }
+
+      <div class="flex gap-2">
+        <button type="button" (click)="prevPage()" [disabled]="!notesService.pagination().has_previous_page"
+          class="px-3 py-1 rounded-md border text-sm transition-opacity"
+          [class.opacity-50]="!notesService.pagination().has_previous_page"
+          [class.cursor-not-allowed]="!notesService.pagination().has_previous_page"
+          style="border-color: rgb(225, 231, 239);">
+          Anterior
+        </button>
+
+        <button type="button" (click)="nextPage()" [disabled]="!notesService.pagination().has_next_page"
+          class="px-3 py-1 rounded-md border text-sm transition-opacity"
+          [class.opacity-50]="!notesService.pagination().has_next_page"
+          [class.cursor-not-allowed]="!notesService.pagination().has_next_page"
+          style="border-color: rgb(225, 231, 239);">
+          Siguiente
+        </button>
+      </div>
     </div>
-    }
     }
   </div>
 </div>

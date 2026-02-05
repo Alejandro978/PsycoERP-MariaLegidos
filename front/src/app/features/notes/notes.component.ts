@@ -21,8 +21,8 @@ import { ToastService } from '../../core/services/toast.service';
     ConfirmationModalComponent
   ],
   templateUrl: './notes.component.html',
-  changeDetection: ChangeDetectionStrategy.OnPush,
-  styles: []
+  styleUrls: ['./notes.component.scss'],
+  changeDetection: ChangeDetectionStrategy.OnPush
 })
 export class NotesComponent implements OnInit {
   private toastService = inject(ToastService);
