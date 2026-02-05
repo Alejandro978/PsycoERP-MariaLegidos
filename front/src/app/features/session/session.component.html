@@ -58,58 +58,94 @@
 
       <div class="px-4">
         <div class="space-y-3">
-          <!-- Clinic selector row (separate to handle chips properly) -->
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-3">
-            <div>
-              <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
-                placeholder="Todas las clínicas" size="sm" [multiple]="true" (applied)="onClinicFilterApplied()">
-              </app-clinic-selector>
-            </div>
+          <!-- Row 1: Clínica -->
+          <div>
+            <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
+              placeholder="Todas las clínicas" size="sm" [multiple]="true" (applied)="onClinicFilterApplied()">
+            </app-clinic-selector>
           </div>
 
-          <!-- Other filters row -->
-          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3">
+          <!-- Row 2: Estado, Método de Pago, Fecha Desde, Fecha Hasta -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 items-start">
             <div>
-              <label class="text-xs font-medium block mb-1">Estado</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
               <select (change)="onFilterChange('status', $any($event.target).value || null)"
                 [value]="filters().status || ''"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
+                class="w-full h-[30px] rounded-lg border border-gray-300 bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 px-2 py-1.5 text-xs text-gray-900 appearance-none cursor-pointer">
                 <option value="">Todos los estados</option>
                 <option value="completada">Completada</option>
                 <option value="cancelada">Cancelada</option>
               </select>
             </div>
 
-            <div>
-              <label class="text-xs font-medium block mb-1">Método de Pago</label>
-              <select (change)="onFilterChange('paymentMethod', $any($event.target).value || null)"
-                [value]="filters().paymentMethod || ''"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
-                <option value="">Todos los métodos</option>
-                <option value="bizum">Bizum</option>
-                <option value="transferencia">Transferencia</option>
-                <option value="tarjeta">Tarjeta</option>
-                <option value="efectivo">Efectivo</option>
-                <option value="pendiente">Pendiente</option>
-              </select>
+            <div class="relative" #paymentDropdownContainer>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Método de Pago</label>
+              <button type="button" (click)="togglePaymentDropdown()"
+                class="flex w-full h-[30px] rounded-lg border border-gray-300 items-center justify-between bg-white hover:border-gray-400 focus-within:outline-none focus-within:ring-2 focus-within:ring-primary/20 cursor-pointer px-2 py-1.5 text-xs text-gray-900">
+                <span class="truncate" [class.text-gray-400]="filters().paymentMethods.length === 0">
+                  {{ getSelectedPaymentMethodsLabel() }}
+                </span>
+                <svg class="h-4 w-4 text-gray-400 flex-shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+                </svg>
+              </button>
+
+              @if (paymentDropdownOpen()) {
+              <!-- Overlay para cerrar al hacer clic fuera -->
+              <div class="fixed inset-0 z-40" (click)="applyPaymentMethodsFilter()"></div>
+              <div class="absolute z-50 mt-1 w-full bg-white border border-gray-300 rounded-md shadow-lg">
+                <div class="py-1">
+                  @for (option of paymentMethodOptions; track option.value) {
+                  <label class="flex items-center px-3 py-1.5 hover:bg-gray-100 cursor-pointer">
+                    <input type="checkbox"
+                      [checked]="isPaymentMethodSelected(option.value)"
+                      (change)="togglePaymentMethod(option.value)"
+                      class="h-3.5 w-3.5 rounded border-gray-300 text-cyan-600 focus:ring-cyan-500">
+                    <span class="ml-2 text-xs">{{ option.label }}</span>
+                  </label>
+                  }
+                </div>
+                <div class="border-t px-3 py-2 flex justify-end">
+                  <button type="button" (click)="applyPaymentMethodsFilter()"
+                    class="px-3 py-1 text-xs bg-cyan-600 text-white rounded hover:bg-cyan-700 transition-colors">
+                    Aplicar
+                  </button>
+                </div>
+              </div>
+              }
+
+              <!-- Chips de métodos de pago seleccionados -->
+              @if (getSelectedPaymentMethodsChips().length > 0) {
+              <div class="flex flex-wrap gap-1.5 mt-2">
+                @for (chip of getSelectedPaymentMethodsChips(); track chip.value) {
+                <span class="inline-flex items-center gap-1 px-2 py-1 bg-sky-50 border border-sky-200 rounded-md text-xs text-sky-700">
+                  {{ chip.label }}
+                  <button type="button" (click)="removePaymentMethod(chip.value)"
+                    class="ml-0.5 text-sky-500 hover:text-sky-700 font-bold leading-none">
+                    ×
+                  </button>
+                </span>
+                }
+              </div>
+              }
             </div>
 
             <div>
-              <label class="text-xs font-medium block mb-1">Fecha Desde</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Desde</label>
               <input type="date" [value]="filters().dateFrom"
                 (change)="onFilterChange('dateFrom', $any($event.target).value)"
                 [class.border-red-500]="dateFromError()"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
+                class="flex w-full h-[30px] rounded-lg border border-gray-300 items-center bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 px-2 py-1.5 text-xs text-gray-900">
               @if (dateFromError()) {
               <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
               }
             </div>
 
             <div>
-              <label class="text-xs font-medium block mb-1">Fecha Hasta</label>
+              <label class="block text-sm font-medium text-gray-700 mb-2">Fecha Hasta</label>
               <input type="date" [value]="filters().dateTo"
                 (change)="onFilterChange('dateTo', $any($event.target).value)" [class.border-red-500]="dateToError()"
-                class="w-full px-2 py-1.5 text-xs border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-cyan-500 h-[30px]">
+                class="flex w-full h-[30px] rounded-lg border border-gray-300 items-center bg-white hover:border-gray-400 focus:outline-none focus:ring-2 focus:ring-primary/20 px-2 py-1.5 text-xs text-gray-900">
               @if (dateToError()) {
               <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
               }

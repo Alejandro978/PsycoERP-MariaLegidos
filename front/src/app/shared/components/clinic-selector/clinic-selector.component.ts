@@ -101,6 +101,17 @@ export class ClinicSelectorComponent {
     return this.selectedClinic ? this.selectedClinic.name : this.placeholder;
   }
 
+  // Get short display text for compact mode (when chips are shown below)
+  get displayTextCompact(): string {
+    if (this.multiple) {
+      const selected = this.selectedClinics;
+      if (selected.length === 0) return this.placeholder;
+      if (selected.length === 1) return '1 clínica seleccionada';
+      return `${selected.length} clínicas seleccionadas`;
+    }
+    return this.selectedClinic ? this.selectedClinic.name : this.placeholder;
+  }
+
   // Event handlers
   onSearchInput(event: Event): void {
     const target = event.target as HTMLInputElement;

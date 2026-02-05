@@ -21,14 +21,8 @@
       <div *ngIf="!multiple && selectedClinic" class="w-3 h-3 rounded-full flex-shrink-0"
         [style.background-color]="selectedClinic.clinic_color"></div>
 
-      <!-- Multiple mode: show count badge -->
-      <div *ngIf="multiple && selectedClinics.length > 0"
-        class="flex-shrink-0 bg-primary text-white text-xs font-medium px-1.5 py-0.5 rounded-full min-w-[20px] text-center">
-        {{ selectedClinics.length }}
-      </div>
-
       <span class="truncate" [class.text-gray-400]="!hasSelection">
-        {{ displayText }}
+        {{ multiple ? displayTextCompact : displayText }}
       </span>
     </div>
 

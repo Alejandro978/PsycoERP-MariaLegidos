@@ -19,7 +19,7 @@ interface SessionFilters {
   clinicIds: number[];
   sessionType: string | null;
   status: string | null;
-  paymentMethod: string | null;
+  paymentMethods: string[];
   dateFrom: string;
   dateTo: string;
 }
@@ -92,10 +92,20 @@ export class SessionComponent implements OnInit {
     clinicIds: [],
     sessionType: null,
     status: null,
-    paymentMethod: null,
+    paymentMethods: [],
     dateFrom: this.getFirstDayOfMonth(),
     dateTo: this.getLastDayOfMonth(),
   });
+
+  // Payment method dropdown state
+  paymentDropdownOpen = signal(false);
+  paymentMethodOptions = [
+    { value: 'bizum', label: 'Bizum' },
+    { value: 'transferencia', label: 'Transferencia' },
+    { value: 'tarjeta', label: 'Tarjeta' },
+    { value: 'efectivo', label: 'Efectivo' },
+    { value: 'pendiente', label: 'Pendiente' },
+  ];
 
   // Pagination signals (frontend only)
   currentPage = signal(1);
@@ -185,8 +195,10 @@ export class SessionComponent implements OnInit {
       queryParts.push(`status=${currentFilters.status}`);
     }
 
-    if (currentFilters.paymentMethod) {
-      queryParts.push(`payment_method=${currentFilters.paymentMethod}`);
+    if (currentFilters.paymentMethods && currentFilters.paymentMethods.length > 0) {
+      currentFilters.paymentMethods.forEach((method) => {
+        queryParts.push(`payment_method=${method}`);
+      });
     }
 
     if (currentFilters.dateFrom) {
@@ -233,8 +245,10 @@ export class SessionComponent implements OnInit {
       queryParts.push(`status=${currentFilters.status}`);
     }
 
-    if (currentFilters.paymentMethod) {
-      queryParts.push(`payment_method=${currentFilters.paymentMethod}`);
+    if (currentFilters.paymentMethods && currentFilters.paymentMethods.length > 0) {
+      currentFilters.paymentMethods.forEach((method) => {
+        queryParts.push(`payment_method=${method}`);
+      });
     }
 
     if (currentFilters.dateFrom) {
@@ -322,13 +336,14 @@ export class SessionComponent implements OnInit {
       clinicIds: [],
       sessionType: null,
       status: null,
-      paymentMethod: null,
+      paymentMethods: [],
       dateFrom: this.getCurrentMonth(),
       dateTo: this.getTodayDate(),
     });
     this.clinicControl.setValue([]);
     this.dateFromError.set(null);
     this.dateToError.set(null);
+    this.paymentDropdownOpen.set(false);
     this.applyFilters();
   }
 
@@ -337,6 +352,70 @@ export class SessionComponent implements OnInit {
     this.pageSize.set(Number(target.value));
     this.currentPage.set(1);
     this.updatePaginatedSessions();
+  }
+
+  // Payment method multi-select methods
+  togglePaymentDropdown(): void {
+    this.paymentDropdownOpen.update((v) => !v);
+  }
+
+  closePaymentDropdown(): void {
+    this.paymentDropdownOpen.set(false);
+  }
+
+  togglePaymentMethod(method: string): void {
+    const currentMethods = this.filters().paymentMethods;
+    const index = currentMethods.indexOf(method);
+
+    if (index === -1) {
+      // Add method
+      this.filters.update((f) => ({
+        ...f,
+        paymentMethods: [...f.paymentMethods, method],
+      }));
+    } else {
+      // Remove method
+      this.filters.update((f) => ({
+        ...f,
+        paymentMethods: f.paymentMethods.filter((m) => m !== method),
+      }));
+    }
+  }
+
+  isPaymentMethodSelected(method: string): boolean {
+    return this.filters().paymentMethods.includes(method);
+  }
+
+  getSelectedPaymentMethodsLabel(): string {
+    const selected = this.filters().paymentMethods;
+    if (selected.length === 0) {
+      return 'Todos los métodos';
+    }
+    if (selected.length === 1) {
+      const option = this.paymentMethodOptions.find((o) => o.value === selected[0]);
+      return option?.label || selected[0];
+    }
+    return `${selected.length} métodos seleccionados`;
+  }
+
+  getSelectedPaymentMethodsChips(): { value: string; label: string }[] {
+    return this.filters().paymentMethods.map((method) => {
+      const option = this.paymentMethodOptions.find((o) => o.value === method);
+      return { value: method, label: option?.label || method };
+    });
+  }
+
+  removePaymentMethod(method: string): void {
+    this.filters.update((f) => ({
+      ...f,
+      paymentMethods: f.paymentMethods.filter((m) => m !== method),
+    }));
+    this.applyFilters();
+  }
+
+  applyPaymentMethodsFilter(): void {
+    this.paymentDropdownOpen.set(false);
+    this.applyFilters();
   }
 
   goToPage(page: number): void {
@@ -564,8 +643,8 @@ export class SessionComponent implements OnInit {
       body.status = currentFilters.status;
     }
 
-    if (currentFilters.paymentMethod) {
-      body.payment_method = currentFilters.paymentMethod;
+    if (currentFilters.paymentMethods && currentFilters.paymentMethods.length > 0) {
+      body.payment_method = currentFilters.paymentMethods;
     }
 
     if (currentFilters.dateFrom) {
