@@ -1287,6 +1287,17 @@ const definitions = {
         description: "ID único de la invitación",
         example: 1,
       },
+      clinic_id: {
+        type: "integer",
+        format: "int64",
+        description: "ID de la clínica asociada",
+        example: 2,
+      },
+      clinic_name: {
+        type: "string",
+        description: "Nombre de la clínica asociada",
+        example: "Clínica Centro",
+      },
       token: {
         type: "string",
         description: "Token único de invitación",
@@ -1337,6 +1348,10 @@ const definitions = {
           id: {
             type: "integer",
             example: 1,
+          },
+          clinic_id: {
+            type: "integer",
+            example: 2,
           },
           token: {
             type: "string",

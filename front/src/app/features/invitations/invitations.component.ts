@@ -56,14 +56,14 @@ export class InvitationsComponent implements OnInit {
     fecha_desde: '',
     fecha_hasta: '',
     page: 1,
-    limit: 10,
+    limit: 5,
   };
 
   // Pagination
   pagination = signal({
     total: 0,
     page: 1,
-    limit: 10,
+    limit: 5,
     totalPages: 0,
   });
 

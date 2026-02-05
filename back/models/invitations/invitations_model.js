@@ -69,8 +69,17 @@ const getInvitations = async (db, filters = {}) => {
 
   let countQuery = `SELECT COUNT(*) as total FROM patient_invitations WHERE 1=1`;
   let dataQuery = `
-    SELECT id, token, status, expires_at, used_at, clinic_id, created_at
-    FROM patient_invitations
+    SELECT
+      pi.id,
+      pi.token,
+      pi.status,
+      pi.expires_at,
+      pi.used_at,
+      pi.clinic_id,
+      c.name AS clinic_name,
+      pi.created_at
+    FROM patient_invitations pi
+    LEFT JOIN clinics c ON c.id = pi.clinic_id
     WHERE 1=1
   `;
 
