@@ -16,6 +16,7 @@ const patientsPaths = require("./paths/patients");
 const remindersPaths = require("./paths/reminders");
 const sessionsPaths = require("./paths/sessions");
 const usersPaths = require("./paths/users");
+const whatsappPaths = require("./paths/whatsapp");
 
 const swaggerDefinition = {
   openapi: "3.0.0",
@@ -77,6 +78,7 @@ const swaggerDefinition = {
     ...remindersPaths,
     ...sessionsPaths,
     ...usersPaths,
+    ...whatsappPaths,
   },
   tags: [
     {
@@ -134,6 +136,10 @@ const swaggerDefinition = {
     {
       name: "Users",
       description: "Gestión de usuarios del sistema",
+    },
+    {
+      name: "WhatsApp",
+      description: "Envío de recordatorios automáticos por WhatsApp vía Twilio",
     },
   ],
 };

@@ -27,6 +27,7 @@ const dashboardRoutes = require("./routes/dashboard/dashboard_routes");
 const clinicalNotesRoutes = require("./routes/clinical_notes/clinical_notes_routes");
 const documentsRoutes = require("./routes/documents/documents_routes");
 const remindersRoutes = require("./routes/reminders/reminders_routes");
+const whatsappRoutes = require("./routes/whatsapp/whatsapp_routes");
 const usersRoutes = require("./routes/users/users_routes");
 const invoicesRoutes = require("./routes/invoices/invoices_routes");
 const notesRoutes = require("./routes/notes/notes_routes");
@@ -218,6 +219,7 @@ app.use("/api/dashboard", dashboardRoutes);
 app.use("/api/clinical-notes", clinicalNotesRoutes);
 app.use("/api/documents", documentsRoutes);
 app.use("/api/reminders", remindersRoutes);
+app.use("/api/whatsapp", whatsappRoutes);
 app.use("/api/users", usersRoutes);
 app.use("/api/invoices", invoicesRoutes);
 app.use("/api/notes", notesRoutes);
@@ -229,4 +231,13 @@ app.listen(PORT, async () => {
 
   // Probar conexión a la base de datos
   await testConnection();
+
+  // ✨ Inicializar scheduler de recordatorios WhatsApp
+  const { scheduleReminders } = require("./schedulers/reminderScheduler");
+  const { getPool } = require("./config/db");
+
+  const db = getPool(); // Obtener el pool por defecto
+  scheduleReminders(db);
+
+  logger.info("🚀 Sistema de recordatorios WhatsApp iniciado");
 });
