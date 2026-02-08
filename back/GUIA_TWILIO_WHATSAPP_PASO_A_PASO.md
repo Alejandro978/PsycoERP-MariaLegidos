@@ -41,17 +41,6 @@ To this number: +1 415 523 8886
 3. Envía el mensaje exacto que te indica (ej: `join heavy-stone`)
 4. Recibirás: _"Twilio Sandbox: ✅ You are all set! ..."_
 
-✅ **Tu número está conectado al Sandbox**
-
-### Paso 3: Verificar credenciales
-
-Las credenciales que ya tienes en tu `.env` son:
-
-```env
-TWILIO_ACCOUNT_SID=AC1cb33f103776e523f63df1039b5e3ef8
-TWILIO_AUTH_TOKEN=f32be838875446415112eb9c6ebbee23
-TWILIO_WHATSAPP_FROM=whatsapp:+14155238886
-```
 
 ✅ **Ya están configuradas correctamente**
 
