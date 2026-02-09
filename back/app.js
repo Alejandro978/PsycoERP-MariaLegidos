@@ -236,8 +236,13 @@ app.listen(PORT, async () => {
   const { scheduleReminders } = require("./schedulers/reminderScheduler");
   const { getPool } = require("./config/db");
 
-  const db = getPool(); // Obtener el pool por defecto
+  // 🎯 Determinar entorno para el scheduler
+  const isLocalOrTest = process.env.NODE_ENV !== 'production';
+  const schedulerHostname = isLocalOrTest ? 'test.psicoandante.com' : null;
+  const db = getPool(schedulerHostname);
+
   scheduleReminders(db);
 
-  logger.info("🚀 Sistema de recordatorios WhatsApp iniciado");
+  const dbEnv = isLocalOrTest ? 'TEST' : 'PRODUCCIÓN';
+  logger.info(`🚀 Sistema de recordatorios WhatsApp iniciado (BD: ${dbEnv})`);
 });
