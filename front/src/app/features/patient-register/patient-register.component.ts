@@ -428,13 +428,13 @@ export class PatientRegisterComponent implements OnInit {
   }
 
   /**
-   * Detiene el dibujo y guarda la firma como base64
+   * Detiene el dibujo y guarda la firma como base64 solo si tiene contenido
    */
   stopDrawing(type: string): void {
     this.isDrawing.set(type, false);
 
     const canvas = this.getCanvasElement(type);
-    if (canvas) {
+    if (canvas && this.isCanvasNotEmpty(canvas)) {
       this.signatures.set(type, canvas.toDataURL('image/png'));
       // Actualizar signals de firma
       if (type === 'patient') {
@@ -443,6 +443,23 @@ export class PatientRegisterComponent implements OnInit {
         this.guardian1SignatureExists.set(true);
       }
     }
+  }
+
+  /**
+   * Verifica si el canvas tiene contenido dibujado (no está vacío)
+   */
+  private isCanvasNotEmpty(canvas: HTMLCanvasElement): boolean {
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return false;
+
+    const pixelData = ctx.getImageData(0, 0, canvas.width, canvas.height).data;
+    // Buscar cualquier píxel que no sea transparente (alpha > 0)
+    for (let i = 3; i < pixelData.length; i += 4) {
+      if (pixelData[i] > 0) {
+        return true;
+      }
+    }
+    return false;
   }
 
   /**

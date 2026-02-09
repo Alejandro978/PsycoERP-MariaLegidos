@@ -137,6 +137,9 @@ export interface SessionsByPrice {
 export interface ClinicInvoiceData {
   clinic_id: number;
   clinic_name: string;
+  fiscal_name?: string;
+  cif?: string;
+  billing_address?: string;
   total_sessions: number;
   total_net_clinic: number;
   sessions_data: SessionsByPrice[];

@@ -1004,9 +1004,9 @@ export class BillingComponent implements OnInit {
     return {
       clinic_id: selectedClinic.clinic_id,
       clinic_name: selectedClinic.clinic_name,
-      fiscal_name: selectedClinic.clinic_name, // Usar el nombre de la clínica como fiscal_name
-      cif: '', // No disponible en datos pendientes
-      billing_address: '', // No disponible en datos pendientes
+      fiscal_name: selectedClinic.fiscal_name || selectedClinic.clinic_name,
+      cif: selectedClinic.cif || '',
+      billing_address: selectedClinic.billing_address || '',
       total_sessions: selectedClinic.total_sessions,
       sessions_data: selectedClinic.sessions_data,
       total_net: selectedClinic.total_net_clinic,
