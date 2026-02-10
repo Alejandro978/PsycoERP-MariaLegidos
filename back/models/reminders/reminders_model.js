@@ -207,8 +207,78 @@ const getReminderLogs = async (db, filters = {}) => {
   return rows;
 };
 
+/**
+ * Obtener recordatorios pendientes para SCHEDULER AUTOMÁTICO
+ * NO verifica tabla reminders (permite enviar aunque la psicóloga ya lo haya hecho manualmente)
+ * Solo verifica reminder_logs para no enviar WhatsApp duplicado el mismo día
+ * @param {Object} db - Pool de conexión
+ * @returns {Promise<Object>} { targetDate, total, sessions }
+ */
+const getPendingRemindersForScheduler = async (db) => {
+  // Reutilizar la misma lógica de cálculo de fecha objetivo
+  const today = new Date();
+  const dayOfWeek = today.getDay();
+
+  let targetDate;
+
+  if (dayOfWeek >= 1 && dayOfWeek <= 4) {
+    // Lunes a Jueves: sesiones del día siguiente
+    targetDate = new Date(today);
+    targetDate.setDate(today.getDate() + 1);
+  } else {
+    // Viernes, Sábado, Domingo: sesiones del lunes siguiente
+    const daysUntilMonday = (8 - dayOfWeek) % 7;
+    targetDate = new Date(today);
+    targetDate.setDate(
+      today.getDate() + (daysUntilMonday === 0 ? 7 : daysUntilMonday)
+    );
+  }
+
+  const formattedDate = targetDate.toISOString().split("T")[0];
+
+  const query = `
+    SELECT 
+      s.id as session_id,
+      s.session_date,
+      s.start_time,
+      s.end_time,
+      s.mode,
+      p.id as patient_id,
+      CONCAT(p.first_name, ' ', p.last_name) as patient_name,
+      p.phone as patient_phone,
+      c.id as clinic_id,
+      c.name as clinic_name,
+      c.address as clinic_address
+    FROM sessions s
+    INNER JOIN patients p ON s.patient_id = p.id
+    INNER JOIN clinics c ON s.clinic_id = c.id
+    LEFT JOIN reminder_logs rl ON s.id = rl.session_id 
+      AND DATE(rl.sent_at) = CURDATE() 
+      AND rl.status = 'sent'
+    WHERE s.session_date = ?
+      AND s.status != 'cancelada'
+      AND s.is_active = true
+      AND p.status = 'en curso'
+      AND c.is_active = true
+      AND c.is_external = 0
+      AND p.phone IS NOT NULL
+      AND p.phone != ''
+      AND rl.id IS NULL
+    ORDER BY s.start_time ASC
+  `;
+
+  const [rows] = await db.execute(query, [formattedDate]);
+
+  return {
+    targetDate: formattedDate,
+    total: rows.length,
+    sessions: rows,
+  };
+};
+
 module.exports = {
   getPendingReminders,
+  getPendingRemindersForScheduler,
   createReminder,
   saveReminderLog,
   getReminderLogs,

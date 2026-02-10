@@ -1,4 +1,4 @@
-const { getPendingReminders, saveReminderLog, getReminderLogs } = require("../../models/reminders/reminders_model");
+const { getPendingRemindersForScheduler, saveReminderLog, getReminderLogs } = require("../../models/reminders/reminders_model");
 const { sendWhatsAppMessage, verifyTwilioConfig } = require("../../utils/whatsappService");
 const logger = require("../../utils/logger");
 
@@ -57,7 +57,8 @@ const procesarRecordatorios = async (db) => {
 
     try {
         // 1. Obtener sesiones pendientes (mañana o lunes siguiente)
-        const result = await getPendingReminders(db);
+        // Usa getPendingRemindersForScheduler que ignora tabla reminders
+        const result = await getPendingRemindersForScheduler(db);
 
         logger.info(`📅 Fecha objetivo: ${result.targetDate}`);
         logger.info(`📋 Sesiones encontradas: ${result.sessions.length}`);
