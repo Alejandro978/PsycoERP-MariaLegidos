@@ -1,5 +1,5 @@
 <div class="relative">
-  <label [ngClass]="{
+  <label *ngIf="label" [ngClass]="{
     'block text-sm font-medium text-gray-700 mb-2': true
   }">
     {{ label }}

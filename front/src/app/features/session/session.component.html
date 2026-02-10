@@ -106,131 +106,134 @@
 
   <!-- FILTROS CARD -->
   <div class="card-elevated p-4 mb-6">
-    <div class="flex flex-col gap-4">
-      <!-- Row 1: Clínica -->
-      <div class="w-full md:w-1/2">
+    <div class="flex flex-col md:flex-row gap-4 items-start">
+      <!-- Clínica -->
+      <div class="w-full md:w-[220px]">
         <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
           placeholder="Todas las clínicas" size="sm" [multiple]="true" (applied)="onClinicFilterApplied()">
         </app-clinic-selector>
       </div>
 
-      <!-- Row 2: Estado, Método de Pago, Fechas -->
-      <div class="flex flex-col md:flex-row gap-4 items-start">
-        <!-- Estado -->
+      <!-- Estado -->
+      <div class="w-full md:w-[180px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
         <select (change)="onFilterChange('status', $any($event.target).value || null)"
           [value]="filters().status || ''"
-          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[180px]"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
           style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
           <option value="">Todos los estados</option>
           <option value="completada">Completada</option>
           <option value="cancelada">Cancelada</option>
         </select>
+      </div>
 
-        <!-- Método de Pago -->
-        <div class="relative w-full md:w-[200px]">
-          <button type="button" (click)="togglePaymentDropdown()"
-            class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full flex items-center justify-between"
-            style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-            <span [class.text-gray-400]="filters().paymentMethods.length === 0">
-              {{ getSelectedPaymentMethodsLabel() }}
-            </span>
-            <svg class="h-4 w-4" style="color: rgb(101, 117, 139);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-            </svg>
-          </button>
+      <!-- Método de Pago -->
+      <div class="relative w-full md:w-[200px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Método de pago</label>
+        <button type="button" (click)="togglePaymentDropdown()"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full flex items-center justify-between"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+          <span [class.text-gray-400]="filters().paymentMethods.length === 0">
+            {{ getSelectedPaymentMethodsLabel() }}
+          </span>
+          <svg class="h-4 w-4" style="color: rgb(101, 117, 139);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+          </svg>
+        </button>
 
-          @if (paymentDropdownOpen()) {
-          <div class="fixed inset-0 z-40" (click)="applyPaymentMethodsFilter()"></div>
-          <div class="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg" style="border-color: rgb(225, 231, 239);">
-            <div class="py-1">
-              @for (option of paymentMethodOptions; track option.value) {
-              <label class="flex items-center px-3 py-2 hover:bg-slate-50 cursor-pointer">
-                <input type="checkbox"
-                  [checked]="isPaymentMethodSelected(option.value)"
-                  (change)="togglePaymentMethod(option.value)"
-                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-                <span class="ml-2 text-sm">{{ option.label }}</span>
-              </label>
-              }
-            </div>
-            <div class="border-t px-3 py-2 flex justify-end" style="border-color: rgb(225, 231, 239);">
-              <button type="button" (click)="applyPaymentMethodsFilter()"
-                class="px-3 py-1.5 text-sm rounded-md text-white"
-                style="background-color: rgb(60, 131, 246);">
-                Aplicar
-              </button>
-            </div>
-          </div>
-          }
-
-          @if (getSelectedPaymentMethodsChips().length > 0) {
-          <div class="flex flex-wrap gap-1.5 mt-2">
-            @for (chip of getSelectedPaymentMethodsChips(); track chip.value) {
-            <span class="inline-flex items-center gap-1 px-2 py-1 bg-sky-50 border border-sky-200 rounded-md text-xs text-sky-700">
-              {{ chip.label }}
-              <button type="button" (click)="removePaymentMethod(chip.value)"
-                class="ml-0.5 text-sky-500 hover:text-sky-700 font-bold leading-none">
-                ×
-              </button>
-            </span>
+        @if (paymentDropdownOpen()) {
+        <div class="fixed inset-0 z-40" (click)="applyPaymentMethodsFilter()"></div>
+        <div class="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg" style="border-color: rgb(225, 231, 239);">
+          <div class="py-1">
+            @for (option of paymentMethodOptions; track option.value) {
+            <label class="flex items-center px-3 py-2 hover:bg-slate-50 cursor-pointer">
+              <input type="checkbox"
+                [checked]="isPaymentMethodSelected(option.value)"
+                (change)="togglePaymentMethod(option.value)"
+                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+              <span class="ml-2 text-sm">{{ option.label }}</span>
+            </label>
             }
           </div>
+          <div class="border-t px-3 py-2 flex justify-end" style="border-color: rgb(225, 231, 239);">
+            <button type="button" (click)="applyPaymentMethodsFilter()"
+              class="px-3 py-1.5 text-sm rounded-md text-white"
+              style="background-color: rgb(60, 131, 246);">
+              Aplicar
+            </button>
+          </div>
+        </div>
+        }
+
+        @if (getSelectedPaymentMethodsChips().length > 0) {
+        <div class="flex flex-wrap gap-1.5 mt-2">
+          @for (chip of getSelectedPaymentMethodsChips(); track chip.value) {
+          <span class="inline-flex items-center gap-1 px-2 py-1 bg-sky-50 border border-sky-200 rounded-md text-xs text-sky-700">
+            {{ chip.label }}
+            <button type="button" (click)="removePaymentMethod(chip.value)"
+              class="ml-0.5 text-sky-500 hover:text-sky-700 font-bold leading-none">
+              ×
+            </button>
+          </span>
           }
         </div>
+        }
+      </div>
 
-        <!-- Fecha Desde -->
-        <div class="w-full md:w-[180px]">
-          <input type="date" [value]="filters().dateFrom"
-            (change)="onFilterChange('dateFrom', $any($event.target).value)"
-            class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
-            [class.border-red-500]="dateFromError()"
-            style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-          @if (dateFromError()) {
-          <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
+      <!-- Fecha Desde -->
+      <div class="w-full md:w-[180px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
+        <input type="date" [value]="filters().dateFrom"
+          (change)="onFilterChange('dateFrom', $any($event.target).value)"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+          [class.border-red-500]="dateFromError()"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+        @if (dateFromError()) {
+        <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
+        }
+      </div>
+
+      <!-- Fecha Hasta -->
+      <div class="w-full md:w-[180px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+        <input type="date" [value]="filters().dateTo"
+          (change)="onFilterChange('dateTo', $any($event.target).value)"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+          [class.border-red-500]="dateToError()"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+        @if (dateToError()) {
+        <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
+        }
+      </div>
+
+      <!-- Spacer -->
+      <div class="flex-1"></div>
+
+      <!-- Botones -->
+      <div class="flex gap-2 md:mt-[28px]">
+        <button (click)="clearFilters()"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap border transition-colors hover:bg-slate-50"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.5rem;">
+          Limpiar
+        </button>
+        <button (click)="downloadExcel()" [disabled]="isDownloading() || totalSessions() === 0"
+          class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+          style="background-color: rgb(60, 131, 246); color: rgb(255, 255, 255); border-radius: 0.5rem; font-weight: 500; box-shadow: rgba(15, 23, 41, 0.1) 0px 4px 6px -1px;">
+          @if (isDownloading()) {
+          <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+            <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Descargando...
+          } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+            <polyline points="7 10 12 15 17 10"></polyline>
+            <line x1="12" y1="15" x2="12" y2="3"></line>
+          </svg>
+          Descargar Excel
           }
-        </div>
-
-        <!-- Fecha Hasta -->
-        <div class="w-full md:w-[180px]">
-          <input type="date" [value]="filters().dateTo"
-            (change)="onFilterChange('dateTo', $any($event.target).value)"
-            class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
-            [class.border-red-500]="dateToError()"
-            style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-          @if (dateToError()) {
-          <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
-          }
-        </div>
-
-        <!-- Spacer -->
-        <div class="flex-1"></div>
-
-        <!-- Botones -->
-        <div class="flex gap-2">
-          <button (click)="clearFilters()"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap border transition-colors hover:bg-slate-50"
-            style="border-color: rgb(225, 231, 239); border-radius: 0.5rem;">
-            Limpiar
-          </button>
-          <button (click)="downloadExcel()" [disabled]="isDownloading() || totalSessions() === 0"
-            class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
-            style="background-color: rgb(60, 131, 246); color: rgb(255, 255, 255); border-radius: 0.5rem; font-weight: 500; box-shadow: rgba(15, 23, 41, 0.1) 0px 4px 6px -1px;">
-            @if (isDownloading()) {
-            <svg class="animate-spin h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-            </svg>
-            Descargando...
-            } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="w-4 h-4">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="7 10 12 15 17 10"></polyline>
-              <line x1="12" y1="15" x2="12" y2="3"></line>
-            </svg>
-            Descargar Excel
-            }
-          </button>
-        </div>
+        </button>
       </div>
     </div>
   </div>
