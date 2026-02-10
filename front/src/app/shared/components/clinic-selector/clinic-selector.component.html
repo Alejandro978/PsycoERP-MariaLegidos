@@ -8,13 +8,14 @@
 
   <!-- Selector trigger -->
   <div [ngClass]="{
-    'flex w-full rounded-lg border border-gray-300 items-center justify-between transition-all duration-200': true,
-    'bg-white hover:border-gray-400 focus-within:outline-none focus-within:ring-2 cursor-pointer': !disabled,
+    'flex w-full border items-center justify-between transition-all duration-200': true,
+    'bg-transparent hover:border-gray-400 focus-within:outline-none focus-within:ring-2 cursor-pointer': !disabled,
     'bg-gray-50 cursor-not-allowed opacity-60': disabled,
     'h-10 px-3 py-2 text-sm text-gray-900 focus-within:ring-primary/20 focus-within:border-primary': size === 'md',
-    'px-2 py-1.5 text-xs text-gray-900 focus-within:ring-primary/20': size === 'sm',
+    'h-9 px-3 py-2 text-sm text-gray-900 focus-within:ring-primary/20': size === 'sm',
     'border-red-500 focus-within:ring-red-500 focus-within:border-red-500': hasError && !disabled
-  }" (click)="openModal()" [tabindex]="disabled ? -1 : 0" role="button" [attr.aria-expanded]="isModalOpenValue" [attr.aria-disabled]="disabled">
+  }" [style.border-color]="hasError ? null : 'rgb(225, 231, 239)'" style="border-radius: 0.75rem;"
+  (click)="openModal()" [tabindex]="disabled ? -1 : 0" role="button" [attr.aria-expanded]="isModalOpenValue" [attr.aria-disabled]="disabled">
 
     <div class="flex items-center gap-2 flex-1 min-w-0">
       <!-- Single mode: show color dot -->

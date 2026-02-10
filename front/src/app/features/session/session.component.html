@@ -106,111 +106,111 @@
 
   <!-- FILTROS CARD -->
   <div class="card-elevated p-4 mb-6">
-    <div class="flex flex-col md:flex-row gap-4 items-start">
-      <!-- Clínica -->
-      <div class="w-full md:w-[220px]">
-        <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
-          placeholder="Todas las clínicas" size="sm" [multiple]="true" (applied)="onClinicFilterApplied()">
-        </app-clinic-selector>
-      </div>
+    <div class="flex flex-col gap-4">
+      <!-- Fila 1: Filtros -->
+      <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4 items-start">
+        <!-- Clínica -->
+        <div>
+          <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
+            placeholder="Todas las clínicas" size="sm" [multiple]="true" (applied)="onClinicFilterApplied()">
+          </app-clinic-selector>
+        </div>
 
-      <!-- Estado -->
-      <div class="w-full md:w-[180px]">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
-        <select (change)="onFilterChange('status', $any($event.target).value || null)"
-          [value]="filters().status || ''"
-          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
-          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-          <option value="">Todos los estados</option>
-          <option value="completada">Completada</option>
-          <option value="cancelada">Cancelada</option>
-        </select>
-      </div>
+        <!-- Estado -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+          <select (change)="onFilterChange('status', $any($event.target).value || null)"
+            [value]="filters().status || ''"
+            class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+            style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+            <option value="">Todos los estados</option>
+            <option value="completada">Completada</option>
+            <option value="cancelada">Cancelada</option>
+          </select>
+        </div>
 
-      <!-- Método de Pago -->
-      <div class="relative w-full md:w-[200px]">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Método de pago</label>
-        <button type="button" (click)="togglePaymentDropdown()"
-          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full flex items-center justify-between"
-          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-          <span [class.text-gray-400]="filters().paymentMethods.length === 0">
-            {{ getSelectedPaymentMethodsLabel() }}
-          </span>
-          <svg class="h-4 w-4" style="color: rgb(101, 117, 139);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
-          </svg>
-        </button>
+        <!-- Método de Pago -->
+        <div class="relative">
+          <label class="block text-sm font-medium text-gray-700 mb-2">Método de pago</label>
+          <button type="button" (click)="togglePaymentDropdown()"
+            class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full flex items-center justify-between"
+            style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+            <span [class.text-gray-400]="filters().paymentMethods.length === 0">
+              {{ getSelectedPaymentMethodsLabel() }}
+            </span>
+            <svg class="h-4 w-4" style="color: rgb(101, 117, 139);" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 9l-7 7-7-7"></path>
+            </svg>
+          </button>
 
-        @if (paymentDropdownOpen()) {
-        <div class="fixed inset-0 z-40" (click)="applyPaymentMethodsFilter()"></div>
-        <div class="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg" style="border-color: rgb(225, 231, 239);">
-          <div class="py-1">
-            @for (option of paymentMethodOptions; track option.value) {
-            <label class="flex items-center px-3 py-2 hover:bg-slate-50 cursor-pointer">
-              <input type="checkbox"
-                [checked]="isPaymentMethodSelected(option.value)"
-                (change)="togglePaymentMethod(option.value)"
-                class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
-              <span class="ml-2 text-sm">{{ option.label }}</span>
-            </label>
+          @if (paymentDropdownOpen()) {
+          <div class="fixed inset-0 z-40" (click)="applyPaymentMethodsFilter()"></div>
+          <div class="absolute z-50 mt-1 w-full bg-white border rounded-md shadow-lg" style="border-color: rgb(225, 231, 239);">
+            <div class="py-1">
+              @for (option of paymentMethodOptions; track option.value) {
+              <label class="flex items-center px-3 py-2 hover:bg-slate-50 cursor-pointer">
+                <input type="checkbox"
+                  [checked]="isPaymentMethodSelected(option.value)"
+                  (change)="togglePaymentMethod(option.value)"
+                  class="h-4 w-4 rounded border-gray-300 text-blue-600 focus:ring-blue-500">
+                <span class="ml-2 text-sm">{{ option.label }}</span>
+              </label>
+              }
+            </div>
+            <div class="border-t px-3 py-2 flex justify-end" style="border-color: rgb(225, 231, 239);">
+              <button type="button" (click)="applyPaymentMethodsFilter()"
+                class="px-3 py-1.5 text-sm rounded-md text-white"
+                style="background-color: rgb(60, 131, 246);">
+                Aplicar
+              </button>
+            </div>
+          </div>
+          }
+
+          @if (getSelectedPaymentMethodsChips().length > 0) {
+          <div class="flex flex-wrap gap-1.5 mt-2">
+            @for (chip of getSelectedPaymentMethodsChips(); track chip.value) {
+            <span class="inline-flex items-center gap-1 px-2 py-1 bg-sky-50 border border-sky-200 rounded-md text-xs text-sky-700">
+              {{ chip.label }}
+              <button type="button" (click)="removePaymentMethod(chip.value)"
+                class="ml-0.5 text-sky-500 hover:text-sky-700 font-bold leading-none">
+                ×
+              </button>
+            </span>
             }
           </div>
-          <div class="border-t px-3 py-2 flex justify-end" style="border-color: rgb(225, 231, 239);">
-            <button type="button" (click)="applyPaymentMethodsFilter()"
-              class="px-3 py-1.5 text-sm rounded-md text-white"
-              style="background-color: rgb(60, 131, 246);">
-              Aplicar
-            </button>
-          </div>
-        </div>
-        }
-
-        @if (getSelectedPaymentMethodsChips().length > 0) {
-        <div class="flex flex-wrap gap-1.5 mt-2">
-          @for (chip of getSelectedPaymentMethodsChips(); track chip.value) {
-          <span class="inline-flex items-center gap-1 px-2 py-1 bg-sky-50 border border-sky-200 rounded-md text-xs text-sky-700">
-            {{ chip.label }}
-            <button type="button" (click)="removePaymentMethod(chip.value)"
-              class="ml-0.5 text-sky-500 hover:text-sky-700 font-bold leading-none">
-              ×
-            </button>
-          </span>
           }
         </div>
-        }
+
+        <!-- Fecha Desde -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
+          <input type="date" [value]="filters().dateFrom"
+            (change)="onFilterChange('dateFrom', $any($event.target).value)"
+            class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+            [class.border-red-500]="dateFromError()"
+            style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+          @if (dateFromError()) {
+          <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
+          }
+        </div>
+
+        <!-- Fecha Hasta -->
+        <div>
+          <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
+          <input type="date" [value]="filters().dateTo"
+            (change)="onFilterChange('dateTo', $any($event.target).value)"
+            class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+            [class.border-red-500]="dateToError()"
+            style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+          @if (dateToError()) {
+          <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
+          }
+        </div>
       </div>
 
-      <!-- Fecha Desde -->
-      <div class="w-full md:w-[180px]">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Desde</label>
-        <input type="date" [value]="filters().dateFrom"
-          (change)="onFilterChange('dateFrom', $any($event.target).value)"
-          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
-          [class.border-red-500]="dateFromError()"
-          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-        @if (dateFromError()) {
-        <p class="text-red-600 text-xs mt-1">{{ dateFromError() }}</p>
-        }
-      </div>
-
-      <!-- Fecha Hasta -->
-      <div class="w-full md:w-[180px]">
-        <label class="block text-sm font-medium text-gray-700 mb-2">Hasta</label>
-        <input type="date" [value]="filters().dateTo"
-          (change)="onFilterChange('dateTo', $any($event.target).value)"
-          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
-          [class.border-red-500]="dateToError()"
-          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-        @if (dateToError()) {
-        <p class="text-red-600 text-xs mt-1">{{ dateToError() }}</p>
-        }
-      </div>
-
-      <!-- Spacer -->
-      <div class="flex-1"></div>
-
-      <!-- Botones -->
-      <div class="flex gap-2 md:mt-[28px]">
+      <!-- Fila 2: Botones -->
+      <div class="flex justify-end gap-2">
         <button (click)="clearFilters()"
           class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap border transition-colors hover:bg-slate-50"
           style="border-color: rgb(225, 231, 239); border-radius: 0.5rem;">
@@ -241,18 +241,18 @@
   <!-- TABLA -->
   <div class="card-elevated overflow-hidden">
     <div class="overflow-x-auto">
-      <table class="w-full">
+      <table class="w-full" style="min-width: 700px;">
         <thead style="background-color: rgba(225, 231, 239, 0.5);">
           <tr>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Paciente</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Tipo</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Fecha</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Clínica</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Estado</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Precio</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Comisión</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Neto</th>
-            <th class="text-left p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Pago</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Paciente</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium hidden md:table-cell" style="color: rgb(101, 117, 139);">Tipo</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Fecha</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium hidden lg:table-cell" style="color: rgb(101, 117, 139);">Clínica</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Estado</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium" style="color: rgb(101, 117, 139);">Precio</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium hidden xl:table-cell" style="color: rgb(101, 117, 139);">Comisión</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium hidden md:table-cell" style="color: rgb(101, 117, 139);">Neto</th>
+            <th class="text-left p-3 lg:p-4 text-sm font-medium hidden sm:table-cell" style="color: rgb(101, 117, 139);">Pago</th>
           </tr>
         </thead>
         <tbody>
@@ -278,14 +278,14 @@
             [style.animation-delay.ms]="i * 30" style="border-bottom: 1px solid rgb(225, 231, 239);">
 
             <!-- Paciente -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4">
               <span class="text-sm font-medium" style="color: rgb(15, 23, 41);">
                 {{ session.SessionDetailData.PatientData.name }}
               </span>
             </td>
 
             <!-- Tipo/Modo -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4 hidden md:table-cell">
               @if (session.SessionDetailData.mode === 'presencial') {
               <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-blue-50 text-blue-600">
                 Presencial
@@ -306,14 +306,14 @@
             </td>
 
             <!-- Fecha -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4">
               <span class="text-sm" style="color: rgb(101, 117, 139);">
                 {{ formatDate(session.SessionDetailData.session_date) }}
               </span>
             </td>
 
             <!-- Clínica -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4 hidden lg:table-cell">
               <div class="flex items-center gap-2">
                 @if (session.SessionDetailData.ClinicDetailData.clinic_color) {
                 <div class="w-3 h-3 rounded-full flex-shrink-0"
@@ -326,7 +326,7 @@
             </td>
 
             <!-- Estado -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4">
               @if (session.SessionDetailData.status === 'completada') {
               <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-green-50 text-green-600">
                 Completada
@@ -343,7 +343,7 @@
             </td>
 
             <!-- Precio -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4">
               <span class="text-sm font-medium" style="color: rgb(101, 117, 139);">
                 @if (session.SessionDetailData.price) {
                 {{ session.SessionDetailData.price }}€
@@ -354,7 +354,7 @@
             </td>
 
             <!-- Comisión -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4 hidden xl:table-cell">
               @if (session.SessionDetailData.price && session.SessionDetailData.net_price) {
               <span class="text-sm font-medium text-orange-600">
                 {{ calcularComision(session.SessionDetailData.price, session.SessionDetailData.net_price).toFixed(2) }}€
@@ -365,7 +365,7 @@
             </td>
 
             <!-- Neto -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4 hidden md:table-cell">
               @if (session.SessionDetailData.net_price) {
               <span class="text-sm font-semibold text-green-600">
                 {{ session.SessionDetailData.net_price.toFixed(2) }}€
@@ -381,7 +381,7 @@
             </td>
 
             <!-- Método de Pago -->
-            <td class="p-4">
+            <td class="p-3 lg:p-4 hidden sm:table-cell">
               @if (session.SessionDetailData.payment_method === 'bizum') {
               <span class="inline-flex items-center rounded-full px-2.5 py-0.5 text-xs font-semibold bg-emerald-50 text-emerald-600">
                 Bizum
@@ -416,7 +416,7 @@
     </div>
 
     <!-- PAGINACION -->
-    <div class="p-4 border-t flex items-center justify-between" style="border-color: rgb(225, 231, 239);">
+    <div class="p-3 sm:p-4 border-t flex flex-col sm:flex-row items-center justify-between gap-2" style="border-color: rgb(225, 231, 239);">
       <div class="text-sm" style="color: rgb(101, 117, 139);">
         Mostrando {{ sessions().length }} de {{ totalSessions() }} sesiones
       </div>
