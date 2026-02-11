@@ -37,9 +37,20 @@ const exportarSesionesExcel = async (req, res) => {
             filters.status = status;
         }
 
-        // Filtro por método de pago
+        // Filtro por método de pago (soporta array o string único)
         if (payment_method) {
-            filters.payment_method = payment_method;
+            // Si es array, usarlo directamente
+            if (Array.isArray(payment_method)) {
+                filters.payment_methods = payment_method.filter(pm => pm && pm.trim());
+            } else {
+                // Si es un solo valor, convertir a array de 1 elemento
+                filters.payment_methods = [payment_method];
+            }
+
+            // Solo aplicar filtro si hay métodos válidos
+            if (!filters.payment_methods || filters.payment_methods.length === 0) {
+                delete filters.payment_methods;
+            }
         }
 
         // Filtros de fechas

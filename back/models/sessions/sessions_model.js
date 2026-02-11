@@ -454,10 +454,11 @@ const getSessionsForExport = async (db, filters = {}) => {
     params.push(...filters.clinic_ids);
   }
 
-  // Filtro por método de pago
-  if (filters.payment_method) {
-    conditions.push("s.payment_method = ?");
-    params.push(filters.payment_method);
+  // Filtro por múltiples métodos de pago
+  if (filters.payment_methods && filters.payment_methods.length > 0) {
+    const placeholders = filters.payment_methods.map(() => '?').join(',');
+    conditions.push(`s.payment_method IN (${placeholders})`);
+    params.push(...filters.payment_methods);
   }
 
   // Filtro por rango de fechas

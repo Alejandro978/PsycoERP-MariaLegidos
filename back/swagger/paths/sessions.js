@@ -868,10 +868,21 @@ const sessionsPaths = {
                   example: "completada",
                 },
                 payment_method: {
-                  type: "string",
-                  enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
-                  description: "Método de pago",
-                  example: "bizum",
+                  oneOf: [
+                    {
+                      type: "string",
+                      enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+                    },
+                    {
+                      type: "array",
+                      items: {
+                        type: "string",
+                        enum: ["pendiente", "transferencia", "bizum", "efectivo", "tarjeta"],
+                      },
+                    },
+                  ],
+                  description: "Método(s) de pago. Puede ser un string único o un array de métodos",
+                  example: ["bizum", "transferencia"],
                 },
                 fecha_desde: {
                   type: "string",
