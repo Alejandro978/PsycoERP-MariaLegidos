@@ -131,7 +131,7 @@ export class ClinicFormComponent implements OnInit, OnChanges {
       name: '',
       clinic_color: '#3b82f6',
       is_online: false,
-      external: false,
+      is_external: false,
       address: '',
       price: 0,
       percentage: 0,
@@ -285,6 +285,9 @@ export class ClinicFormComponent implements OnInit, OnChanges {
 
       // Excluir is_online del envío ya que no se almacena en BD
       delete formData.is_online;
+
+      // Asegurar que is_external sea boolean (false si no está marcado)
+      formData.is_external = formData.is_external ?? false;
 
       // Si es online o externa, asegurar que address esté vacío
       if (this.clinicaForm.get('is_online')?.value || formData.is_external) {

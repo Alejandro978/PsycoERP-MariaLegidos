@@ -21,7 +21,7 @@
 
   <!-- FILTROS CARD -->
   <div class="card-elevated p-4 mb-6">
-    <div class="flex flex-col md:flex-row gap-3 items-start md:items-end flex-wrap">
+    <div class="flex flex-col md:flex-row gap-3 items-start flex-wrap">
       <!-- Clínica -->
       <div class="w-full md:w-[220px]">
         <app-clinic-selector [control]="clinicControl" [clinics]="clinics()" label="Clínica"
@@ -30,52 +30,67 @@
       </div>
 
       <!-- Estado (Activos/Inactivos) -->
-      <select (change)="onFilterChange('patientStatus', $any($event.target).value)"
-        [value]="filters().patientStatus"
-        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[180px]"
-        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-        <option value="active">Activos</option>
-        <option value="inactive">Inactivos</option>
-      </select>
+      <div class="w-full md:w-[180px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Estado</label>
+        <select (change)="onFilterChange('patientStatus', $any($event.target).value)"
+          [value]="filters().patientStatus"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+          <option value="active">Activos</option>
+          <option value="inactive">Inactivos</option>
+        </select>
+      </div>
 
       <!-- Género -->
-      <select (change)="onFilterChange('gender', $any($event.target).value || null)"
-        [value]="filters().gender || ''"
-        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[160px]"
-        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-        <option value="">Género</option>
-        @for (option of genderOptions; track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
-        }
-      </select>
+      <div class="w-full md:w-[160px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Género</label>
+        <select (change)="onFilterChange('gender', $any($event.target).value || null)"
+          [value]="filters().gender || ''"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+          <option value="">Todos</option>
+          @for (option of genderOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
 
       <!-- Estado del tratamiento -->
-      <select (change)="onFilterChange('treatmentStatus', $any($event.target).value || null)"
-        [value]="filters().treatmentStatus || ''"
-        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[180px]"
-        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
-        <option value="">Tratamiento</option>
-        @for (option of treatmentStatusOptions; track option.value) {
-          <option [value]="option.value">{{ option.label }}</option>
-        }
-      </select>
+      <div class="w-full md:w-[180px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Tratamiento</label>
+        <select (change)="onFilterChange('treatmentStatus', $any($event.target).value || null)"
+          [value]="filters().treatmentStatus || ''"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+          <option value="">Todos</option>
+          @for (option of treatmentStatusOptions; track option.value) {
+            <option [value]="option.value">{{ option.label }}</option>
+          }
+        </select>
+      </div>
 
       <!-- Búsqueda por nombre -->
-      <input type="text" placeholder="Nombre..."
-        [value]="filters().first_name || ''"
-        (input)="onFilterChange('first_name', $any($event.target).value)"
-        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:flex-1 md:min-w-[180px]"
-        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+      <div class="w-full md:flex-1 md:min-w-[180px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
+        <input type="text" placeholder="Buscar..."
+          [value]="filters().first_name || ''"
+          (input)="onFilterChange('first_name', $any($event.target).value)"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+      </div>
 
       <!-- Búsqueda por DNI -->
-      <input type="text" placeholder="DNI..."
-        [value]="filters().dni || ''"
-        (input)="onFilterChange('dni', $any($event.target).value)"
-        class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full md:w-[150px]"
-        style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+      <div class="w-full md:w-[150px]">
+        <label class="block text-sm font-medium text-gray-700 mb-2">DNI</label>
+        <input type="text" placeholder="Buscar..."
+          [value]="filters().dni || ''"
+          (input)="onFilterChange('dni', $any($event.target).value)"
+          class="border-input h-9 rounded-md border bg-transparent px-3 py-2 text-sm w-full"
+          style="border-color: rgb(225, 231, 239); border-radius: 0.75rem;">
+      </div>
 
       <!-- Botones -->
-      <div class="flex gap-2">
+      <div class="flex gap-2 md:mt-[28px]">
         <button (click)="applyFilters()"
           class="inline-flex items-center justify-center rounded-md text-sm font-medium h-9 px-4 py-2 whitespace-nowrap gap-2 text-white transition-colors hover:opacity-90"
           style="background-color: #6aa591; border-radius: 0.5rem;">
