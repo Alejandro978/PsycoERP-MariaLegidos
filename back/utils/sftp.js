@@ -52,6 +52,7 @@ const normalizeFilename = (filename) => {
 
 /**
  * Encuentra el siguiente nombre disponible agregando sufijo _2, _3, etc.
+ * OPTIMIZADO: Intenta primero sin sufijo, luego agrega timestamp para unicidad
  * @param {SftpClient} sftp - Cliente SFTP conectado
  * @param {string} patientDir - Directorio del paciente
  * @param {string} baseFilename - Nombre base normalizado del archivo
@@ -61,16 +62,17 @@ const findAvailableFilename = async (sftp, patientDir, baseFilename) => {
   const extension = baseFilename.substring(baseFilename.lastIndexOf("."));
   const nameWithoutExt = baseFilename.substring(0, baseFilename.lastIndexOf("."));
 
-  let filename = baseFilename;
-  let counter = 2;
+  // Verificar si el archivo existe
+  const fullPath = `${patientDir}/${baseFilename}`;
+  const exists = await sftp.exists(fullPath);
 
-  // Verificar si el archivo existe, si sí, agregar sufijo
-  while (await sftp.exists(`${patientDir}/${filename}`)) {
-    filename = `${nameWithoutExt}_${counter}${extension}`;
-    counter++;
+  if (!exists) {
+    return baseFilename;
   }
 
-  return filename;
+  // Si existe, usar timestamp para garantizar unicidad sin bucle
+  const timestamp = Date.now();
+  return `${nameWithoutExt}_${timestamp}${extension}`;
 };
 
 /**
@@ -93,20 +95,17 @@ const uploadFileToVPS = async (fileBuffer, originalFilename, patientId) => {
     // Ruta en el servidor VPS usando variable de entorno
     const patientDir = `${SFTP_BASE_PATH}/${patientId}`;
 
-    // Crear SOLO el directorio del paciente si no existe (no el path completo)
-    const dirExists = await sftp.exists(patientDir);
-    if (!dirExists) {
-      // Verificar que el directorio base existe
-      const baseExists = await sftp.exists(SFTP_BASE_PATH);
-      if (!baseExists) {
-        throw new Error(`El directorio base ${SFTP_BASE_PATH} no existe en el VPS. Debe ser creado manualmente.`);
-      }
-
-      // Crear solo la carpeta del paciente (no recursive)
+    // Crear directorio del paciente si no existe
+    try {
       await sftp.mkdir(patientDir, false);
+    } catch (mkdirError) {
+      // El directorio ya existe o hay un error de permisos
+      if (!mkdirError.message.includes("already exists") && !mkdirError.message.includes("File exists")) {
+        throw new Error(`Error al crear directorio: ${mkdirError.message}`);
+      }
     }
 
-    // Buscar nombre disponible (agrega _2, _3, etc. si ya existe)
+    // Buscar nombre disponible (agrega timestamp si ya existe)
     const filename = await findAvailableFilename(sftp, patientDir, normalizedFilename);
     const remoteFilePath = `${patientDir}/${filename}`;
 
