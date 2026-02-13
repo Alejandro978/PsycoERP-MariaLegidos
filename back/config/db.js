@@ -45,7 +45,7 @@ const dbMiddleware = (req, res, next) => {
 
   // Localhost siempre usa TEST
   if (hostname === "127.0.0.1" || hostname === "localhost") {
-    hostname = "test.psicoandante.com";
+    hostname = "test.psycoerp.psicoandante.com";
   }
 
   req.db = getPool(hostname);
@@ -61,7 +61,7 @@ const testConnection = async () => {
     prodConnection.release();
     await prodTestPool.end();
 
-    const testConfig = getDBConfig("test.psicoandante.com");
+    const testConfig = getDBConfig("test.psycoerp.psicoandante.com");
     const testTestPool = mysql.createPool(testConfig);
     const testConnection = await testTestPool.getConnection();
     testConnection.release();

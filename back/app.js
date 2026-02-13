@@ -238,7 +238,7 @@ app.listen(PORT, async () => {
 
   // 🎯 Determinar entorno para el scheduler
   const isLocalOrTest = process.env.NODE_ENV !== 'production';
-  const schedulerHostname = isLocalOrTest ? 'test.psicoandante.com' : null;
+  const schedulerHostname = isLocalOrTest ? 'test.psycoerp.psicoandante.com' : null;
   const db = getPool(schedulerHostname);
 
   scheduleReminders(db);
