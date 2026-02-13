@@ -8,6 +8,9 @@ const { procesarRecordatorios } = require("../controllers/whatsapp/whatsapp_cont
  * @param {Object} db - Pool de conexión a BD
  */
 const scheduleReminders = (db) => {
+    // TODO: Scheduler temporalmente desactivado
+    return;
+
     // Expresión cron: 0 8 * * * = 8:00 AM todos los días
     // Para testing usa: */2 * * * * (cada 2 minutos)
 
