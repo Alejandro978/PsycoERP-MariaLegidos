@@ -562,8 +562,8 @@ export class NewSessionFormComponent implements OnInit {
               const isExternal = patient.clinicaExterna || false;
               this.isExternalClinic.set(isExternal);
 
-              // Set the mode based on patient's presencial setting
-              const mode = patient.presencial ? 'presencial' : 'online';
+              // In edit mode, use the session's saved mode, not the patient's default
+              const mode = sessionData.SessionDetailData.mode?.toLowerCase() || (patient.presencial ? 'presencial' : 'online');
 
               // Update form with calculated base_price
               this.sessionForm.patchValue({
