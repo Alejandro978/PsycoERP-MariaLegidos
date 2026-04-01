@@ -583,6 +583,14 @@ export class PatientRegisterComponent implements OnInit {
     this.errorMessage.set('');
     this.signatureError.set('');
 
+    // Asegurar que el preview sea visible antes de generar el PDF (fix iOS Safari)
+    const previousTab = this.activeTab;
+    if (this.activeTab !== 'preview') {
+      this.activeTab = 'preview';
+      // Esperar a que el DOM se actualice para que html2canvas pueda medir dimensiones
+      await new Promise<void>((resolve) => setTimeout(resolve, 300));
+    }
+
     const formData: PatientRegistration = {
       ...this.registerForm.value,
       // Clean phone and DNI
@@ -653,10 +661,15 @@ export class PatientRegisterComponent implements OnInit {
           return from(this.documentPreview.getPdfBlob()).pipe(
             catchError((pdfError) => {
               console.error('Error generando PDF:', pdfError);
+              // Restaurar tab en caso de error
+              this.activeTab = previousTab;
               // Si falla la generación del PDF, continuar sin documento
               return of({ blob: null, fileName: null });
             }),
             switchMap((pdfResult: any) => {
+              // Restaurar tab original después de generar el PDF
+              this.activeTab = previousTab;
+
               if (!pdfResult.blob) {
                 console.warn(
                   'No se pudo generar el PDF, continuando sin documento',

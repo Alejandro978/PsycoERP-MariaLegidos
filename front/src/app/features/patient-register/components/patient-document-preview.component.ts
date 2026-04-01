@@ -38,7 +38,16 @@ export class PatientDocumentPreviewComponent {
       backgroundColor: '#ffffff',
       logging: false,
       imageTimeout: 5000, // Timeout para imágenes
+      width: element.scrollWidth || element.offsetWidth,
+      height: element.scrollHeight || element.offsetHeight,
     });
+
+    // Validar que el canvas tenga dimensiones válidas (fix iOS Safari)
+    if (!canvas.width || !canvas.height) {
+      throw new Error(
+        'El canvas generado tiene dimensiones inválidas (0x0). El elemento puede estar oculto.',
+      );
+    }
 
     // Crear PDF con compresión JPEG en lugar de PNG
     const imgData = canvas.toDataURL('image/jpeg', 0.8); // JPEG con 80% calidad
@@ -58,14 +67,23 @@ export class PatientDocumentPreviewComponent {
     const imgX = (pdfWidth - imgWidth * ratio) / 2;
     const imgY = 0;
 
-    pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+    pdf.addImage(
+      imgData,
+      'JPEG',
+      imgX,
+      imgY,
+      imgWidth * ratio,
+      imgHeight * ratio,
+    );
 
     // Generar nombre del archivo
-    const patientName = this.registerForm.get('first_name')?.value || 'paciente';
+    const patientName =
+      this.registerForm.get('first_name')?.value || 'paciente';
     const patientLastName = this.registerForm.get('last_name')?.value || '';
-    const fileName = `consentimiento_${patientName}_${patientLastName}_${new Date().toISOString().split('T')[0]}.pdf`
-      .toLowerCase()
-      .replace(/\s+/g, '_');
+    const fileName =
+      `consentimiento_${patientName}_${patientLastName}_${new Date().toISOString().split('T')[0]}.pdf`
+        .toLowerCase()
+        .replace(/\s+/g, '_');
 
     // Retornar blob y nombre
     const blob = pdf.output('blob');
