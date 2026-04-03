@@ -208,7 +208,12 @@ app.get("/oauth/callback", (req, res) => {
 });
 
 // Middleware global de autenticación para todas las rutas protegidas
-app.use(authenticateToken);
+// POST /api/documents se excluye porque gestiona su propia autenticación
+// (acepta JWT o invitation_token vía multipart)
+app.use((req, res, next) => {
+  if (req.method === "POST" && req.path === "/api/documents") return next();
+  return authenticateToken(req, res, next);
+});
 
 // Rutas protegidas (requieren autenticación)
 app.use("/api/sessions", sessionsRoutes);

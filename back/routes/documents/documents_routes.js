@@ -8,9 +8,10 @@ const {
   descargarDocumento,
   eliminarDocumento,
 } = require("../../controllers/documents/documents_controller");
+const { authenticateTokenOrInvitation } = require("../../middlewares/auth");
 
 router.get("/patient/:patient_id", obtenerDocumentosPorPaciente);
-router.post("/", upload.single("file"), subirDocumento);
+router.post("/", upload.single("file"), authenticateTokenOrInvitation, subirDocumento);
 router.get("/:id/download", descargarDocumento);
 router.delete("/:id", eliminarDocumento);
 
