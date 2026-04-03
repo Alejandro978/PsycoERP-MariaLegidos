@@ -10,7 +10,7 @@ const {
 // Rate limiter para endpoints públicos: 10 intentos cada 15 minutos por IP
 const publicRateLimiter = rateLimit({
   windowMs: 15 * 60 * 1000, // 15 minutos
-  max: 10,
+  max: 5000,
   message: {
     success: false,
     message: "Demasiadas solicitudes. Por favor, intente nuevamente en 15 minutos",
