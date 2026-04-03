@@ -30,45 +30,103 @@ export class PatientDocumentPreviewComponent {
 
     const element = this.documentContent.nativeElement;
 
-    // Capturar el elemento como canvas con escala reducida para mejor rendimiento
-    const canvas = await html2canvas(element, {
-      scale: 1.5, // Reducido de 2 a 1.5 para mejor rendimiento
-      useCORS: true,
-      allowTaint: true,
-      backgroundColor: '#ffffff',
-      logging: false,
-      imageTimeout: 5000, // Timeout para imágenes
-    });
+    // En móvil el contenedor padre puede tener clase 'hidden' (display:none) porque
+    // el usuario está en el tab del formulario. html2canvas no puede capturar elementos
+    // ocultos y devuelve un canvas 0x0, lo que causa "invalid coordinates" en jsPDF.
+    // Solución: buscar el ancestro oculto y mostrarlo temporalmente fuera de pantalla.
+    let hiddenAncestor: HTMLElement | null = null;
+    let parent = element.parentElement;
+    while (parent) {
+      if (
+        parent.classList.contains('hidden') ||
+        getComputedStyle(parent).display === 'none'
+      ) {
+        hiddenAncestor = parent;
+        break;
+      }
+      parent = parent.parentElement;
+    }
 
-    // Crear PDF con compresión JPEG en lugar de PNG
-    const imgData = canvas.toDataURL('image/jpeg', 0.8); // JPEG con 80% calidad
+    if (hiddenAncestor) {
+      hiddenAncestor.classList.remove('hidden');
+      hiddenAncestor.style.position = 'fixed';
+      hiddenAncestor.style.left = '-9999px';
+      hiddenAncestor.style.top = '0';
+      hiddenAncestor.style.width = '800px';
+      // Esperar a que el navegador renderice y cargue todas las imágenes
+      const images = Array.from(element.querySelectorAll('img'));
+      await Promise.all([
+        new Promise((resolve) => setTimeout(resolve, 150)),
+        ...images.map(
+          (img) =>
+            new Promise((resolve) => {
+              if (img.complete && img.naturalWidth > 0) {
+                resolve(null);
+              } else {
+                img.onload = () => resolve(null);
+                img.onerror = () => resolve(null); // si falla, continuar igual
+              }
+            }),
+        ),
+      ]);
+    }
 
-    const pdf = new jsPDF({
-      orientation: 'portrait',
-      unit: 'mm',
-      format: 'a4',
-      compress: true,
-    });
+    try {
+      const canvas = await html2canvas(element, {
+        scale: 1.5,
+        useCORS: true,
+        allowTaint: true,
+        backgroundColor: '#ffffff',
+        logging: false,
+        imageTimeout: 5000,
+      });
 
-    const pdfWidth = pdf.internal.pageSize.getWidth();
-    const pdfHeight = pdf.internal.pageSize.getHeight();
-    const imgWidth = canvas.width;
-    const imgHeight = canvas.height;
-    const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
-    const imgX = (pdfWidth - imgWidth * ratio) / 2;
-    const imgY = 0;
+      alert('DEBUG 3: canvas generado. width=' + canvas.width + ' height=' + canvas.height);
 
-    pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      if (canvas.width === 0 || canvas.height === 0) {
+        throw new Error('El canvas generado tiene dimensiones inválidas');
+      }
 
-    // Generar nombre del archivo
-    const patientName = this.registerForm.get('first_name')?.value || 'paciente';
-    const patientLastName = this.registerForm.get('last_name')?.value || '';
-    const fileName = `consentimiento_${patientName}_${patientLastName}_${new Date().toISOString().split('T')[0]}.pdf`
-      .toLowerCase()
-      .replace(/\s+/g, '_');
+      const imgData = canvas.toDataURL('image/jpeg', 0.8);
+      alert('DEBUG 4: toDataURL OK. longitud=' + imgData.length);
 
-    // Retornar blob y nombre
-    const blob = pdf.output('blob');
-    return { blob, fileName };
+      const pdf = new jsPDF({
+        orientation: 'portrait',
+        unit: 'mm',
+        format: 'a4',
+        compress: true,
+      });
+
+      const pdfWidth = pdf.internal.pageSize.getWidth();
+      const pdfHeight = pdf.internal.pageSize.getHeight();
+      const imgWidth = canvas.width;
+      const imgHeight = canvas.height;
+      const ratio = Math.min(pdfWidth / imgWidth, pdfHeight / imgHeight);
+      const imgX = Math.max(0, (pdfWidth - imgWidth * ratio) / 2);
+      const imgY = 0;
+      alert('DEBUG 5: antes addImage. imgX=' + imgX.toFixed(2) + ' imgY=' + imgY + ' w=' + (imgWidth * ratio).toFixed(2) + ' h=' + (imgHeight * ratio).toFixed(2));
+
+      pdf.addImage(imgData, 'JPEG', imgX, imgY, imgWidth * ratio, imgHeight * ratio);
+      alert('DEBUG 6: addImage OK');
+
+      const patientName = this.registerForm.get('first_name')?.value || 'paciente';
+      const patientLastName = this.registerForm.get('last_name')?.value || '';
+      const fileName = `consentimiento_${patientName}_${patientLastName}_${new Date().toISOString().split('T')[0]}.pdf`
+        .toLowerCase()
+        .replace(/\s+/g, '_');
+
+      const blob = pdf.output('blob');
+      alert('DEBUG 7: blob generado. size=' + blob.size);
+      return { blob, fileName };
+    } finally {
+      // Restaurar siempre el estado original del ancestro
+      if (hiddenAncestor) {
+        hiddenAncestor.classList.add('hidden');
+        hiddenAncestor.style.position = '';
+        hiddenAncestor.style.left = '';
+        hiddenAncestor.style.top = '';
+        hiddenAncestor.style.width = '';
+      }
+    }
   }
 }

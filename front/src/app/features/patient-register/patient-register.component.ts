@@ -670,6 +670,7 @@ export class PatientRegisterComponent implements OnInit {
                   blob,
                   fileName,
                   'Documento de consentimiento informado',
+                  this.token,
                 )
                 .pipe(
                   // Si falla la subida del documento, no bloqueamos el registro
@@ -706,14 +707,13 @@ export class PatientRegisterComponent implements OnInit {
           this.isSubmitting.set(false);
 
           if (result.patientCreated) {
-            if (result.documentUploaded) {
-              this.successMessage.set('Registro completado exitosamente.');
-            } else {
-              // Paciente creado pero documento no subido
-              this.successMessage.set('Registro completado exitosamente.');
+            if (!result.documentUploaded) {
+              alert('Tu registro se ha completado, pero hubo un problema al generar el documento. Por favor, comunícaselo a tu psicóloga.');
             }
+            this.successMessage.set('Registro completado exitosamente.');
             this.isValidToken.set(false);
           } else {
+            alert('Error al completar el registro. Por favor, contacta con tu psicóloga.');
             this.errorMessage.set(
               'Error al completar el registro. Por favor, intenta nuevamente.',
             );

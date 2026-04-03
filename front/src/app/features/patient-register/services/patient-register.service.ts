@@ -57,15 +57,18 @@ export class PatientRegisterService {
     patientId: number,
     pdfBlob: Blob,
     fileName: string,
-    description: string
+    description: string,
+    invitationToken?: string
   ): Observable<DocumentUploadResponse> {
     const formData = new FormData();
     formData.append('patient_id', patientId.toString());
     formData.append('description', description);
     formData.append('file', pdfBlob, fileName);
+    if (invitationToken) {
+      formData.append('invitation_token', invitationToken);
+    }
 
     // No establecer Content-Type, el navegador lo hace automáticamente con boundary
-    // POST /api/documents (sin /upload)
     return this.http.post<DocumentUploadResponse>(
       this.documentsUrl,
       formData
