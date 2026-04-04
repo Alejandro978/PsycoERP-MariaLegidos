@@ -23,7 +23,7 @@
           <!-- Header -->
           <div class="flex mb-4 mt-3 items-start justify-between">
             <p class="text-xl font-semibold m-0">Firmado profesional</p>
-            <img src="assets/logo/logo.png"
+            <img [src]="logoDataUrl || 'assets/logo/logo.png'"
               style="height: 60px;" alt="Logo Psicoandante" class="ml-auto">
           </div>
 
@@ -68,60 +68,42 @@
           <!-- Checkboxes -->
           <div class="space-y-4 mb-8">
             @if (isMinor) {
-            <div class="flex">
-              <div class="mr-2 flex-shrink-0" style="width: 14px; height: 14px; margin-top: 3px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; vertical-align: top; width: 16px; padding-right: 6px; font-size: 14px; line-height: 1.4; color: #6b7280;">
                 @if (registerForm.get('consent_legal_representative')?.value) {
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
-                  <path d="M3 7L6 10L11 4" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <span style="color: #16a34a;">☑</span>
                 } @else {
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
-                </svg>
+                <span>☐</span>
                 }
               </div>
-              <div class="w-full">
-                <pre class="whitespace-pre-wrap font-sans text-sm">En caso de no estar presente ambos progenitores/tutores legales, la persona solicitante declara ser la persona responsable legal del menor participante y manifiesta que el resto de representantes legales, si los hay, están conformes con el tratamiento</pre>
-              </div>
+              <p class="font-sans text-sm" style="margin: 0; display: table-cell; vertical-align: top;">En caso de no estar presente ambos progenitores/tutores legales, la persona solicitante declara ser la persona responsable legal del menor participante y manifiesta que el resto de representantes legales, si los hay, están conformes con el tratamiento</p>
             </div>
             }
 
-            <div class="flex">
-              <div class="mr-2 flex-shrink-0" style="width: 14px; height: 14px; margin-top: 3px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; vertical-align: top; width: 16px; padding-right: 6px; font-size: 14px; line-height: 1.4; color: #6b7280;">
                 @if (registerForm.get('consent_data_protection')?.value) {
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
-                  <path d="M3 7L6 10L11 4" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <span style="color: #16a34a;">☑</span>
                 } @else {
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
-                </svg>
+                <span>☐</span>
                 }
               </div>
-              <div class="w-full">
-                <pre class="whitespace-pre-wrap font-sans text-sm">En cumplimiento de la Ley Orgánica 3/2018 de protección de datos de carácter personal y garantía de los derechos digitales y del Reglamento Europeo RGPD 679/2016 le informamos que sus datos están siendo objeto de tratamiento por parte de María Legidos Huertas con la finalidad de gestionar el historial clínico {{ isMinor ? 'del menor' : 'del paciente' }} y un seguimiento posterior, prestarle nuestros servicios sanitarios, enviarles información, responder a sus consultas y peticiones mientras dure nuestra relación y/o tengamos su consentimiento. Las bases jurídicas de legitimación son la relación contractual, interés legítimo y en su caso, consentimiento del interesado. No se cederán datos a terceros salvo obligación legal o autorización previa. Pueden ejercer sus derechos de acceso, rectificación, supresión, así como otros derechos como indica la información adicional: https://www.adelopd.com/privacidad/psicoandante
-
-{{ isMinor ? 'Los progenitores' : 'El paciente' }} mediante el envío de este formulario manifiestan que han sido informados sobre el tratamiento de datos por parte de la empresa.</pre>
+              <div style="display: table-cell; vertical-align: top;">
+                <p class="font-sans text-sm" style="margin: 0;">En cumplimiento de la Ley Orgánica 3/2018 de protección de datos de carácter personal y garantía de los derechos digitales y del Reglamento Europeo RGPD 679/2016 le informamos que sus datos están siendo objeto de tratamiento por parte de María Legidos Huertas con la finalidad de gestionar el historial clínico {{ isMinor ? 'del menor' : 'del paciente' }} y un seguimiento posterior, prestarle nuestros servicios sanitarios, enviarles información, responder a sus consultas y peticiones mientras dure nuestra relación y/o tengamos su consentimiento. Las bases jurídicas de legitimación son la relación contractual, interés legítimo y en su caso, consentimiento del interesado. No se cederán datos a terceros salvo obligación legal o autorización previa. Pueden ejercer sus derechos de acceso, rectificación, supresión, así como otros derechos como indica la información adicional: https://www.adelopd.com/privacidad/psicoandante</p>
+                <p class="font-sans text-sm" style="margin: 4px 0 0 0;">{{ isMinor ? 'Los progenitores' : 'El paciente' }} mediante el envío de este formulario manifiestan que han sido informados sobre el tratamiento de datos por parte de la empresa.</p>
               </div>
             </div>
 
-            <div class="flex">
-              <div class="mr-2 flex-shrink-0" style="width: 14px; height: 14px; margin-top: 3px;">
+            <div style="display: table; width: 100%;">
+              <div style="display: table-cell; vertical-align: top; width: 16px; padding-right: 6px; font-size: 14px; line-height: 1.4; color: #6b7280;">
                 @if (registerForm.get('consent_service_conditions')?.value) {
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
-                  <path d="M3 7L6 10L11 4" stroke="#16a34a" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/>
-                </svg>
+                <span style="color: #16a34a;">☑</span>
                 } @else {
-                <svg width="14" height="14" viewBox="0 0 14 14" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <rect x="0.5" y="0.5" width="13" height="13" rx="1.5" stroke="#6b7280" stroke-width="1"/>
-                </svg>
+                <span>☐</span>
                 }
               </div>
-              <div class="w-full">
-                <pre class="whitespace-pre-wrap font-sans text-sm">CONDICIONES DEL SERVICIO
+              <div style="display: table-cell; vertical-align: top;">
+                <pre class="font-sans text-sm" style="margin: 0; white-space: pre-wrap;">CONDICIONES DEL SERVICIO
 
 La finalidad del presente contenido es especificar las condiciones generales del funcionamiento del programa terapéutico que usted va a comenzar.
 
