@@ -22,6 +22,7 @@ export class PatientDocumentPreviewComponent implements OnInit {
   // Logo precargado como data URL para que html2canvas lo renderice sin peticiones externas
   logoDataUrl = '';
 
+
   ngOnInit(): void {
     const img = new Image();
     img.onload = () => {
@@ -32,6 +33,7 @@ export class PatientDocumentPreviewComponent implements OnInit {
       this.logoDataUrl = canvas.toDataURL('image/png');
     };
     img.src = 'assets/logo/logo.png';
+
   }
 
   /**
